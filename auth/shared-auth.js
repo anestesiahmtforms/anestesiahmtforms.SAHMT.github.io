@@ -5,7 +5,7 @@
     authSessionBackupKey: "sahmt-google-auth-session-backup-v1",
     trustedDeviceKey: "sahmt-google-trusted-device-v1",
     googleClientId: "908976987584-o59p0obmvq013lg3t9726itf06e15v2c.apps.googleusercontent.com",
-    authEndpoint: "https://script.google.com/macros/s/AKfycbxYpFWmgIUKjd1nXlxnOP2un6cpiD9lXcjAex1XjtG_gQ6_2mFKx6fFHN9lhMrm2Bmk/exec",
+    authEndpoint: "https://script.google.com/macros/s/AKfycbzdtxNDDOwGyZ44oMbx4LPktnQvdKemF0c2kdbpD63rmzAsF-tiUDOtheBAgej1SWaH/exec",
     trustedDeviceDays: 36500,
   };
 
