@@ -161,7 +161,7 @@ body.modal-open {
   height: calc(100dvh - 16px);
   max-height: calc(100dvh - 16px);
   overflow: hidden;
-  padding-bottom: 74px;
+  padding-bottom: 10px;
 }
 
 .hero-card,
@@ -1481,19 +1481,13 @@ button:hover,
 }
 
 .main-return-dock {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-  transform: translateX(-50%);
-  z-index: 45;
-  width: min(430px, calc(100% - 28px));
+  width: 100%;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
-  pointer-events: none;
 }
 
 .main-return-button {
-  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;

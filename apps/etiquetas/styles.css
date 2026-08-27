@@ -99,7 +99,7 @@ body::before {
   padding:
     max(6px, env(safe-area-inset-top, 0px))
     0
-    max(138px, env(safe-area-inset-bottom, 0px));
+    max(16px, env(safe-area-inset-bottom, 0px));
 }
 
 .topbar {
@@ -728,19 +728,13 @@ label[hidden] {
 }
 
 .main-return-dock {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-  transform: translateX(-50%);
-  z-index: 40;
-  width: min(1120px, calc(100% - 28px));
+  width: 100%;
+  margin-top: 10px;
   display: flex;
-  justify-content: flex-end;
-  pointer-events: none;
+  justify-content: center;
 }
 
 .main-return-button {
-  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;

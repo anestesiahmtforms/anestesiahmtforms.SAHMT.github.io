@@ -91,7 +91,7 @@ body.folder-open {
   padding:
     max(10px, env(safe-area-inset-top, 0px))
     max(12px, env(safe-area-inset-right, 0px))
-    max(96px, env(safe-area-inset-bottom, 0px))
+    max(18px, env(safe-area-inset-bottom, 0px))
     max(12px, env(safe-area-inset-left, 0px));
 }
 
@@ -220,19 +220,14 @@ body.folder-open {
 }
 
 .main-return-dock {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-  transform: translateX(-50%);
-  z-index: 45;
-  width: min(420px, calc(100% - 28px));
+  width: 100%;
+  margin-top: 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
-  pointer-events: none;
 }
 
 .main-return-button {
-  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
