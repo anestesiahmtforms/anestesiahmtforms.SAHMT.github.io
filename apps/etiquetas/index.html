@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3f3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <title>ETIQUETAS SAHMT</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="../../icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="../../icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css?v=105">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a id="home-return" class="home-logo-link" href="../../index.html?from=etiquetas&skipNotice=1" aria-label="Voltar ao app principal SAHMT">
+        <img src="../../sahmt_option1.png" alt="SAHMT" class="home-logo-image">
+      </a>
+      <div class="hero-copy">
+        <h1>ETIQUETAS SAHMT</h1>
+      </div>
+      <div class="topbar-status">
+        <span id="auth-user" class="status-pill">Acesso liberado</span>
+        <span id="sheet-status" class="status-pill neutral">Planilha nao configurada</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel scanner-panel">
+        <div class="section-title">
+          <h2>Scanner</h2>
+          <span id="camera-status" class="status-pill neutral">Camera desligada</span>
+        </div>
+
+        <div class="camera-stage">
+          <video id="camera" playsinline muted></video>
+          <div class="guide-overlay" aria-hidden="true">
+            <div class="guide-frame">
+            </div>
+          </div>
+        </div>
+
+        <canvas id="snapshot" hidden></canvas>
+
+        <div class="actions scanner-actions">
+          <button id="capture-image" type="button" class="capture-shutter" aria-label="Abrir camera">Abrir camera</button>
+        </div>
+        <div class="scanner-secondary-actions">
+          <button id="open-manual-entry" type="button" class="scanner-action">Registro Manual</button>
+        </div>
+        <p class="capture-note">Use: Etiqueta Nítida e ambiente claro</p>
+
+        <div class="preview-wrap">
+          <img id="preview" alt="Previa da etiqueta capturada">
+        </div>
+
+        <button id="process-image" type="button" class="wide-button" disabled>Ler Etiqueta</button>
+        <p id="processing-status" class="hint"></p>
+      </section>
+
+      <div class="quick-actions">
+        <section class="quick-action-card">
+          <button id="open-summary-panel" type="button" class="home-action-button">RELATÓRIO DIÁRIO</button>
+        </section>
+        <section class="quick-action-card">
+          <button id="open-monthly-report" type="button" class="home-action-button monthly-action">RELATÓRIO MENSAL</button>
+        </section>
+      </div>
+
+      <section class="panel form-panel modal-panel" id="entry-panel" hidden>
+        <div class="section-title">
+          <h2>Entrada</h2>
+        </div>
+
+        <form id="label-form" class="form-grid">
+          <label class="full-width">
+            <span>Data</span>
+            <input id="data" name="data" type="date" required>
+          </label>
+
+          <label class="full-width">
+            <span>Nome do Paciente</span>
+            <input id="nomePaciente" name="nomePaciente" autocomplete="off" required>
+          </label>
+
+          <label class="full-width">
+            <span>Convênio</span>
+            <input id="convenio" name="convenio" type="text" autocomplete="off" placeholder="Nome do convênio" required>
+          </label>
+
+          <label>
+            <span>Cirurgia</span>
+            <input id="cirurgia" name="cirurgia" inputmode="numeric" autocomplete="off" required>
+          </label>
+
+          <label>
+            <span>Atendimento</span>
+            <input id="atendimento" name="atendimento" inputmode="numeric" autocomplete="off" required>
+          </label>
+
+          <label>
+            <span>Tipo</span>
+            <select id="tipo" name="tipo" required>
+              <option value="">Selecione</option>
+              <option>Particular</option>
+              <option>Complementação</option>
+              <option>Convênio</option>
+              <option>Consulta Pré-anestésica</option>
+            </select>
+          </label>
+
+          <label id="valor-field" hidden>
+            <span>Valor em Real</span>
+            <input id="valor" name="valor" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00">
+          </label>
+
+          <label>
+            <span>Credor</span>
+            <select id="credor" name="credor" required>
+              <option value="">Selecione</option>
+              <option>Caixa</option>
+              <option>Plantão</option>
+              <option>Plantão/Caixa</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Plantonista(s)</span>
+            <select id="plantonistas" name="plantonistas" multiple size="1" required>
+              <option>AD</option>
+              <option>AA</option>
+              <option>AL</option>
+              <option>BA</option>
+              <option>CH</option>
+              <option>CR</option>
+              <option>DE</option>
+              <option>DN</option>
+              <option>FL</option>
+              <option>FR</option>
+              <option>GU</option>
+              <option>GB</option>
+              <option>IG</option>
+              <option>JÁ</option>
+              <option>L2</option>
+              <option>LE</option>
+              <option>LD</option>
+              <option>LC</option>
+              <option>LH</option>
+              <option>LU</option>
+              <option>LA</option>
+              <option>LO</option>
+              <option>MA</option>
+              <option>MH</option>
+              <option>PR</option>
+              <option>RA</option>
+              <option>RL</option>
+              <option>RC</option>
+              <option>RO</option>
+              <option>RU</option>
+              <option>WE</option>
+            </select>
+          </label>
+        </form>
+
+        <div class="actions">
+          <button id="send-sheet" type="button">ENVIAR</button>
+          <button id="clear-form" type="button" class="secondary">Limpar</button>
+        </div>
+        <p id="send-feedback" class="send-feedback" hidden></p>
+        <div class="panel-base-action">
+          <button type="button" class="panel-home-button" data-return-home>VOLTAR AO APP</button>
+        </div>
+      </section>
+
+      <section class="panel summary-panel modal-panel" id="summary-panel" hidden>
+        <div class="section-title">
+          <h2>RELATÓRIO DIÁRIO</h2>
+        </div>
+
+        <div class="summary-bottom-tools">
+          <div class="summary-date-picker">
+            <label id="summary-date-field" class="summary-date-field">
+              <input id="summary-date" type="date" aria-label="Data do registro">
+            </label>
+          </div>
+        </div>
+        <div id="summary-totals" class="summary-totals" hidden></div>
+        <div id="summary-list" class="summary-list">
+          <p class="empty-state">Nenhum resumo carregado ainda.</p>
+        </div>
+        <div class="panel-base-action">
+          <button type="button" class="panel-home-button" data-return-home>VOLTAR AO APP</button>
+        </div>
+      </section>
+
+      <section class="panel monthly-panel modal-panel" id="monthly-panel" hidden>
+        <div class="section-title monthly-heading">
+          <h2>RELATÓRIO MENSAL</h2>
+        </div>
+        <label class="monthly-month-control">
+          <span>Escolha o Mês</span>
+          <input id="report-month" type="month" aria-label="Escolha o Mês">
+        </label>
+
+        <div id="monthly-report-panel" class="monthly-report-panel">
+          <p id="monthly-status" class="monthly-status">Relatorio mensal ainda nao atualizado.</p>
+          <div id="monthly-list" class="monthly-list">
+            <p class="empty-state">Selecione o mes para carregar os registros.</p>
+          </div>
+          <button id="generate-month-pdf-whatsapp" type="button" class="monthly-whatsapp-button">PDF mensal no WhatsApp</button>
+        </div>
+        <div class="panel-base-action">
+          <button type="button" class="panel-home-button" data-return-home>VOLTAR AO APP</button>
+        </div>
+      </section>
+
+      <section class="panel settings-panel" hidden>
+        <div class="section-title">
+          <h2>Integracao</h2>
+        </div>
+
+        <label>
+          <span>URL do Google Apps Script Web App</span>
+          <input id="script-url" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+        </label>
+
+        <div class="actions">
+          <button id="save-settings" type="button" class="secondary">Salvar URL</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="confirm-overlay" class="confirm-overlay" hidden>
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title" class="confirm-title-alert">Conferir antes de enviar</h2>
+      <div id="confirm-summary" class="confirm-summary"></div>
+      <div class="confirm-actions">
+        <button id="confirm-send" type="button">Confirmar envio</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="edit-overlay" class="confirm-overlay edit-overlay" hidden>
+    <div class="confirm-card edit-card modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+      <div class="section-title">
+        <h2 id="edit-title">Editar registro</h2>
+      </div>
+      <p id="edit-context" class="edit-context"></p>
+      <div id="edit-summary" class="confirm-summary"></div>
+      <p id="edit-feedback" class="send-feedback" hidden></p>
+      <div class="confirm-actions">
+        <button id="edit-save" type="button">Salvar edicao</button>
+      </div>
+      <div class="panel-base-action">
+        <button type="button" class="panel-home-button" data-return-home>VOLTAR AO APP</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    (() => {
+      const legacyUrls = new Set([
+        "https://script.google.com/macros/s/AKfycbw8Yz3WGzC7sBGRBhWdMpFl87z5MEGFbw7tahFPxPluEuHnn06zWdyGobwqnPySydp3/exec",
+        "https://script.google.com/macros/s/AKfycbzJw6_ZlF97gRuMdmaiwDgo01tXUKg6AUiV7r8ng8XUTM1TEY34AzB2mwTPOYIRTX2A/exec",
+        "https://script.google.com/macros/s/AKfycbxyZIn0JO7eCrCOo5MdaCQkrUMuUwGB0HY_Z6j5FZ8xS5OEJ4ySQLNPaUoIz8nbbrKN/exec",
+        "https://script.google.com/macros/s/AKfycbzWwukthNK5OP2itdkJ9tNR-4TZg5IfoORA8q1ke0KpLkCkKklZQJyxEpiEH0mjY0gn0w/exec",
+        "https://script.google.com/macros/s/AKfycbxBLda_QQYDfl5Y47kanACt0DSL-BFbhxmOenPL18fHWM6feU0H5xaEagsrwE6rdv546A/exec",
+        "https://script.google.com/macros/s/AKfycbzTb2EQ8iM-oB5KnxI26uBvG_ddjDLCD7G0YBov9mgLe7apX89vBECecaUnOHyRTwED/exec",
+      ]);
+      try {
+        const key = "etiqueta-hmt-ia-v1";
+        const saved = JSON.parse(localStorage.getItem(key) || "{}");
+        if (legacyUrls.has(String(saved.scriptUrl || "").trim())) {
+          localStorage.removeItem(key);
+        }
+      } catch {
+        localStorage.removeItem("etiqueta-hmt-ia-v1");
+      }
+    })();
+  </script>
+  <script src="./app.js?v=108" type="module"></script>
+</body>
+</html>

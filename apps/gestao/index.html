@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#d9f5f4">
+  <meta name="description" content="Segmento de Gestão SAHMT">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon-192.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <title>Segmento de Gestão SAHMT</title>
+</head>
+<body>
+  <div class="wallpaper"></div>
+  <div class="halo halo--one"></div>
+  <div class="halo halo--two"></div>
+
+  <div class="iphone-shell">
+    <main class="springboard" role="main">
+      <section class="hero-card glass-card" aria-label="Segmento de Gestão SAHMT">
+        <div class="hero__logo-lockup">
+          <img class="hero__logo-image" src="assets/sahmt-logo.png" alt="Logo SAHMT">
+          <div class="hero__logo-ribbon">Segmento de Gestão</div>
+        </div>
+      </section>
+
+      <section class="icon-grid-wrap glass-card">
+        <section class="icon-grid" id="iconGrid" aria-label="Áreas de gestão"></section>
+      </section>
+    </main>
+  </div>
+
+  <div id="folderOverlay" class="folder-overlay hidden" aria-hidden="true">
+    <button id="folderBackdrop" class="folder-overlay__backdrop" type="button" aria-label="Fechar painel"></button>
+    <section class="folder-sheet" role="dialog" aria-modal="true" aria-labelledby="folderTitle">
+      <div class="folder-sheet__bar"></div>
+      <div class="folder-sheet__top">
+        <button id="closeFolder" class="folder-sheet__close" type="button" aria-label="Fechar">Fechar</button>
+        <div class="folder-sheet__time">16:28</div>
+      </div>
+
+      <div class="folder-sheet__hero">
+        <div id="folderGlyph" class="folder-sheet__glyph" aria-hidden="true"></div>
+        <div class="folder-sheet__copy">
+          <p class="folder-sheet__eyebrow">Segmento de Gestão</p>
+          <h2 id="folderTitle">Área</h2>
+          <p id="folderSubtitle">Escolha a ação desejada.</p>
+        </div>
+      </div>
+
+      <div class="folder-sheet__actions">
+        <a id="folderGestor" class="folder-action folder-action--gestor" href="#" target="_blank" rel="noopener noreferrer">Gestor</a>
+        <a id="folderEquipe" class="folder-action folder-action--equipe" href="#" target="_blank" rel="noopener noreferrer">Equipe</a>
+      </div>
+    </section>
+  </div>
+
+  <template id="cardTemplate">
+    <button class="app-icon" type="button">
+      <span class="app-icon__text"></span>
+    </button>
+  </template>
+
+  <script src="app.js?v=20260823-7"></script>
+</body>
+</html>
