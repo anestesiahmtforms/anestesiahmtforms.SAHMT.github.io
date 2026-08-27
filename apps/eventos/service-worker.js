@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v88";
+const CACHE_NAME = "sahmt-pwa-v89";
 const APP_SHELL = [
   "./",
   "./index.html",

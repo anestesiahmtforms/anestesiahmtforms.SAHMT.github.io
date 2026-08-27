@@ -210,9 +210,10 @@ async function bootstrap() {
 
 async function authenticateSharedAppAccess() {
   if (!window.SAHMT_AUTH?.requireAccess) {
-    state.auth = { email: "Acesso público", name: "", token: "", deviceToken: "" };
-    state.authenticated = true;
-    return;
+    state.auth = null;
+    state.authenticated = false;
+    renderAuthStatus();
+    throw new Error("Autenticacao compartilhada indisponivel neste app.");
   }
 
   const auth = await window.SAHMT_AUTH.requireAccess({
@@ -700,7 +701,7 @@ function renderAuthStatus() {
   if (!authUserEl) {
     return;
   }
-  authUserEl.textContent = state.auth?.email ? `Acesso: ${state.auth.email}` : "Acesso liberado";
+  authUserEl.textContent = state.auth?.email ? `Acesso: ${state.auth.email}` : "Aguardando login";
   authUserEl.className = "status-pill";
 }
 
@@ -715,7 +716,7 @@ function getJwtExpirationMs(token) {
 }
 
 function ensureAuthenticated() {
-  return state.auth || { email: "Sem login", name: "", token: "", deviceToken: "" };
+  return state.auth || { email: "", name: "", token: "", deviceToken: "" };
 }
 
 function addAuthToUrl(url) {

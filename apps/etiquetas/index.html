@@ -25,9 +25,9 @@
       </a>
       <div class="hero-copy">
         <h1>ETIQUETAS SAHMT</h1>
+        <span data-auth-user hidden></span>
       </div>
       <div class="topbar-status">
-        <span id="auth-user" class="status-pill">Acesso liberado</span>
         <span id="sheet-status" class="status-pill neutral">Planilha nao configurada</span>
       </div>
     </header>
@@ -35,7 +35,10 @@
     <main class="layout">
       <section class="panel scanner-panel">
         <div class="section-title">
-          <h2>Scanner</h2>
+          <div class="section-title-copy">
+            <h2>Scanner</h2>
+            <span data-auth-user hidden></span>
+          </div>
           <span id="camera-status" class="status-pill neutral">Camera desligada</span>
         </div>
 
@@ -80,7 +83,10 @@
 
       <section class="panel form-panel modal-panel" id="entry-panel" hidden>
         <div class="section-title">
-          <h2>Entrada</h2>
+          <div class="section-title-copy">
+            <h2>Entrada</h2>
+            <span data-auth-user hidden></span>
+          </div>
         </div>
 
         <form id="label-form" class="form-grid">
@@ -185,7 +191,10 @@
 
       <section class="panel summary-panel modal-panel" id="summary-panel" hidden>
         <div class="section-title">
-          <h2>RELATÓRIO DIÁRIO</h2>
+          <div class="section-title-copy">
+            <h2>RELATÓRIO DIÁRIO</h2>
+            <span data-auth-user hidden></span>
+          </div>
         </div>
 
         <div class="summary-bottom-tools">
@@ -206,7 +215,10 @@
 
       <section class="panel monthly-panel modal-panel" id="monthly-panel" hidden>
         <div class="section-title monthly-heading">
-          <h2>RELATÓRIO MENSAL</h2>
+          <div class="section-title-copy">
+            <h2>RELATÓRIO MENSAL</h2>
+            <span data-auth-user hidden></span>
+          </div>
         </div>
         <label class="monthly-month-control">
           <span>Escolha o Mês</span>
@@ -255,7 +267,10 @@
   <div id="edit-overlay" class="confirm-overlay edit-overlay" hidden>
     <div class="confirm-card edit-card modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-title">
       <div class="section-title">
-        <h2 id="edit-title">Editar registro</h2>
+        <div class="section-title-copy">
+          <h2 id="edit-title">Editar registro</h2>
+          <span data-auth-user hidden></span>
+        </div>
       </div>
       <p id="edit-context" class="edit-context"></p>
       <div id="edit-summary" class="confirm-summary"></div>
@@ -292,7 +307,7 @@
       }
     })();
   </script>
-  <script src="../../auth/shared-auth.js?v=20260827-2"></script>
+  <script src="../../auth/shared-auth.js?v=20260827-3"></script>
   <script src="./app.js?v=108" type="module"></script>
 </body>
 </html>

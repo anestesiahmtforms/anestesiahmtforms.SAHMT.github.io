@@ -152,6 +152,27 @@
       .sahmt-user-pill[hidden] {
         display: none !important;
       }
+      .sahmt-inline-auth {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        max-width: min(100%, 100%);
+        margin-top: 8px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        background: rgba(11, 35, 63, 0.88);
+        color: #f8fbff;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+        backdrop-filter: blur(10px);
+      }
+      .sahmt-inline-auth[hidden] {
+        display: none !important;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -207,6 +228,42 @@
     return pill;
   }
 
+  function ensureInlineUserSlots() {
+    const selector = [
+      "[data-auth-host]",
+      ".hero-copy",
+      ".folder-sheet__copy",
+      ".topbar .hero-copy",
+    ].join(", ");
+
+    const slots = [];
+    document.querySelectorAll(selector).forEach((host) => {
+      if (!(host instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!host.matches("[data-auth-host]") && host.querySelector("[data-auth-user]")) {
+        const nestedSlot = host.querySelector(":scope > [data-auth-user]");
+        if (!nestedSlot) {
+          return;
+        }
+      }
+
+      let slot = host.querySelector(":scope > [data-auth-user]");
+      if (!slot) {
+        slot = document.createElement("span");
+        slot.setAttribute("data-auth-user", "");
+        slot.hidden = true;
+        host.appendChild(slot);
+      }
+
+      slot.classList.add("sahmt-inline-auth");
+      slots.push(slot);
+    });
+
+    return slots;
+  }
+
   function showGateMessage(message, options = {}) {
     ensureStyles();
     const gate = ensureGate();
@@ -242,11 +299,13 @@
   function updateUserUi() {
     const pill = ensureUserPill();
     const label = authState?.email ? `Acesso: ${authState.email}` : "";
+    const inlineSlots = ensureInlineUserSlots();
     pill.textContent = label;
-    pill.hidden = !label;
+    pill.hidden = !label || inlineSlots.length > 0;
 
     document.querySelectorAll("#auth-user, [data-auth-user]").forEach((element) => {
-      element.textContent = label || "Acesso liberado";
+      element.textContent = label || "Aguardando login";
+      element.hidden = !label;
     });
   }
 
