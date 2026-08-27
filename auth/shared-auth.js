@@ -19,6 +19,7 @@
   let googleButtonRendered = false;
   let pendingResolve = null;
   let pendingReject = null;
+  const AUTH_REQUEST_TIMEOUT_MS = 20000;
 
   function getConfig() {
     const external = window.SAHMT_SYNC_CONFIG?.auth || {};
@@ -369,14 +370,51 @@
     notifyListeners();
   }
 
+  function parseAuthResponseText(responseText) {
+    const trimmed = String(responseText || "").trim();
+    if (!trimmed) {
+      return {};
+    }
+
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      if (/<html[\s>]/i.test(trimmed) || /<!doctype/i.test(trimmed)) {
+        throw new Error("A implantação de autenticação não respondeu como web app válido.");
+      }
+      throw new Error("A implantação de autenticação devolveu um formato inválido.");
+    }
+  }
+
   async function postAuthAction(action, payload) {
     const config = getConfig();
-    const response = await fetch(config.authEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action, ...payload }),
-    });
-    const result = await response.json().catch(() => ({}));
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS)
+      : 0;
+
+    let response;
+    try {
+      response = await fetch(config.authEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        cache: "no-store",
+        signal: controller?.signal,
+        body: JSON.stringify({ action, ...payload }),
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        throw new Error("A autenticação demorou demais para responder. Tente novamente em alguns segundos.");
+      }
+      throw new Error("Não foi possível conectar a implantação de autenticação.");
+    } finally {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    }
+
+    const responseText = await response.text().catch(() => "");
+    const result = parseAuthResponseText(responseText);
     if (!response.ok || result.ok !== true) {
       throw new Error(result.message || "Falha de autenticação.");
     }
@@ -522,24 +560,34 @@
     if (!credential) {
       throw new Error("Conta Google não autorizada.");
     }
-    showGateMessage("Validando conta Google cadastrada...", { showGoogle: false, showOther: false });
-    const config = getConfig();
-    const result = await validateGoogleCredential(credential, activeContext || {});
-    applyAuthenticatedUser({
-      token: credential,
-      email: String(result.email || "").toLowerCase(),
-      name: result.name || "",
-      deviceToken: getOrCreateDeviceToken(config),
-      trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
-      expiresAt: getJwtExpirationMs(credential),
-    });
-    persistSession(config);
-    hideGate();
-    await trackAccess("login_success", "Conta Google autorizada");
-    if (pendingResolve) {
-      pendingResolve(authState);
-      pendingResolve = null;
-      pendingReject = null;
+    try {
+      showGateMessage("Validando conta Google cadastrada...", { showGoogle: false, showOther: false });
+      const config = getConfig();
+      const result = await validateGoogleCredential(credential, activeContext || {});
+      applyAuthenticatedUser({
+        token: credential,
+        email: String(result.email || "").toLowerCase(),
+        name: result.name || "",
+        deviceToken: getOrCreateDeviceToken(config),
+        trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
+        expiresAt: getJwtExpirationMs(credential),
+      });
+      persistSession(config);
+      hideGate();
+      await trackAccess("login_success", "Conta Google autorizada");
+      if (pendingResolve) {
+        pendingResolve(authState);
+        pendingResolve = null;
+        pendingReject = null;
+      }
+    } catch (error) {
+      showGateMessage(error?.message || "Não foi possível concluir o login Google.", { showGoogle: true, showOther: true });
+      if (pendingReject) {
+        pendingReject(error);
+        pendingReject = null;
+        pendingResolve = null;
+      }
+      throw error;
     }
   }
 
