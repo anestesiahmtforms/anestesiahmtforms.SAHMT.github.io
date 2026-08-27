@@ -190,10 +190,7 @@ bootstrap();
 
 async function bootstrap() {
   navigator.serviceWorker?.getRegistration?.().then((registration) => registration?.update?.()).catch(() => {});
-  // Este PWA usa acesso publico; nao bloqueie a tela com autenticacao Google.
-  state.auth = { email: "Acesso público", name: "", token: "", deviceToken: "" };
-  state.authenticated = true;
-  hideAuthGate();
+  await authenticateSharedAppAccess();
   renderAuthStatus();
   prepareBackNavigationToHome();
   resetInitialPanels();
@@ -209,6 +206,31 @@ async function bootstrap() {
   renderSheetStatus();
   await initializeAuthorizedApp();
   registerServiceWorker();
+}
+
+async function authenticateSharedAppAccess() {
+  if (!window.SAHMT_AUTH?.requireAccess) {
+    state.auth = { email: "Acesso público", name: "", token: "", deviceToken: "" };
+    state.authenticated = true;
+    return;
+  }
+
+  const auth = await window.SAHMT_AUTH.requireAccess({
+    moduleId: "ETIQUETAS",
+    pageId: "home",
+    returnUrl: window.location.href
+  });
+
+  applyAuthenticatedUser(auth || {});
+  state.authenticated = Boolean(state.auth?.email);
+  window.SAHMT_AUTH.onChange((nextAuth) => {
+    if (!nextAuth) {
+      return;
+    }
+    applyAuthenticatedUser(nextAuth);
+    state.authenticated = Boolean(state.auth?.email);
+    renderAuthStatus();
+  });
 }
 
 function resetInitialPanels() {

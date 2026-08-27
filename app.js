@@ -108,6 +108,8 @@
     closeNoticeModal: document.getElementById("closeNoticeModal")
   };
 
+  await ensureSharedAccess();
+
   if (elements.formattedDate) {
     elements.formattedDate.textContent = "Carregando escala...";
   }
@@ -249,6 +251,18 @@
 
   render(elements.dateInput.value);
   refreshScheduleFromSheet();
+
+  async function ensureSharedAccess() {
+    if (!window.SAHMT_AUTH?.requireAccess) {
+      return;
+    }
+
+    await window.SAHMT_AUTH.requireAccess({
+      moduleId: "SAHMT",
+      pageId: "home",
+      returnUrl: window.location.href
+    });
+  }
 
   function applyScheduleData(scheduleData) {
     data = scheduleData;
@@ -584,6 +598,7 @@
 
   async function pushSharedSiglaCheck(dateKey, sigla, marked) {
     const url = new URL(sharedStateEndpoint);
+    const authUser = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
     // The server receives the intended state, not an ambiguous toggle. This
     // makes unmarking persistent across every device that reads the sheet.
     url.searchParams.set("action", "set");
@@ -592,7 +607,7 @@
     url.searchParams.set("date", dateKey);
     url.searchParams.set("sigla", sigla);
     url.searchParams.set("marked", marked ? "true" : "false");
-    url.searchParams.set("updatedBy", clientId);
+    url.searchParams.set("updatedBy", authUser || clientId);
     url.searchParams.set("source", "PWA");
 
     const response = await fetch(url.toString(), {
@@ -889,6 +904,7 @@
   }
 
   function openEventsModal() {
+    window.SAHMT_AUTH?.track("area_open", "Eventos de Escala");
     window.location.href = new URL(eventsUrl, window.location.href).href;
   }
 
@@ -899,6 +915,7 @@
   }
 
   function openLabelsModal() {
+    window.SAHMT_AUTH?.track("area_open", "Etiquetas");
     window.location.href = new URL(labelsUrl, window.location.href).href;
   }
 
@@ -909,6 +926,7 @@
   }
 
   function openManagementModal() {
+    window.SAHMT_AUTH?.track("area_open", "Gestao");
     window.location.href = new URL(managementSiteUrl, window.location.href).href;
   }
 

@@ -166,6 +166,7 @@ function configureLink(link, url, itemTitle, audienceLabel) {
 }
 
 function openFolder(item, index) {
+  window.SAHMT_AUTH?.track("area_open", formatLabel(item.title));
   folderTitle.textContent = formatLabel(item.title);
   folderSubtitle.textContent = "Escolha a ação desejada.";
   folderGlyph.textContent = splitIntoBalancedLines(item.title);
@@ -236,5 +237,17 @@ document.addEventListener("click", (event) => {
   }
 });
 
-renderCards();
-registerServiceWorker();
+async function bootstrapManagementApp() {
+  if (window.SAHMT_AUTH?.requireAccess) {
+    await window.SAHMT_AUTH.requireAccess({
+      moduleId: "GESTAO",
+      pageId: "home",
+      returnUrl: window.location.href
+    });
+  }
+
+  renderCards();
+  registerServiceWorker();
+}
+
+bootstrapManagementApp();

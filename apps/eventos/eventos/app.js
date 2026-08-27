@@ -1136,7 +1136,7 @@ function showToast(message) {
 }
 
 function isAuthenticated() {
-  return sessionStorage.getItem(AUTH_SESSION_KEY) === "1";
+  return Boolean(window.SAHMT_AUTH?.getSession?.()?.email);
 }
 
 function showAppContent() {
@@ -1158,7 +1158,6 @@ function sanitizePasswordInput() {
 }
 
 function unlockApp() {
-  sessionStorage.setItem(AUTH_SESSION_KEY, "1");
   showAppContent();
   if (!appBootstrapped) {
     bootstrapApp();
@@ -1167,18 +1166,18 @@ function unlockApp() {
 
 function handleAuthSubmit(event) {
   event.preventDefault();
-  sanitizePasswordInput();
-
-  if (passwordInput.value !== APP_PASSWORD) {
-    showToast("Senha incorreta.");
-    passwordInput.focus();
-    passwordInput.select();
-    return;
+  if (window.SAHMT_AUTH?.requireAccess) {
+    window.SAHMT_AUTH.requireAccess({
+      moduleId: "EVENTOS-INTERNO",
+      pageId: "home",
+      returnUrl: window.location.href,
+    }).then(() => {
+      unlockApp();
+      showToast("Acesso liberado.");
+    }).catch(() => {
+      showToast("Nao foi possivel autenticar agora.");
+    });
   }
-
-  unlockApp();
-  passwordInput.value = "";
-  showToast("Acesso liberado.");
 }
 
 function isStandaloneMode() {
@@ -1245,7 +1244,7 @@ function buildPayload() {
   const atrasoTempo = isAtrasoEvent(evento) ? Number(atrasoTempoSelect.value || 0) : "";
   const turno = isAtrasoEvent(evento) ? "" : turnoSelect.value;
 
-  return {
+  const payload = {
     data: dataInput.value,
     dataDoEvento: dataInput.value,
     evento,
@@ -1270,6 +1269,13 @@ function buildPayload() {
     criadoEmIso: new Date().toISOString(),
     origem: "PWA Eventos de escala",
   };
+
+  const authEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+  if (authEmail) {
+    payload.updatedBy = authEmail;
+  }
+
+  return window.SAHMT_AUTH?.withPayload ? window.SAHMT_AUTH.withPayload(payload) : payload;
 }
 
 function buildAnnotationPayload() {
@@ -1579,16 +1585,19 @@ function bootstrapApp() {
   updateInstallUI();
 }
 
-function initializeApp() {
-  if (isAuthenticated()) {
-    showAppContent();
-    bootstrapApp();
-    return;
+async function initializeApp() {
+  if (window.SAHMT_AUTH?.requireAccess) {
+    await window.SAHMT_AUTH.requireAccess({
+      moduleId: "EVENTOS-INTERNO",
+      pageId: "home",
+      returnUrl: window.location.href,
+    });
   }
 
-  hideAppContent();
-  updateFieldHaloState();
-  passwordInput?.focus();
+  showAppContent();
+  if (!appBootstrapped) {
+    bootstrapApp();
+  }
 }
 
 eventoSelect.addEventListener("change", updateEventoState);
@@ -1662,5 +1671,7 @@ window.addEventListener("appinstalled", () => {
   showToast("Aplicativo instalado com sucesso.");
 });
 
-initializeApp();
-
+initializeApp().catch(() => {
+  hideAppContent();
+  showToast("Nao foi possivel autenticar agora.");
+});

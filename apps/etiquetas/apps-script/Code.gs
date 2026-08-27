@@ -4,6 +4,9 @@ const REGISTROS_SHEET = "ETIQUETA";
 const LISTAS_SHEET = "Listas";
 const OPENAI_MODEL = "gpt-5.2";
 const OPENAI_API_KEY_PROPERTY = "OPENAI_API_KEY";
+const GOOGLE_CLIENT_ID = "908976987584-o59p0obmvq013lg3t9726itf06e15v2c.apps.googleusercontent.com";
+const TRUSTED_DEVICES_SHEET = "DISPOSITIVOS_CONFIAVEIS";
+const ACCESS_HISTORY_SHEET = "HISTORICO_ACESSO_SAHMT";
 const AUTHORIZED_EMAILS = [
   "giovannoni1806@gmail.com", "igorfagundesvieira@gmail.com", "jaymebc@gmail.com", "lalvesaraujo1@gmail.com",
   "leodcp1@gmail.com", "luc3101@gmail.com", "lucas.cardoso.andrade@gmail.com", "luciah1509@gmail.com",
@@ -20,64 +23,6 @@ const AUTHORIZED_EMAILS = [
   "richard.fernandes.sousa@gmail.com", "lucasmarquesdrumond@gmail.com", "beguimaraes3@gmail.com", "brunacandida@gmail.com",
   "carolassisval@gmail.com", "nandobracar@gmail.com", "vieiraa.jessica09@gmail.com"
 ];
-/* Lista de emails removida: o app nao exige login Google. */
-/*
-  "giovannoni1806@gmail.com",
-  "igorfagundesvieira@gmail.com",
-  "jaymebc@gmail.com",
-  "lalvesaraujo1@gmail.com",
-  "leodcp1@gmail.com",
-  "luc3101@gmail.com",
-  "lucas.cardoso.andrade@gmail.com",
-  "luciah1509@gmail.com",
-  "macielfonseca@gmail.com",
-  "marcio.henrique82@gmail.com",
-  "deilerjeunon19@gmail.com",
-  "deneradiniz@gmail.com",
-  "digoanest@gmail.com",
-  "ericardolucas@gmail.com",
-  "rafael.augusto.rezende@gmail.com",
-  "rodrigocapuano12@gmail.com",
-  "vcrelio@gmail.com",
-  "wx2064@gmail.com",
-  "25.guilherme@gmail.com",
-  "adelsonjm@gmail.com",
-  "adrianonevesdealmeida1966@gmail.com",
-  "barbararcoutinho@gmail.com",
-  "bovino3.lf@gmail.com",
-  "wendellvcp@gmail.com",
-  "gpbicalho@gmail.com",
-  "decastromorais@gmail.com",
-  "luizacs4182@gmail.com",
-  "luizotavio.andrade@gmail.com",
-  "paulorenato12021@gmail.com",
-  "rubenscpinheiro0217@gmail.com",
-  "nyhumberto@gmail.com",
-  "marianasantosbrant@gmail.com",
-  "anacarolinacbo1@gmail.com",
-  "anandaqrlima@gmail.com",
-  "lucasreis611@gmail.com",
-  "araujo.barbaral44@gmail.com",
-  "peereiralana@gmail.com",
-  "bernardofsilvestrini@gmail.com",
-  "eduardorfamaral@gmail.com",
-  "aliciafreire98@gmail.com",
-  "livia.campos12@gmail.com",
-  "isapinvin@gmail.com",
-  "na.tigre0@gmail.com",
-  "matheusspiccolo2@gmail.com",
-  "leonardoantonio2000sg@gmail.com",
-  "joaoboscom28@gmail.com",
-  "igorsmatias@gmail.com",
-  "gbgabri3@gmail.com",
-  "richard.fernandes.sousa@gmail.com",
-  "lucasmarquesdrumond@gmail.com",
-  "beguimaraes3@gmail.com",
-  "brunacandida@gmail.com",
-  "carolassisval@gmail.com",
-  "nandobracar@gmail.com",
-  "vieiraa.jessica09@gmail.com",
-]; */
 
 const REGISTROS_HEADERS = [
   "Data",
@@ -185,6 +130,10 @@ function doPost(e) {
       return handleAuth_(payload);
     }
 
+    if (action === "track") {
+      return handleTrack_(payload);
+    }
+
     const user = requireAuthorized_(
       payload.authToken || (e.parameter && e.parameter.authToken),
       payload.deviceToken || (e.parameter && e.parameter.deviceToken),
@@ -260,13 +209,46 @@ function doPost(e) {
 
 function handleAuth_(payload) {
   const user = requireAuthorized_(payload.authToken, payload.deviceToken, payload.userEmail);
+  registerAccessHistory_(user, {
+    eventType: "login",
+    moduleId: payload.moduleId,
+    pageId: payload.pageId,
+    pageTitle: payload.pageTitle,
+    path: payload.path,
+    embedded: payload.embedded,
+    detail: payload.detail || "Autenticacao Google",
+    deviceToken: payload.deviceToken,
+    userAgent: payload.userAgent,
+  });
   const response = {
     ok: true,
     email: user.email,
     name: user.name,
+    trustedDeviceExpiresAt: user.trustedDeviceExpiresAt,
   };
 
   return jsonResponse(response);
+}
+
+function handleTrack_(payload) {
+  const user = requireAuthorized_(payload.authToken, payload.deviceToken, payload.userEmail);
+  registerAccessHistory_(user, {
+    eventType: payload.eventType || "page_access",
+    moduleId: payload.moduleId,
+    pageId: payload.pageId,
+    pageTitle: payload.pageTitle,
+    path: payload.path,
+    embedded: payload.embedded,
+    detail: payload.detail,
+    deviceToken: payload.deviceToken,
+    userAgent: payload.userAgent,
+  });
+
+  return jsonResponse({
+    ok: true,
+    email: user.email,
+    name: user.name,
+  });
 }
 
 function handleAiHealth_(user) {
@@ -296,9 +278,201 @@ function handleAiHealth_(user) {
 }
 
 function requireAuthorized_(idToken, deviceToken, claimedEmail) {
-  // O endpoint foi configurado como publico. Os argumentos antigos sao
-  // mantidos apenas para compatibilidade com versoes ja instaladas do PWA.
-  return { email: "Acesso público", name: "", trustedDeviceExpiresAt: "" };
+  const normalizedDeviceToken = normalizeDeviceToken_(deviceToken);
+  const normalizedClaimedEmail = normalizeEmail_(claimedEmail);
+
+  if (String(idToken || "").trim()) {
+    const googleUser = verifyGoogleIdToken_(idToken);
+    if (!isAuthorizedEmail_(googleUser.email)) {
+      throw new Error("Conta Google nao autorizada para este app.");
+    }
+    const trustedDeviceExpiresAt = registerTrustedDevice_(normalizedDeviceToken, googleUser);
+    return {
+      email: googleUser.email,
+      name: googleUser.name || "",
+      trustedDeviceExpiresAt: trustedDeviceExpiresAt,
+    };
+  }
+
+  if (normalizedDeviceToken && normalizedClaimedEmail) {
+    const trustedUser = findTrustedDeviceUser_(normalizedDeviceToken, normalizedClaimedEmail);
+    if (trustedUser) {
+      touchTrustedDevice_(normalizedDeviceToken, normalizedClaimedEmail);
+      return trustedUser;
+    }
+  }
+
+  throw new Error("Faca login com uma conta Google autorizada.");
+}
+
+function verifyGoogleIdToken_(idToken) {
+  const response = UrlFetchApp.fetch(
+    "https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(String(idToken || "").trim()),
+    { method: "get", muteHttpExceptions: true }
+  );
+  const status = response.getResponseCode();
+  const payload = JSON.parse(response.getContentText() || "{}");
+
+  if (status < 200 || status >= 300) {
+    throw new Error("O Google nao confirmou a conta informada.");
+  }
+  if (String(payload.aud || "").trim() !== GOOGLE_CLIENT_ID) {
+    throw new Error("Client ID Google invalido para este app.");
+  }
+  if (String(payload.email_verified || "").trim() !== "true") {
+    throw new Error("O e-mail Google precisa estar verificado.");
+  }
+
+  const email = normalizeEmail_(payload.email);
+  if (!email) {
+    throw new Error("A conta Google nao informou um e-mail valido.");
+  }
+
+  return {
+    email: email,
+    name: String(payload.name || "").trim(),
+  };
+}
+
+function isAuthorizedEmail_(email) {
+  return AUTHORIZED_EMAILS.indexOf(normalizeEmail_(email)) !== -1;
+}
+
+function normalizeEmail_(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function normalizeDeviceToken_(deviceToken) {
+  const text = String(deviceToken || "").trim().toLowerCase();
+  return /^[a-f0-9]{64}$/.test(text) ? text : "";
+}
+
+function registerTrustedDevice_(deviceToken, user) {
+  if (!deviceToken) {
+    throw new Error("Dispositivo invalido para autorizacao.");
+  }
+
+  const sheet = ensureTrustedDevicesSheet_();
+  const values = sheet.getDataRange().getValues();
+  const now = new Date();
+  const trustedUntil = new Date("9999-12-31T23:59:59Z");
+  const email = normalizeEmail_(user.email);
+
+  for (var rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+    const row = values[rowIndex];
+    if (normalizeDeviceToken_(row[0]) === deviceToken && normalizeEmail_(row[1]) === email) {
+      sheet.getRange(rowIndex + 1, 3).setValue(String(user.name || "").trim());
+      sheet.getRange(rowIndex + 1, 5).setValue(now);
+      sheet.getRange(rowIndex + 1, 6).setValue(trustedUntil);
+      sheet.getRange(rowIndex + 1, 7).setValue("ATIVO");
+      return trustedUntil.toISOString();
+    }
+  }
+
+  sheet.appendRow([
+    deviceToken,
+    email,
+    String(user.name || "").trim(),
+    now,
+    now,
+    trustedUntil,
+    "ATIVO",
+  ]);
+  return trustedUntil.toISOString();
+}
+
+function findTrustedDeviceUser_(deviceToken, claimedEmail) {
+  const sheet = ensureTrustedDevicesSheet_();
+  const values = sheet.getDataRange().getValues();
+
+  for (var rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+    const row = values[rowIndex];
+    const savedDeviceToken = normalizeDeviceToken_(row[0]);
+    const savedEmail = normalizeEmail_(row[1]);
+    const expiresAt = row[5] instanceof Date ? row[5] : new Date(row[5]);
+    const status = String(row[6] || "").trim().toUpperCase();
+
+    if (savedDeviceToken !== deviceToken || savedEmail !== claimedEmail) {
+      continue;
+    }
+    if (status && status !== "ATIVO") {
+      return null;
+    }
+    if (!(expiresAt instanceof Date) || isNaN(expiresAt.getTime()) || expiresAt.getTime() < Date.now()) {
+      return null;
+    }
+
+    return {
+      email: savedEmail,
+      name: String(row[2] || "").trim(),
+      trustedDeviceExpiresAt: expiresAt.toISOString(),
+    };
+  }
+
+  return null;
+}
+
+function touchTrustedDevice_(deviceToken, email) {
+  const sheet = ensureTrustedDevicesSheet_();
+  const values = sheet.getDataRange().getValues();
+
+  for (var rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+    const row = values[rowIndex];
+    if (normalizeDeviceToken_(row[0]) === deviceToken && normalizeEmail_(row[1]) === email) {
+      sheet.getRange(rowIndex + 1, 5).setValue(new Date());
+      return;
+    }
+  }
+}
+
+function ensureTrustedDevicesSheet_() {
+  const spreadsheet = getSpreadsheet_();
+  let sheet = spreadsheet.getSheetByName(TRUSTED_DEVICES_SHEET);
+  const headers = ["Device Token", "Email", "Nome", "Criado em", "Ultimo acesso em", "Valido ate", "Status"];
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(TRUSTED_DEVICES_SHEET);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+
+  return sheet;
+}
+
+function ensureAccessHistorySheet_() {
+  const spreadsheet = getSpreadsheet_();
+  let sheet = spreadsheet.getSheetByName(ACCESS_HISTORY_SHEET);
+  const headers = ["Timestamp", "Evento", "Email", "Nome", "Modulo", "Pagina", "Titulo", "Path", "Incorporado", "Detalhe", "Device Token", "User Agent"];
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(ACCESS_HISTORY_SHEET);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+
+  return sheet;
+}
+
+function registerAccessHistory_(user, context) {
+  const sheet = ensureAccessHistorySheet_();
+  sheet.appendRow([
+    new Date(),
+    String(context.eventType || "page_access").trim(),
+    normalizeEmail_(user.email),
+    String(user.name || "").trim(),
+    String(context.moduleId || "").trim(),
+    String(context.pageId || "").trim(),
+    String(context.pageTitle || "").trim(),
+    String(context.path || "").trim(),
+    String(context.embedded === true),
+    String(context.detail || "").trim(),
+    normalizeDeviceToken_(context.deviceToken),
+    String(context.userAgent || "").trim(),
+  ]);
 }
 
 function handleAiExtract_(payload) {

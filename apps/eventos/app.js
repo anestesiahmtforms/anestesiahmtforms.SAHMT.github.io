@@ -144,10 +144,9 @@
     siglasGrid: document.getElementById("siglasGrid"),
     vacationCard: document.getElementById("vacationCard")
   };
+  let currentAccessLabel = "";
 
-  if (!ensureAuthorizedAccess()) {
-    return;
-  }
+  await ensureSharedAuthorizedAccess();
 
   if (elements.formattedDate) {
     elements.formattedDate.textContent = "Carregando escala...";
@@ -610,6 +609,23 @@
     elements.appFrame?.classList.remove("hidden");
   }
 
+  async function ensureSharedAuthorizedAccess() {
+    if (window.SAHMT_AUTH?.requireAccess) {
+      const auth = await window.SAHMT_AUTH.requireAccess({
+        moduleId: "EVENTOS",
+        pageId: "home",
+        returnUrl: window.location.href
+      });
+      currentAccessLabel = String(auth?.email || "").trim();
+      window.SAHMT_AUTH.onChange((nextAuth) => {
+        currentAccessLabel = String(nextAuth?.email || "").trim();
+      });
+    }
+
+    clearAuthStatus();
+    unlockApplication();
+  }
+
   function setAuthStatus(message) {
     if (!elements.authStatus) {
       return;
@@ -790,13 +806,14 @@
 
   async function pushSharedSiglaCheck(dateKey, sigla, marked) {
     const url = new URL(sharedStateEndpoint);
+    const authUser = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
     url.searchParams.set("action", "set");
     url.searchParams.set("spreadsheetId", scheduleSpreadsheetId);
     url.searchParams.set("sheetName", "DESTAQUES APP");
     url.searchParams.set("date", dateKey);
     url.searchParams.set("sigla", sigla);
     url.searchParams.set("marked", marked ? "true" : "false");
-    url.searchParams.set("updatedBy", clientId);
+    url.searchParams.set("updatedBy", authUser || clientId);
     url.searchParams.set("source", "PWA");
 
     const response = await fetch(url.toString(), {
@@ -1237,7 +1254,7 @@
       updatedBy
     } : {};
 
-    return {
+    const payload = {
       data: displayEventDate,
       dataDoEvento: displayEventDate,
       ausente: memberStatus,
@@ -1264,6 +1281,8 @@
       criadoEmIso: createdAtIso,
       ...editMetadata
     };
+
+    return window.SAHMT_AUTH?.withPayload ? window.SAHMT_AUTH.withPayload(payload) : payload;
   }
 
   async function postEventEntryPayload(payload) {
@@ -2349,6 +2368,11 @@
   }
 
   function getEventEntryEditorLabel() {
+    const userEmail = String(currentAccessLabel || window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+    if (userEmail) {
+      return userEmail;
+    }
+
     const shortId = String(clientId || "")
       .replace(/^client-/i, "")
       .slice(0, 8)
@@ -3560,4 +3584,3 @@
     return `${year}-${month}-${day}`;
   }
 })();
-
