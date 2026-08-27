@@ -763,6 +763,14 @@ label[hidden] {
     linear-gradient(105deg, #76b2ff 0%, #4387ea 54%, #295fbe 100%);
 }
 
+.layout:has(.form-panel.is-open) .main-return-dock,
+.layout:has(.summary-panel.is-open) .main-return-dock,
+.layout:has(.monthly-panel.is-open) .main-return-dock,
+body:has(#edit-overlay:not([hidden])) .main-return-dock,
+body:has(#confirm-overlay:not([hidden])) .main-return-dock {
+  display: none;
+}
+
 .panel {
   position: relative;
   overflow: hidden;
