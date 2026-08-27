@@ -161,7 +161,7 @@ body.modal-open {
   height: calc(100dvh - 16px);
   max-height: calc(100dvh - 16px);
   overflow: hidden;
-  padding-bottom: 0;
+  padding-bottom: 74px;
 }
 
 .hero-card,
@@ -1478,6 +1478,42 @@ button:hover,
   background: var(--teal);
   font-size: 0.63rem;
   font-weight: 800;
+}
+
+.main-return-dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  transform: translateX(-50%);
+  z-index: 45;
+  width: min(430px, calc(100% - 28px));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.main-return-button {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 154, 82, 0.34);
+  background: linear-gradient(135deg, rgba(255, 249, 240, 0.98), rgba(240, 225, 196, 0.96));
+  color: #7a5217;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 16px 32px rgba(96, 70, 26, 0.18);
+}
+
+.main-return-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 36px rgba(96, 70, 26, 0.24);
 }
 
 .contact-modal {
