@@ -855,8 +855,10 @@ function stopCamera() {
   state.stream.getTracks().forEach((track) => track.stop());
   state.stream = null;
   cameraEl.srcObject = null;
-  cameraStatusEl.textContent = "Camera desligada";
-  cameraStatusEl.className = "status-pill neutral";
+  if (cameraStatusEl) {
+    cameraStatusEl.textContent = "Camera desligada";
+    cameraStatusEl.className = "status-pill neutral";
+  }
 }
 
 async function captureFromCamera() {
@@ -886,8 +888,10 @@ function handleFileUpload(event) {
 
   setImageBlob(file);
   stopCamera();
-  cameraStatusEl.textContent = "Foto enviada";
-  cameraStatusEl.className = "status-pill neutral";
+  if (cameraStatusEl) {
+    cameraStatusEl.textContent = "Foto enviada";
+    cameraStatusEl.className = "status-pill neutral";
+  }
   setStatus("Foto carregada. Toque em Ler Etiqueta.", "success");
 }
 

@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=106">
+  <link rel="stylesheet" href="./styles.css?v=107">
 </head>
 <body>
   <div class="app-shell">
@@ -34,13 +34,6 @@
 
     <main class="layout">
       <section class="panel scanner-panel">
-        <div class="section-title">
-          <div class="section-title-copy">
-            <h2>Scanner</h2>
-          </div>
-          <span id="camera-status" class="status-pill neutral">Camera desligada</span>
-        </div>
-
         <div class="camera-stage">
           <video id="camera" playsinline muted></video>
           <div class="guide-overlay" aria-hidden="true">
@@ -57,7 +50,6 @@
         <div class="scanner-secondary-actions">
           <button id="open-manual-entry" type="button" class="scanner-action">Registro Manual</button>
         </div>
-        <p class="capture-note">Use: Etiqueta Nítida e ambiente claro</p>
 
         <div class="preview-wrap">
           <img id="preview" alt="Previa da etiqueta capturada">
