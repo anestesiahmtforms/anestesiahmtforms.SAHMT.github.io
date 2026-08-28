@@ -2625,6 +2625,9 @@ function buildMonthlyPdf(rows, month) {
   }
 
   const alertCount = rows.filter((row) => isAlertType(row.tipo)).length;
+  const toneA = [36, 78, 112];
+  const toneB = [93, 104, 128];
+  const alertTone = [133, 77, 14];
   const doc = new jsPdf({ orientation: "landscape", unit: "mm", format: "a4" });
   if (typeof doc.autoTable !== "function") {
     throw new Error("Plugin de tabela PDF nao carregado.");
@@ -2660,17 +2663,23 @@ function buildMonthlyPdf(rows, month) {
     theme: "grid",
     styles: { font: "helvetica", fontSize: 7.5, cellPadding: 2, overflow: "linebreak", textColor: [31, 41, 55] },
     headStyles: { fillColor: [11, 63, 58], textColor: [255, 255, 255], fontStyle: "bold", halign: "center" },
-    alternateRowStyles: { fillColor: [245, 248, 247] },
+    alternateRowStyles: { fillColor: [244, 248, 252] },
     columnStyles: {
       0: { cellWidth: 8, halign: "center" }, 1: { cellWidth: 20 }, 2: { cellWidth: 45 },
       3: { cellWidth: 30 }, 4: { cellWidth: 18 }, 5: { cellWidth: 20 }, 6: { cellWidth: 25 },
       7: { cellWidth: 20 }, 8: { cellWidth: 25 }, 9: { cellWidth: 30 }, 10: { cellWidth: 35 },
     },
     didParseCell(data) {
-      if (data.section === "body" && isAlertType(rows[data.row.index]?.tipo)) {
-        data.cell.styles.textColor = [185, 28, 28];
-        data.cell.styles.fontStyle = "bold";
-        data.cell.styles.fillColor = [255, 241, 242];
+      if (data.section === "body") {
+        const row = rows[data.row.index];
+        data.cell.styles.textColor = data.row.index % 2 === 0 ? toneA : toneB;
+        if (isAlertType(row?.tipo)) {
+          data.cell.styles.textColor = alertTone;
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.fillColor = [255, 248, 235];
+        } else if (row?.resumoEdicao) {
+          data.cell.styles.fillColor = [241, 249, 244];
+        }
       }
     },
   });
