@@ -855,7 +855,7 @@ async function loadAiHealth() {
   if (!state.config.scriptUrl) {
     state.aiHealth = null;
     state.aiReady = false;
-    document.querySelector("#process-image").disabled = true;
+    document.querySelector("#process-image").disabled = !state.imageBlob;
     renderAiStatus();
     return;
   }
@@ -892,7 +892,7 @@ async function loadAiHealth() {
       checkedAt: new Date().toISOString(),
     };
     state.aiReady = false;
-    document.querySelector("#process-image").disabled = true;
+    document.querySelector("#process-image").disabled = !state.imageBlob;
   } finally {
     renderAiStatus();
   }
@@ -1008,7 +1008,7 @@ function setImageBlob(blob) {
   previewEl.classList.add("has-image");
   document.querySelector(".camera-stage")?.classList.add("has-capture");
   cameraEl.style.display = "none";
-  document.querySelector("#process-image").disabled = !state.aiReady;
+  document.querySelector("#process-image").disabled = false;
 }
 
 function resetScannerView() {
@@ -1064,7 +1064,7 @@ async function processCurrentImage() {
   }
 
   if (!state.aiReady) {
-    setStatus("Aguarde a ativação da IA antes de ler a etiqueta.", "info");
+    setStatus('No momento Ler por IA não está disponível, Aguarde ou entre com os dados pelo "Registro Manual" no Botão abaixo', "info");
     return;
   }
 
@@ -2902,7 +2902,7 @@ function toggleBusy(isBusy) {
 
   if (!isBusy) {
     document.querySelector("#capture-image").disabled = false;
-    document.querySelector("#process-image").disabled = !state.imageBlob || !state.aiReady;
+    document.querySelector("#process-image").disabled = !state.imageBlob;
     document.querySelector("#open-manual-entry").disabled = false;
     syncPlantonistasRequirement();
   }
