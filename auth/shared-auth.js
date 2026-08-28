@@ -414,6 +414,21 @@
     }
   }
 
+  function applyStoredTrustedDeviceSession(saved) {
+    if (!saved?.deviceToken || !saved?.email) {
+      return null;
+    }
+    applyAuthenticatedUser({
+      token: "",
+      email: String(saved.email || "").toLowerCase(),
+      name: saved.name || "",
+      deviceToken: saved.deviceToken,
+      trustedDeviceExpiresAt: saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
+      expiresAt: 0,
+    });
+    return authState;
+  }
+
   function applyAuthenticatedUser(nextState) {
     authState = {
       token: nextState.token || "",
@@ -666,6 +681,29 @@
     return authState;
   }
 
+  async function refreshTrustedDeviceSessionInBackground(context) {
+    const config = getConfig();
+    const saved = readStoredSession(config);
+    if (!saved) {
+      return;
+    }
+    try {
+      const result = await validateTrustedDevice(saved, context);
+      applyAuthenticatedUser({
+        token: "",
+        email: String(result.email || saved.email || "").toLowerCase(),
+        name: result.name || saved.name || "",
+        deviceToken: saved.deviceToken,
+        trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
+        expiresAt: 0,
+      });
+      persistSession(config);
+      await trackAccess("page_access", "Dispositivo confiavel");
+    } catch {
+      // Keep the device-authenticated session active locally.
+    }
+  }
+
   async function requireAccess(context = {}) {
     if (activePromise) {
       return activePromise;
@@ -682,15 +720,16 @@
 
     activePromise = (async () => {
       const config = getConfig();
-      try {
-        const restored = await restoreTrustedDeviceSession(activeContext);
+      const saved = readStoredSession(config);
+      if (saved) {
+        const restored = applyStoredTrustedDeviceSession(saved);
         if (restored) {
           hideGate();
-          await trackAccess("page_access", "Dispositivo confiável");
+          window.setTimeout(() => {
+            refreshTrustedDeviceSessionInBackground(activeContext).catch(() => {});
+          }, 0);
           return restored;
         }
-      } catch {
-        clearSession(config);
       }
 
       authState = null;

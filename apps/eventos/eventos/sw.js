@@ -1,4 +1,4 @@
-const CACHE_NAME = "eventos-escala-v25";
+const CACHE_NAME = "eventos-escala-v26";
 const APP_ASSETS = [
   "./",
   "./index.html",
