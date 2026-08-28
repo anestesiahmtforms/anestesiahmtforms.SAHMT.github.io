@@ -1226,6 +1226,17 @@ video {
   margin-top: 2px;
   position: relative;
   z-index: 1;
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+#process-image.ai-ready {
+  border-color: rgba(22, 145, 91, 0.72);
+  box-shadow: 0 0 0 5px rgba(53, 186, 115, 0.2), 0 0 22px rgba(53, 186, 115, 0.42);
+}
+
+#process-image.ai-unavailable {
+  border-color: rgba(190, 75, 75, 0.62);
+  box-shadow: 0 0 0 5px rgba(224, 116, 116, 0.16), 0 0 18px rgba(224, 116, 116, 0.28);
 }
 
 .actions,

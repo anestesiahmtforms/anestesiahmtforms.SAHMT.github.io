@@ -815,6 +815,10 @@ function renderSheetStatus() {
 }
 
 function renderAiStatus() {
+  const processButton = document.querySelector("#process-image");
+  processButton?.classList.toggle("ai-ready", Boolean(state.aiReady));
+  processButton?.classList.toggle("ai-unavailable", !state.aiReady);
+
   if (!aiStatusEl) {
     return;
   }
@@ -936,9 +940,9 @@ async function registerServiceWorker() {
 
 async function startCamera() {
   document.querySelector(".camera-stage")?.classList.remove("has-capture");
-  cameraEl.style.display = "block";
   try {
     stopCamera();
+    cameraEl.style.display = "block";
     state.stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -973,13 +977,13 @@ async function handleCameraCaptureButton() {
 }
 
 function stopCamera() {
-  if (!state.stream) {
-    return;
+  if (state.stream) {
+    state.stream.getTracks().forEach((track) => track.stop());
+    state.stream = null;
   }
 
-  state.stream.getTracks().forEach((track) => track.stop());
-  state.stream = null;
   cameraEl.srcObject = null;
+  cameraEl.style.display = "none";
   if (cameraStatusEl) {
     cameraStatusEl.textContent = "Camera desligada";
     cameraStatusEl.className = "status-pill neutral";
