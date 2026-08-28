@@ -106,6 +106,26 @@ const plantonistasUi = {
   checks: [],
 };
 
+function setCaptureButtonIdleState() {
+  const captureButton = document.querySelector("#capture-image");
+  if (!captureButton) {
+    return;
+  }
+  captureButton.textContent = "Abrir camera";
+  captureButton.setAttribute("aria-label", "Abrir camera");
+  captureButton.disabled = false;
+}
+
+function setCaptureButtonReadyState() {
+  const captureButton = document.querySelector("#capture-image");
+  if (!captureButton) {
+    return;
+  }
+  captureButton.textContent = "CAPTURAR IMÁGEM";
+  captureButton.setAttribute("aria-label", "Capturar imagem");
+  captureButton.disabled = false;
+}
+
 document.querySelector("#capture-image").addEventListener("click", handleCameraCaptureButton);
 document.querySelector("#open-manual-entry").addEventListener("click", openManualEntry);
 document.querySelector("#upload-image")?.addEventListener("change", handleFileUpload);
@@ -827,9 +847,7 @@ async function startCamera() {
     await cameraEl.play();
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
-    document.querySelector("#capture-image").disabled = false;
-    document.querySelector("#capture-image").textContent = "Capturar Etiqueta";
-    document.querySelector("#capture-image").setAttribute("aria-label", "Capturar etiqueta");
+    setCaptureButtonReadyState();
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
   } catch (error) {
     cameraStatusEl.textContent = "Sem acesso";
@@ -859,12 +877,7 @@ function stopCamera() {
     cameraStatusEl.textContent = "Camera desligada";
     cameraStatusEl.className = "status-pill neutral";
   }
-  const captureButton = document.querySelector("#capture-image");
-  if (captureButton) {
-    captureButton.textContent = "Abrir camera";
-    captureButton.setAttribute("aria-label", "Abrir camera");
-    captureButton.disabled = false;
-  }
+  setCaptureButtonIdleState();
 }
 
 async function captureFromCamera() {
@@ -920,12 +933,7 @@ function resetScannerView() {
   previewEl.removeAttribute("src");
   previewEl.classList.remove("has-image");
   cameraEl.style.display = "block";
-  const captureButton = document.querySelector("#capture-image");
-  if (captureButton) {
-    captureButton.textContent = "Abrir camera";
-    captureButton.setAttribute("aria-label", "Abrir camera");
-    captureButton.disabled = false;
-  }
+  setCaptureButtonIdleState();
 }
 
 function getGuideCropRect(sourceWidth, sourceHeight) {
