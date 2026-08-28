@@ -82,7 +82,8 @@ function parsePayload_(e) {
     originalPagador: pickFirstValue_(payload, ['originalPagador']),
     originalCredor: pickFirstValue_(payload, ['originalCredor']),
     originalValor: pickFirstValue_(payload, ['originalValor']),
-    updatedBy: pickFirstValue_(payload, ['updatedBy']),
+    userEmail: pickFirstValue_(payload, ['userEmail']),
+    updatedBy: pickFirstValue_(payload, ['updatedBy', 'userEmail']),
     dataDoEvento: pickFirstValue_(payload, ['dataDoEvento', 'data']),
     membro: pickFirstValue_(payload, ['membroAusenteAtrasado', 'ausente']),
     tipo: pickFirstValue_(payload, ['tipoDeEvento', 'evento']),
@@ -218,6 +219,10 @@ function findRowIndexBySnapshot_(sheet, payload) {
 function buildRow_(payload, history, timestampOverride, registeredByOverride) {
   const timestamp = timestampOverride || normalizeTimestamp_(payload.criadoEm || new Date());
   const dataDoEvento = normalizeDateText_(payload.dataDoEvento);
+  const registeredBy = String(registeredByOverride || payload.userEmail || payload.updatedBy || '').trim().toLowerCase();
+  if (!registeredBy) {
+    throw new Error('E-mail autenticado nao identificado. Entre novamente no app e tente salvar o evento.');
+  }
 
   return [
     timestamp,
@@ -233,7 +238,7 @@ function buildRow_(payload, history, timestampOverride, registeredByOverride) {
     payload.valor,
     payload.origem || 'PWA Eventos de escala',
     String(history || '').trim(),
-    String(registeredByOverride || payload.updatedBy || 'Acesso local').trim()
+    registeredBy
   ];
 }
 

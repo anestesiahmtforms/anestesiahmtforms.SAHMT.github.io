@@ -1183,6 +1183,12 @@
       return;
     }
 
+    const authenticatedEmail = getAuthenticatedEmail();
+    if (!authenticatedEmail) {
+      setEventEntryStatus("E-mail autenticado nao identificado. Entre novamente no app antes de salvar.", "error");
+      return;
+    }
+
     const payload = buildEventEntryPayload();
     setEventEntrySubmitting(true);
     setEventEntryStatus(isEditingEventRecord() ? "Salvando alteracao na planilha..." : "Salvando dados na planilha...", "");
@@ -2385,17 +2391,16 @@
   }
 
   function getEventEntryEditorLabel() {
-    const userEmail = String(currentAccessLabel || window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+    return getAuthenticatedEmail() || "";
+  }
+
+  function getAuthenticatedEmail() {
+    const sessionEmail = String(window.SAHMT_AUTH?.getSession?.()?.email || "").trim();
+    const userEmail = String(currentAccessLabel || sessionEmail || window.SAHMT_AUTH?.getUserLabel?.() || "").trim().toLowerCase();
     if (userEmail) {
       return userEmail;
     }
-
-    const shortId = String(clientId || "")
-      .replace(/^client-/i, "")
-      .slice(0, 8)
-      .toUpperCase();
-
-    return shortId ? `Dispositivo ${shortId}` : "Acesso local";
+    return "";
   }
 
   function buildMonthlyCreditorSummaryRows(records) {
