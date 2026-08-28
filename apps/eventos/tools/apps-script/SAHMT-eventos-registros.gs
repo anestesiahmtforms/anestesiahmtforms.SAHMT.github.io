@@ -1,9 +1,9 @@
 // Apps Script de referencia operacional para o envio do modal "Lancamento do evento".
-// Planilha alvo: 1WAeUMVOj21LEsWOE7RzsoSF_2QW1mQnMBxZuWupWnCI
+// Planilha alvo: 1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg
 // Aba alvo: Registros
 // Endpoint implantado e confirmado em 23/08/2026:
 // https://script.google.com/macros/s/AKfycbwDZom6t3uMZQdvoitGc6JjOR0PcgYj364VkrOR4V4Ie_JbYna0fXCWqQ8zHQdJhGsH/exec
-const EVENTOS_SPREADSHEET_ID = '1WAeUMVOj21LEsWOE7RzsoSF_2QW1mQnMBxZuWupWnCI';
+const EVENTOS_SPREADSHEET_ID = '1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg';
 const EVENTOS_REGISTROS_SHEET = 'Registros';
 const EVENTOS_HEADERS = [
   'Timestamp',

@@ -17,8 +17,8 @@ Referencia operacional atualizada em 14/08/2026.
 
 ## Planilha alvo
 
-- Spreadsheet ID: `1WAeUMVOj21LEsWOE7RzsoSF_2QW1mQnMBxZuWupWnCI`
-- Planilha: `Eventos de escala - Referencia PWA 2026`
+- Spreadsheet ID: `1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg`
+- Planilha: `EVENTOS - Registros PWA SAHMT`
 - Aba: `Registros`
 
 ## Estrutura gravada
@@ -35,6 +35,7 @@ Referencia operacional atualizada em 14/08/2026.
 10. `CREDOR`
 11. `VALOR A PAGAR`
 12. `ORIGEM`
+13. `HISTORICO DE ALTERACAO`
 
 ## Quando precisar republicar
 
