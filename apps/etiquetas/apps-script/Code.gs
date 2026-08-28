@@ -166,9 +166,10 @@ function doPost(e) {
   }
 }
 
-function getRequestUser_() {
+function getRequestUser_(payload) {
+  const email = String(payload && payload.userEmail || "").trim().toLowerCase();
   return {
-    email: "autenticacao-pagina-principal",
+    email: email || "autenticacao-pagina-principal",
     name: "",
   };
 }

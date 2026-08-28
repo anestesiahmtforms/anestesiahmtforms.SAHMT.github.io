@@ -46,6 +46,8 @@ O acesso do usuario acontece uma unica vez na autenticacao Google da pagina prin
 
 O `apps-script/Code.gs` nao repete a autenticacao antiga do app separado. O Web App do ETIQUETAS deve ser implantado com acesso que permita as chamadas do PWA; a protecao de entrada permanece na pagina principal.
 
+As colunas de responsavel usam o `userEmail` enviado pela sessao da pagina principal. Chamadas diretas sem esse campo usam `autenticacao-pagina-principal`.
+
 Client ID configurado no PWA:
 
 ```text
