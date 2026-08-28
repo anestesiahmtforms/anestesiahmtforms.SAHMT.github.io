@@ -89,7 +89,7 @@
     eventEntryModal: document.getElementById("eventEntryModal"),
     eventEntryBackdrop: document.getElementById("eventEntryBackdrop"),
     closeEventEntryModal: document.getElementById("closeEventEntryModal"),
-    eventEntryKicker: document.getElementById("eventEntryKicker"),
+    eventEntryKicker: document.getElementById("eventEntryTitle"),
     siglaChoiceModal: document.getElementById("siglaChoiceModal"),
     siglaChoiceBackdrop: document.getElementById("siglaChoiceBackdrop"),
     closeSiglaChoiceModal: document.getElementById("closeSiglaChoiceModal"),
@@ -1949,8 +1949,10 @@
   }
 
   function syncEventEntryModeUi() {
+    elements.eventEntryModal?.classList.toggle("entry-modal--editing", isEditingEventRecord());
+
     if (elements.eventEntryKicker) {
-      elements.eventEntryKicker.textContent = isEditingEventRecord() ? "Editar registro do evento" : "Lancamento do evento";
+      elements.eventEntryKicker.textContent = isEditingEventRecord() ? "Editar registro do evento" : "Lançamento do evento";
     }
 
     if (elements.submitEventEntryButton) {

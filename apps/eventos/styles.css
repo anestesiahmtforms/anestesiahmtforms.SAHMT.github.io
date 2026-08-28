@@ -520,22 +520,50 @@ body.modal-open {
 }
 
 .entry-sheet__header {
+  position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.entry-sheet__kicker {
+.entry-sheet__header-copy {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0 54px;
+  text-align: center;
+}
+
+.entry-sheet__title {
   margin: 0;
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.15;
   text-transform: uppercase;
-  color: rgba(20, 50, 84, 0.72);
+  color: var(--ink);
+}
+
+.entry-sheet__auth {
+  color: rgba(20, 50, 84, 0.54);
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.entry-sheet__auth::before {
+  content: "Responsável pelo lançamento: ";
+}
+
+.entry-modal--editing .entry-sheet__auth::before {
+  content: "Responsável pela edição: ";
 }
 
 .entry-sheet__close {
+  position: absolute;
+  top: 0;
+  right: 0;
   padding: 8px 10px;
   border-radius: 12px;
   background: var(--mist);
