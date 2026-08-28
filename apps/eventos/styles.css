@@ -721,6 +721,10 @@ body.modal-open {
   border-radius: 18px;
   background: rgba(220, 232, 238, 0.34);
   border: 1px solid rgba(13, 50, 87, 0.08);
+  min-height: clamp(170px, 24vh, 220px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .records-banner {
@@ -2106,6 +2110,7 @@ button:hover,
   .search-banner {
     padding: 4px;
     margin-bottom: 4px;
+    min-height: 210px;
   }
 
   .controls-grid,
