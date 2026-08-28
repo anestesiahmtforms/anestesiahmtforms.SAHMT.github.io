@@ -18,7 +18,8 @@ const EVENTOS_HEADERS = [
   'CREDOR',
   'VALOR A PAGAR',
   'ORIGEM',
-  'HISTORICO DE ALTERACAO'
+  'HISTORICO DE ALTERACAO',
+  'RESPONSAVEL PELO REGISTRO'
 ];
 
 function doGet() {
@@ -143,7 +144,8 @@ function updateExistingRow_(sheet, payload) {
   var currentRow = sheet.getRange(rowIndex, 1, 1, EVENTOS_HEADERS.length).getDisplayValues()[0];
   var timestamp = String(currentRow[0] || '').trim() || normalizeTimestamp_(payload.originalTimestamp || new Date());
   var previousHistory = String(currentRow[12] || payload.originalHistory || '').trim();
-  var nextRow = buildRow_(payload, previousHistory, timestamp);
+  var currentRegisteredBy = String(currentRow[13] || '').trim();
+  var nextRow = buildRow_(payload, previousHistory, timestamp, currentRegisteredBy);
   var historyEntry = buildHistoryEntry_(currentRow, nextRow, payload.updatedBy);
 
   if (!historyEntry) {
@@ -213,7 +215,7 @@ function findRowIndexBySnapshot_(sheet, payload) {
   return 0;
 }
 
-function buildRow_(payload, history, timestampOverride) {
+function buildRow_(payload, history, timestampOverride, registeredByOverride) {
   const timestamp = timestampOverride || normalizeTimestamp_(payload.criadoEm || new Date());
   const dataDoEvento = normalizeDateText_(payload.dataDoEvento);
 
@@ -230,7 +232,8 @@ function buildRow_(payload, history, timestampOverride) {
     payload.credor,
     payload.valor,
     payload.origem || 'PWA Eventos de escala',
-    String(history || '').trim()
+    String(history || '').trim(),
+    String(registeredByOverride || payload.updatedBy || 'Acesso local').trim()
   ];
 }
 
@@ -249,6 +252,10 @@ function ensureHeaders_(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, EVENTOS_HEADERS.length).setValues([EVENTOS_HEADERS]);
     return;
+  }
+
+  if (sheet.getMaxColumns() < EVENTOS_HEADERS.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), EVENTOS_HEADERS.length - sheet.getMaxColumns());
   }
 
   const currentHeaders = sheet.getRange(1, 1, 1, EVENTOS_HEADERS.length).getDisplayValues()[0];

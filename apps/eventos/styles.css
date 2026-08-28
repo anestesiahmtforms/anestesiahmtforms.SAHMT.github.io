@@ -302,6 +302,15 @@ body.modal-open {
   text-transform: uppercase;
 }
 
+.records-card {
+  padding: 5px;
+}
+
+.records-card .records-panel-toggle {
+  min-height: 46px;
+  padding: 10px 14px;
+}
+
 .records-panel-toggle::after {
   content: "Abrir";
   position: absolute;
@@ -890,6 +899,11 @@ body.modal-open {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
+.record-card__row--registration {
+  background: rgba(226, 241, 252, 0.82);
+  border: 1px solid rgba(55, 133, 190, 0.18);
+}
+
 .record-card__label {
   flex: 0 0 118px;
   min-width: 0;
@@ -965,6 +979,10 @@ body.modal-open {
   color: #9b5b00;
 }
 
+.record-card__label--registration {
+  color: #397eae;
+}
+
 .record-card__value {
   flex: 1 1 auto;
   min-width: 0;
@@ -978,6 +996,11 @@ body.modal-open {
 
 .record-card__value--history {
   color: #8a3500;
+  font-weight: 800;
+}
+
+.record-card__row--registration .record-card__value {
+  color: #397eae;
   font-weight: 800;
 }
 
@@ -2233,12 +2256,12 @@ button:hover,
   }
 
   .records-card {
-    padding: 8px;
+    padding: 5px;
   }
 
   .records-panel-toggle {
-    min-height: 44px;
-    padding: 10px 12px;
+    min-height: 40px;
+    padding: 8px 10px;
     font-size: 0.66rem;
   }
 

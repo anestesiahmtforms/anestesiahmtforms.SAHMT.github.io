@@ -1571,7 +1571,8 @@
         credor: String(row[9] || "").trim(),
         valor: String(row[10] || "").trim(),
         origem: String(row[11] || "").trim(),
-        history: String(row[12] || "").trim()
+        history: String(row[12] || "").trim(),
+        registeredBy: String(row[13] || "").trim()
       }))
       .filter((record) => record.dataDoEventoKey)
     ).sort(compareEventRecordsDesc);
@@ -1602,7 +1603,8 @@
       credor: String(payload.credor || payload.resultadoCredor || "").trim(),
       valor: String(payload.valorAPagar || payload.valorPagar || "").trim(),
       origem: String(payload.origem || "PWA Eventos de escala").trim(),
-      history: String(editHistory || activeEventRecordEdit?.history || "").trim()
+      history: String(editHistory || activeEventRecordEdit?.history || "").trim(),
+      registeredBy: String(activeEventRecordEdit?.record?.registeredBy || payload.updatedBy || "").trim()
     };
 
     if (!nextRecord.dataDoEventoKey) {
@@ -1783,6 +1785,7 @@
         ["Pagador", record.pagador],
         ["Credor", record.credor],
         ["Valor a pagar", record.valor],
+        ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
@@ -1792,11 +1795,17 @@
           if (label === "Ultima edicao") {
             row.classList.add("record-card__row--history");
           }
+          if (label === "Responsável pelo Registro") {
+            row.classList.add("record-card__row--registration");
+          }
 
           const labelElement = document.createElement("span");
           labelElement.className = "record-card__label";
           if (label === "Ultima edicao") {
             labelElement.classList.add("record-card__label--history");
+          }
+          if (label === "Responsável pelo Registro") {
+            labelElement.classList.add("record-card__label--registration");
           }
           labelElement.textContent = label;
 
@@ -1851,6 +1860,7 @@
         ["Pagador", record.pagador],
         ["Credor", record.credor],
         ["Valor", record.valor],
+        ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
@@ -1860,11 +1870,17 @@
           if (label === "Ultima edicao") {
             row.classList.add("record-card__row--history");
           }
+          if (label === "Responsável pelo Registro") {
+            row.classList.add("record-card__row--registration");
+          }
 
           const labelElement = document.createElement("span");
           labelElement.className = "record-card__label";
           if (label === "Ultima edicao") {
             labelElement.classList.add("record-card__label--history");
+          }
+          if (label === "Responsável pelo Registro") {
+            labelElement.classList.add("record-card__label--registration");
           }
           labelElement.textContent = label;
 
