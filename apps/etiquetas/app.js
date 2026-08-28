@@ -35,6 +35,7 @@ const state = {
   imageBlob: null,
   imageUrl: "",
   metadata: null,
+  aiHealth: null,
   config: loadConfig(),
   summaryRows: [],
   summaryMode: "date",
@@ -53,6 +54,7 @@ const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
 const sheetStatusEl = document.querySelector("#sheet-status");
+const aiStatusEl = document.querySelector("#ai-status");
 const authGateEl = document.querySelector("#auth-gate");
 const authMessageEl = document.querySelector("#auth-message");
 const authUserEl = document.querySelector("#auth-user");
@@ -485,6 +487,7 @@ async function handleGoogleCredentialResponse(credential) {
 
 async function initializeAuthorizedApp() {
   await loadMetadata();
+  await loadAiHealth();
 }
 
 function waitForGoogleIdentity() {
@@ -775,17 +778,42 @@ function renderSheetStatus() {
   if (state.config.scriptUrl && state.metadata?.spreadsheetName) {
     sheetStatusEl.textContent = state.metadata.spreadsheetName;
     sheetStatusEl.className = "status-pill";
-    return;
-  }
-
-  if (state.config.scriptUrl) {
+  } else if (state.config.scriptUrl) {
     sheetStatusEl.textContent = "Planilha configurada";
     sheetStatusEl.className = "status-pill";
+  } else {
+    sheetStatusEl.textContent = "Planilha nao configurada";
+    sheetStatusEl.className = "status-pill neutral";
+  }
+
+  renderAiStatus();
+}
+
+function renderAiStatus() {
+  if (!aiStatusEl) {
     return;
   }
 
-  sheetStatusEl.textContent = "Planilha nao configurada";
-  sheetStatusEl.className = "status-pill neutral";
+  if (!state.config.scriptUrl) {
+    aiStatusEl.textContent = "IA nao configurada";
+    aiStatusEl.className = "status-pill neutral";
+    return;
+  }
+
+  if (state.aiHealth?.ok) {
+    aiStatusEl.textContent = `IA ativa${state.aiHealth.model ? `: ${state.aiHealth.model}` : ""}`;
+    aiStatusEl.className = "status-pill";
+    return;
+  }
+
+  if (state.aiHealth?.message) {
+    aiStatusEl.textContent = "IA nao confirmada";
+    aiStatusEl.className = "status-pill error";
+    return;
+  }
+
+  aiStatusEl.textContent = "IA nao verificada";
+  aiStatusEl.className = "status-pill neutral";
 }
 
 async function loadMetadata() {
@@ -812,6 +840,47 @@ async function loadMetadata() {
     state.metadata = null;
   } finally {
     renderSheetStatus();
+  }
+}
+
+async function loadAiHealth() {
+  if (!state.config.scriptUrl) {
+    state.aiHealth = null;
+    renderAiStatus();
+    return;
+  }
+
+  try {
+    const url = new URL(state.config.scriptUrl);
+    url.searchParams.set("action", "aiHealth");
+    addAuthToUrl(url);
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(withAuthPayload({ action: "aiHealth" })),
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.ok !== true) {
+      throw new Error(result.message || "IA nao confirmada.");
+    }
+
+    state.aiHealth = {
+      ok: true,
+      model: String(result.model || "").trim(),
+      message: String(result.message || "").trim(),
+      checkedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.warn("Falha ao verificar IA:", error);
+    state.aiHealth = {
+      ok: false,
+      model: "",
+      message: error instanceof Error ? error.message : String(error || "Falha ao verificar IA."),
+      checkedAt: new Date().toISOString(),
+    };
+  } finally {
+    renderAiStatus();
   }
 }
 
@@ -994,6 +1063,13 @@ async function processCurrentImage() {
     const missingNote = missing.length ? ` Confira manualmente: ${missing.join(", ")}.` : "";
     setStatus(`Leitura Concluída.${missingNote}${qualityNote}`, missing.length ? "info" : "success");
   } catch (error) {
+    state.aiHealth = {
+      ok: false,
+      model: String(state.aiHealth?.model || "").trim(),
+      message: error instanceof Error ? error.message : String(error || "Falha na leitura por IA."),
+      checkedAt: new Date().toISOString(),
+    };
+    renderAiStatus();
     console.error(error);
     setStatus(`Falha na leitura da etiqueta: ${error.message}`, "error");
   } finally {
@@ -1019,6 +1095,14 @@ async function extractLabelWithAi(imageBlob) {
   if (!response.ok || result.ok !== true) {
     throw new Error(result.message || "Resposta invalida do Apps Script.");
   }
+
+  state.aiHealth = {
+    ok: true,
+    model: String(result.model || state.aiHealth?.model || "").trim(),
+    message: String(result.message || "IA respondeu na leitura.").trim(),
+    checkedAt: new Date().toISOString(),
+  };
+  renderAiStatus();
 
   return {
     nomePaciente: String(result.nomePaciente || "").trim(),

@@ -257,23 +257,33 @@ function handleAiHealth_(user) {
     throw new Error("Configure a propriedade OPENAI_API_KEY no Apps Script.");
   }
 
-  const response = UrlFetchApp.fetch("https://api.openai.com/v1/models/" + encodeURIComponent(OPENAI_MODEL), {
-    method: "get",
+  const response = UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
+    method: "post",
+    contentType: "application/json",
     headers: {
       Authorization: "Bearer " + apiKey,
     },
+    payload: JSON.stringify({
+      model: OPENAI_MODEL,
+      input: "Responda apenas OK.",
+      max_output_tokens: 8,
+    }),
     muteHttpExceptions: true,
   });
   const status = response.getResponseCode();
+  const content = response.getContentText();
   if (status < 200 || status >= 300) {
-    throw new Error("API OpenAI nao confirmou o modelo " + OPENAI_MODEL + " (" + status + ").");
+    throw new Error("API OpenAI nao confirmou a rota de leitura (" + status + "): " + content.slice(0, 200));
   }
+
+  const payload = JSON.parse(content || "{}");
+  const outputText = extractOutputText_(payload);
 
   return jsonResponse({
     ok: true,
     model: OPENAI_MODEL,
     userEmail: user.email,
-    message: "API OpenAI ativa.",
+    message: outputText ? "IA OpenAI ativa via Responses." : "IA OpenAI respondeu sem texto util.",
   });
 }
 
@@ -494,6 +504,9 @@ function handleAiExtract_(payload) {
     "2. convenio: texto depois de 'Convenio:' ate o fim da linha. Exemplo: 'Unimed BH - HMT'. Nao inclua a palavra Convenio:.",
     "3. cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Deve conter somente digitos.",
     "4. atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Deve conter somente digitos.",
+    "5. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
+    "6. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
+    "7. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
@@ -550,14 +563,16 @@ function handleAiExtract_(payload) {
     throw new Error("A IA nao retornou texto estruturado.");
   }
 
-  const extracted = JSON.parse(outputText);
+  const extracted = parseJsonObjectSafe_(outputText);
   const nomePaciente = cleanName_(extracted.nomePaciente);
   const convenio = cleanConvenio_(extracted.convenio);
-  const cirurgia = cleanDigits_(extracted.cirurgia);
-  const atendimento = cleanDigits_(extracted.atendimento);
+  const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);
+  const atendimento = sanitizeLabelNumber_(extracted.atendimento);
 
   return jsonResponse({
     ok: true,
+    model: OPENAI_MODEL,
+    message: "Leitura por IA concluida.",
     nomePaciente,
     convenio,
     cirurgia,
@@ -582,6 +597,31 @@ function extractOutputText_(apiResult) {
   }
 
   return "";
+}
+
+function parseJsonObjectSafe_(text) {
+  const raw = String(text || "").trim();
+  if (!raw) {
+    throw new Error("A IA nao retornou JSON.");
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[0]);
+    }
+    throw new Error("A IA retornou texto fora do JSON esperado.");
+  }
+}
+
+function sanitizeLabelNumber_(value) {
+  const digits = cleanDigits_(value);
+  if (!digits || digits.length < 3) {
+    return "";
+  }
+  return digits;
 }
 
 function ensureWorkbook_() {

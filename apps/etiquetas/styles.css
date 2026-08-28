@@ -953,6 +953,10 @@ body:has(#confirm-overlay:not([hidden])) .footer-banner {
   display: none;
 }
 
+#ai-status {
+  max-width: 160px;
+}
+
 .auth-locked {
   overflow: hidden;
 }
