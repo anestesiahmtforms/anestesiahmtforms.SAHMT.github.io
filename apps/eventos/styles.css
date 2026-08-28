@@ -160,8 +160,7 @@ body.modal-open {
   gap: 6px;
   height: calc(100dvh - 16px);
   max-height: calc(100dvh - 16px);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   padding-bottom: 6px;
 }
 
@@ -2140,10 +2139,10 @@ button:hover,
   }
 
   .search-banner {
-    padding: 6px;
-    margin-bottom: 4px;
+    padding: 5px;
+    margin-bottom: 3px;
     min-height: 231px;
-    gap: 7px;
+    gap: 5px;
   }
 
   .controls-grid,
@@ -2211,7 +2210,8 @@ button:hover,
   }
 
   .app-frame {
-    gap: 6px;
+    gap: 4px;
+    padding-bottom: 3px;
   }
 
   .panel-card {
@@ -2219,7 +2219,7 @@ button:hover,
   }
 
   .schedule-card {
-    padding: 8px;
+    padding: 6px;
   }
 
   .records-card {
@@ -2318,8 +2318,9 @@ button:hover,
   }
 
   .siglas-grid {
-    gap: 4px;
+    gap: 3px;
     grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+    margin-top: 3px;
   }
 
   .sigla-token {
