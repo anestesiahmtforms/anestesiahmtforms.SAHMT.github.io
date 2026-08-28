@@ -160,7 +160,8 @@ body.modal-open {
   gap: 6px;
   height: calc(100dvh - 16px);
   max-height: calc(100dvh - 16px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding-bottom: 6px;
 }
 
@@ -749,10 +750,11 @@ body.modal-open {
   border-radius: 18px;
   background: rgba(220, 232, 238, 0.34);
   border: 1px solid rgba(13, 50, 87, 0.08);
-  min-height: clamp(170px, 24vh, 220px);
+  min-height: clamp(187px, 26.4vh, 242px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .records-banner {
@@ -1082,7 +1084,9 @@ body.modal-open {
 .controls-grid {
   display: grid;
   gap: 5px;
-  margin-top: 6px;
+  align-content: space-between;
+  flex: 1;
+  margin-top: 0;
   min-width: 0;
 }
 
@@ -2136,9 +2140,10 @@ button:hover,
   }
 
   .search-banner {
-    padding: 4px;
+    padding: 6px;
     margin-bottom: 4px;
-    min-height: 210px;
+    min-height: 231px;
+    gap: 7px;
   }
 
   .controls-grid,
