@@ -1010,10 +1010,12 @@
     const activeDate = String(elements.dateInput?.value || todayKey).trim() || todayKey;
     resetEventEntryForm(activeDate);
     supportShortcutLaunchActive = true;
+    populateEventEntryOptionLists();
 
     if (elements.eventTypeInput) {
       setSelectControlValue(elements.eventTypeInput, "Suporte");
       setAutoFilledFieldLock(elements.eventTypeInput, true);
+      syncFieldInteractivity(elements.eventTypeInput);
     }
 
     updateEventEntryState();
@@ -2480,7 +2482,7 @@
 
   function populateEventEntryOptionLists() {
     setSelectOptions(elements.eventTypeInput, eventFieldOptions.eventTypes, "Selecione o tipo de evento", {
-      hiddenValues: ["Suporte"]
+      hiddenValues: supportShortcutLaunchActive ? [] : ["Suporte"]
     });
     setSelectOptions(elements.delayMultipleInput, eventFieldOptions.delayMultiples, "Selecione o multiplo");
     setSelectOptions(elements.substituteInput, eventFieldOptions.substitutes, "Selecione o substituto", {
@@ -2572,6 +2574,7 @@
     toggleEventField(elements.shiftInput, rule.showShift);
 
     setFieldDisabled(elements.memberStatusInput, hideMemberStatus);
+    setAutoFilledFieldLock(elements.eventTypeInput, supportShortcutLaunchActive && normalizedEventType === "suporte");
     setAutoFilledFieldLock(elements.payerInput, !isEditingEventRecord() && rule.autoPayer && Boolean(resolveEventEntryPayer(rule, memberName)));
     setAutoFilledFieldLock(elements.creditorInput, !isEditingEventRecord() && rule.autoCreditor && Boolean(resolveEventEntryCreditor(rule, substitute)));
     setAutoFilledFieldLock(elements.amountToPayInput, !isEditingEventRecord() && rule.autoAmount);
@@ -2853,6 +2856,7 @@
   function syncAutoFilledFieldLocks() {
     [
       elements.memberStatusInput,
+      elements.eventTypeInput,
       elements.payerInput,
       elements.creditorInput,
       elements.amountToPayInput,

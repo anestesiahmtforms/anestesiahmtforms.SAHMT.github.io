@@ -153,22 +153,19 @@
         display: none !important;
       }
       .sahmt-inline-auth {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-        max-width: min(100%, 100%);
-        margin-top: 8px;
-        padding: 6px 11px;
-        border-radius: 999px;
-        background: rgba(11, 35, 63, 0.88);
-        color: #f8fbff;
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.02em;
-        line-height: 1.2;
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
-        backdrop-filter: blur(10px);
+        display: block;
+        max-width: 100%;
+        margin-top: 6px;
+        padding: 0;
+        background: transparent;
+        color: rgba(248, 251, 255, 0.78);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        line-height: 1.25;
+        text-shadow: 0 1px 1px rgba(15, 23, 42, 0.18);
+        box-shadow: none;
+        backdrop-filter: none;
       }
       .sahmt-inline-auth[hidden] {
         display: none !important;
@@ -298,7 +295,7 @@
 
   function updateUserUi() {
     const pill = ensureUserPill();
-    const label = authState?.email ? `Acesso: ${authState.email}` : "";
+    const label = authState?.email ? String(authState.email) : "";
     const inlineSlots = ensureInlineUserSlots();
     pill.textContent = label;
     pill.hidden = !label || inlineSlots.length > 0;

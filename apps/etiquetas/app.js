@@ -464,11 +464,7 @@ async function handleGoogleCredentialResponse(credential) {
 }
 
 async function initializeAuthorizedApp() {
-  await Promise.all([
-    loadMetadata(),
-    loadSummary({ silent: true }),
-    loadMonthlySummary({ silent: true }),
-  ]);
+  await loadMetadata();
 }
 
 function waitForGoogleIdentity() {
@@ -701,8 +697,8 @@ function renderAuthStatus() {
   if (!authUserEl) {
     return;
   }
-  authUserEl.textContent = state.auth?.email ? `Acesso: ${state.auth.email}` : "Aguardando login";
-  authUserEl.className = "status-pill";
+  authUserEl.textContent = state.auth?.email ? String(state.auth.email) : "Aguardando login";
+  authUserEl.className = "";
 }
 
 function getJwtExpirationMs(token) {
@@ -1138,6 +1134,17 @@ function closeMonthlyReportPanel() {
   syncModalLock();
 }
 
+async function refreshOpenPanelsData() {
+  const tasks = [];
+  if (summaryPanelEl && !summaryPanelEl.hidden) {
+    tasks.push(loadSummary({ silent: true, date: summaryDateEl?.value || getTodayISO() }));
+  }
+  if (monthlyPanelEl && !monthlyPanelEl.hidden && reportMonthEl?.value) {
+    tasks.push(loadMonthlySummary({ silent: true }));
+  }
+  await Promise.all(tasks);
+}
+
 function syncModalLock() {
   const hasOpenPanel = [entryPanelEl, summaryPanelEl, monthlyPanelEl].some((panel) => panel && !panel.hidden);
   document.body.classList.toggle("modal-open", hasOpenPanel);
@@ -1202,10 +1209,7 @@ async function sendToSheet() {
     resetForm({ keepImage: false, keepDate: sentDate });
     summaryDateEl.value = sentDate;
     reportMonthEl.value = sentDate.slice(0, 7);
-    await Promise.all([
-      loadSummary({ silent: true }),
-      loadMonthlySummary({ silent: true }),
-    ]);
+    await refreshOpenPanelsData();
     resetScannerView();
     setSendFeedback("Dados enviados com sucesso!", "success");
     setStatus("Dados enviados com sucesso!", "success");
@@ -1741,10 +1745,7 @@ async function refreshDisplayedSummaries() {
     return;
   }
 
-  await Promise.all([
-    loadSummary({ silent: true }),
-    loadMonthlySummary({ silent: true }),
-  ]);
+  await refreshOpenPanelsData();
 }
 
 async function loadSummary(options = {}) {
@@ -2160,10 +2161,7 @@ async function saveEditedRecord() {
     if (payload.data) {
       summaryDateEl.value = payload.data;
     }
-    await Promise.all([
-      loadSummary({ silent: true }),
-      loadMonthlySummary({ silent: true }),
-    ]);
+    await refreshOpenPanelsData();
     setStatus(result.message || "Registro editado com sucesso!", "success");
   } catch (error) {
     setEditFeedback(`Falha ao editar registro: ${error.message}`, "error");
