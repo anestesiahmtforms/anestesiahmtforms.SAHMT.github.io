@@ -189,7 +189,7 @@ function handleAiHealth_() {
     payload: JSON.stringify({
       model: OPENAI_MODEL,
       input: "Responda apenas OK.",
-      max_output_tokens: 8,
+      max_output_tokens: 16,
     }),
     muteHttpExceptions: true,
   });

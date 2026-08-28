@@ -51,6 +51,7 @@ const state = {
   googleButtonRendered: false,
   googleAuthInProgress: false,
   aiReady: false,
+  aiHealthRequestInFlight: false,
 };
 
 const cameraEl = document.querySelector("#camera");
@@ -262,6 +263,9 @@ async function authenticateSharedAppAccess() {
     applyAuthenticatedUser(nextAuth);
     state.authenticated = Boolean(state.auth?.email);
     renderAuthStatus();
+    if (state.authenticated) {
+      initializeAuthorizedApp().catch((error) => console.warn("Falha ao reativar IA após autenticação:", error));
+    }
   });
 }
 
@@ -495,7 +499,20 @@ async function handleGoogleCredentialResponse(credential) {
 }
 
 async function initializeAuthorizedApp() {
-  await Promise.all([loadMetadata(), loadAiHealth()]);
+  await Promise.all([loadMetadata(), loadAiHealthWithRetry()]);
+}
+
+async function loadAiHealthWithRetry() {
+  const delays = [0, 1200, 3000, 6000];
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt]) {
+      await new Promise((resolve) => window.setTimeout(resolve, delays[attempt]));
+    }
+    await loadAiHealth();
+    if (state.aiReady) {
+      return;
+    }
+  }
 }
 
 function waitForGoogleIdentity() {
@@ -852,11 +869,17 @@ async function loadMetadata() {
 }
 
 async function loadAiHealth() {
+  if (state.aiHealthRequestInFlight) {
+    return;
+  }
+
+  state.aiHealthRequestInFlight = true;
   if (!state.config.scriptUrl) {
     state.aiHealth = null;
     state.aiReady = false;
     document.querySelector("#process-image").disabled = !state.imageBlob;
     renderAiStatus();
+    state.aiHealthRequestInFlight = false;
     return;
   }
 
@@ -894,6 +917,7 @@ async function loadAiHealth() {
     state.aiReady = false;
     document.querySelector("#process-image").disabled = !state.imageBlob;
   } finally {
+    state.aiHealthRequestInFlight = false;
     renderAiStatus();
   }
 }
