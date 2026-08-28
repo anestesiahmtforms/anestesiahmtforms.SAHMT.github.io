@@ -828,7 +828,7 @@ async function startCamera() {
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
     document.querySelector("#capture-image").disabled = false;
-    document.querySelector("#capture-image").textContent = "Capturar";
+    document.querySelector("#capture-image").textContent = "Capturar Etiqueta";
     document.querySelector("#capture-image").setAttribute("aria-label", "Capturar etiqueta");
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
   } catch (error) {
@@ -858,6 +858,12 @@ function stopCamera() {
   if (cameraStatusEl) {
     cameraStatusEl.textContent = "Camera desligada";
     cameraStatusEl.className = "status-pill neutral";
+  }
+  const captureButton = document.querySelector("#capture-image");
+  if (captureButton) {
+    captureButton.textContent = "Abrir camera";
+    captureButton.setAttribute("aria-label", "Abrir camera");
+    captureButton.disabled = false;
   }
 }
 

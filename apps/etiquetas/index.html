@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=108">
+  <link rel="stylesheet" href="./styles.css?v=109">
 </head>
 <body>
   <div class="app-shell">
@@ -47,6 +47,7 @@
         <div class="actions scanner-actions">
           <button id="capture-image" type="button" class="capture-shutter" aria-label="Abrir camera">Abrir camera</button>
         </div>
+        <button id="process-image" type="button" class="wide-button" disabled>Ler Etiqueta</button>
         <div class="scanner-secondary-actions">
           <button id="open-manual-entry" type="button" class="scanner-action">Registro Manual</button>
         </div>
@@ -54,8 +55,6 @@
         <div class="preview-wrap">
           <img id="preview" alt="Previa da etiqueta capturada">
         </div>
-
-        <button id="process-image" type="button" class="wide-button" disabled>Ler Etiqueta</button>
         <p id="processing-status" class="hint"></p>
       </section>
 
@@ -302,6 +301,6 @@
     })();
   </script>
   <script src="../../auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=108" type="module"></script>
+  <script src="./app.js?v=109" type="module"></script>
 </body>
 </html>
