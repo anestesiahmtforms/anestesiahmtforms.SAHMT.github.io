@@ -4,6 +4,7 @@ const REGISTROS_SHEET = "ETIQUETA";
 const LISTAS_SHEET = "Listas";
 const OPENAI_MODEL = "gpt-5.2";
 const OPENAI_API_KEY_PROPERTY = "OPENAI_API_KEY";
+// A autenticacao de entrada e feita pela pagina principal SAHMT.
 const GOOGLE_CLIENT_ID = "908976987584-o59p0obmvq013lg3t9726itf06e15v2c.apps.googleusercontent.com";
 const TRUSTED_DEVICES_SHEET = "DISPOSITIVOS_CONFIAVEIS";
 const ACCESS_HISTORY_SHEET = "HISTORICO_ACESSO_SAHMT";
@@ -58,11 +59,6 @@ function setup() {
 
 function doGet(e) {
   try {
-    const user = requireAuthorized_(
-      e && e.parameter && e.parameter.authToken,
-      e && e.parameter && e.parameter.deviceToken,
-      e && e.parameter && e.parameter.userEmail
-    );
     const spreadsheet = ensureWorkbook_();
     const action = (e && e.parameter && e.parameter.action) || "";
 
@@ -75,7 +71,6 @@ function doGet(e) {
         tipoOptions: TIPO_OPTIONS,
         credorOptions: CREDOR_OPTIONS,
         plantonistaOptions: PLANTONISTA_OPTIONS,
-        userEmail: user.email,
       });
     }
 
@@ -111,7 +106,6 @@ function doGet(e) {
       ok: true,
       message: "ETIQUETAS SAHMT API online.",
       spreadsheetName: spreadsheet.getName(),
-      userEmail: user.email,
     });
   } catch (error) {
     return jsonResponse({
@@ -126,22 +120,8 @@ function doPost(e) {
     const payload = JSON.parse((e.postData && e.postData.contents) || "{}");
     const action = String(payload.action || (e.parameter && e.parameter.action) || "").trim();
 
-    if (action === "auth") {
-      return handleAuth_(payload);
-    }
-
-    if (action === "track") {
-      return handleTrack_(payload);
-    }
-
-    const user = requireAuthorized_(
-      payload.authToken || (e.parameter && e.parameter.authToken),
-      payload.deviceToken || (e.parameter && e.parameter.deviceToken),
-      payload.userEmail || (e.parameter && e.parameter.userEmail)
-    );
-
     if (action === "aiHealth") {
-      return handleAiHealth_(user);
+      return handleAiHealth_();
     }
 
     if (action === "aiExtract") {
@@ -151,11 +131,11 @@ function doPost(e) {
     ensureWorkbook_();
 
     if (action === "updateObservation") {
-      return handleUpdateObservation_(payload, user);
+      return handleUpdateObservation_(payload, getRequestUser_(payload));
     }
 
     if (action === "updateRecord") {
-      return handleUpdateRecord_(payload, user);
+      return handleUpdateRecord_(payload, getRequestUser_(payload));
     }
 
     validatePayload_(payload);
@@ -177,7 +157,7 @@ function doPost(e) {
       payload.plantonistas || "",
       compactCellText_(buildObservacoes_(payload), "Observacao"),
       new Date(),
-      user.email,
+      getRequestUser_(payload).email,
       "",
       "",
       "",
@@ -197,7 +177,7 @@ function doPost(e) {
       ok: true,
       message: "Entrada salva com sucesso.",
       entries: getEntriesByDate_(payload.data),
-      userEmail: user.email,
+      userEmail: getRequestUser_(payload).email,
     });
   } catch (error) {
     return jsonResponse({
@@ -207,51 +187,14 @@ function doPost(e) {
   }
 }
 
-function handleAuth_(payload) {
-  const user = requireAuthorized_(payload.authToken, payload.deviceToken, payload.userEmail);
-  registerAccessHistory_(user, {
-    eventType: "login",
-    moduleId: payload.moduleId,
-    pageId: payload.pageId,
-    pageTitle: payload.pageTitle,
-    path: payload.path,
-    embedded: payload.embedded,
-    detail: payload.detail || "Autenticacao Google",
-    deviceToken: payload.deviceToken,
-    userAgent: payload.userAgent,
-  });
-  const response = {
-    ok: true,
-    email: user.email,
-    name: user.name,
-    trustedDeviceExpiresAt: user.trustedDeviceExpiresAt,
+function getRequestUser_() {
+  return {
+    email: "autenticacao-pagina-principal",
+    name: "",
   };
-
-  return jsonResponse(response);
 }
 
-function handleTrack_(payload) {
-  const user = requireAuthorized_(payload.authToken, payload.deviceToken, payload.userEmail);
-  registerAccessHistory_(user, {
-    eventType: payload.eventType || "page_access",
-    moduleId: payload.moduleId,
-    pageId: payload.pageId,
-    pageTitle: payload.pageTitle,
-    path: payload.path,
-    embedded: payload.embedded,
-    detail: payload.detail,
-    deviceToken: payload.deviceToken,
-    userAgent: payload.userAgent,
-  });
-
-  return jsonResponse({
-    ok: true,
-    email: user.email,
-    name: user.name,
-  });
-}
-
-function handleAiHealth_(user) {
+function handleAiHealth_() {
   const apiKey = PropertiesService.getScriptProperties().getProperty(OPENAI_API_KEY_PROPERTY);
   if (!apiKey) {
     throw new Error("Configure a propriedade OPENAI_API_KEY no Apps Script.");
@@ -282,74 +225,8 @@ function handleAiHealth_(user) {
   return jsonResponse({
     ok: true,
     model: OPENAI_MODEL,
-    userEmail: user.email,
     message: outputText ? "IA OpenAI ativa via Responses." : "IA OpenAI respondeu sem texto util.",
   });
-}
-
-function requireAuthorized_(idToken, deviceToken, claimedEmail) {
-  const normalizedDeviceToken = normalizeDeviceToken_(deviceToken);
-  const normalizedClaimedEmail = normalizeEmail_(claimedEmail);
-
-  if (String(idToken || "").trim()) {
-    const googleUser = verifyGoogleIdToken_(idToken);
-    if (!isAuthorizedEmail_(googleUser.email)) {
-      throw new Error("Conta Google nao autorizada para este app.");
-    }
-    const trustedDeviceExpiresAt = registerTrustedDevice_(normalizedDeviceToken, googleUser);
-    return {
-      email: googleUser.email,
-      name: googleUser.name || "",
-      trustedDeviceExpiresAt: trustedDeviceExpiresAt,
-    };
-  }
-
-  if (normalizedDeviceToken && normalizedClaimedEmail) {
-    const trustedUser = findTrustedDeviceUser_(normalizedDeviceToken, normalizedClaimedEmail);
-    if (trustedUser) {
-      touchTrustedDevice_(normalizedDeviceToken, normalizedClaimedEmail);
-      return trustedUser;
-    }
-  }
-
-  throw new Error("Faca login com uma conta Google autorizada.");
-}
-
-function verifyGoogleIdToken_(idToken) {
-  const response = UrlFetchApp.fetch(
-    "https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(String(idToken || "").trim()),
-    { method: "get", muteHttpExceptions: true }
-  );
-  const status = response.getResponseCode();
-  const payload = JSON.parse(response.getContentText() || "{}");
-
-  if (status < 200 || status >= 300) {
-    throw new Error("O Google nao confirmou a conta informada.");
-  }
-  if (String(payload.aud || "").trim() !== GOOGLE_CLIENT_ID) {
-    throw new Error("Client ID Google invalido para este app.");
-  }
-  if (String(payload.email_verified || "").trim() !== "true") {
-    throw new Error("O e-mail Google precisa estar verificado.");
-  }
-
-  const email = normalizeEmail_(payload.email);
-  if (!email) {
-    throw new Error("A conta Google nao informou um e-mail valido.");
-  }
-
-  return {
-    email: email,
-    name: String(payload.name || "").trim(),
-  };
-}
-
-function isAuthorizedEmail_(email) {
-  return AUTHORIZED_EMAILS.indexOf(normalizeEmail_(email)) !== -1;
-}
-
-function normalizeEmail_(email) {
-  return String(email || "").trim().toLowerCase();
 }
 
 function normalizeDeviceToken_(deviceToken) {

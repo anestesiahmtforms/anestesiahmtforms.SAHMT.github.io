@@ -40,15 +40,11 @@ O app nao tem mais a caixa separada `Observacoes de Registros lancados`. As corr
 
 O app mantem quem fez o primeiro lancamento e grava tambem quem fez a ultima edicao.
 
-## Acesso restrito
+## Acesso
 
-O app usa Google Identity Services com entrada automatica quando o usuario ja esta logado no Google. Quem nao estiver logado em uma conta autorizada recebe a mensagem:
+O acesso do usuario acontece uma unica vez na autenticacao Google da pagina principal SAHMT. Depois que o ETIQUETAS e aberto por essa pagina, o app usa a mesma sessao no cliente.
 
-```text
-Você precisa estar logado em sua conta Google Cadastrada para entrar
-```
-
-O bloqueio existe tambem no `apps-script/Code.gs`, que valida o token do Google antes de ler resumo, chamar a IA, salvar registro ou alterar observacoes.
+O `apps-script/Code.gs` nao repete a autenticacao antiga do app separado. O Web App do ETIQUETAS deve ser implantado com acesso que permita as chamadas do PWA; a protecao de entrada permanece na pagina principal.
 
 Client ID configurado no PWA:
 
