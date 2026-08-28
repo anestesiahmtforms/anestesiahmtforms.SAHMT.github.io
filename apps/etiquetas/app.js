@@ -1110,6 +1110,8 @@ async function extractLabelWithAi(imageBlob) {
     convenio: String(result.convenio || "").trim(),
     cirurgia: cleanDigits(result.cirurgia || ""),
     atendimento: cleanDigits(result.atendimento || ""),
+    tipo: String(result.tipo || "").trim(),
+    credor: String(result.credor || "").trim(),
   };
 }
 
@@ -1148,6 +1150,17 @@ function applyDataToForm(data) {
   if (data.atendimento) {
     fields.atendimento.value = data.atendimento;
   }
+
+  if (data.tipo) {
+    fields.tipo.value = data.tipo;
+  }
+
+  if (data.credor) {
+    fields.credor.value = data.credor;
+  }
+
+  syncConditionalEntryFields();
+  syncPlantonistasRequirement();
 
   updateEntryValidationStates();
 }

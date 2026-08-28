@@ -497,16 +497,19 @@ function handleAiExtract_(payload) {
   }
 
   const prompt = [
-    "Voce le etiquetas hospitalares HMT.",
+    "Voce le etiquetas hospitalares HMT e tambem cards de consulta pre-anestesica.",
     "Extraia somente os campos abaixo e responda em JSON.",
     "Regras:",
-    "1. nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Exemplo: 'Celio Cardoso'. Nao inclua Pront nem o numero do prontuario.",
-    "2. convenio: texto depois de 'Convenio:' ate o fim da linha. Exemplo: 'Unimed BH - HMT'. Nao inclua a palavra Convenio:.",
-    "3. cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Deve conter somente digitos.",
-    "4. atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Deve conter somente digitos.",
-    "5. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
-    "6. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
-    "7. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
+    "1. Para etiqueta hospitalar padrao, nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Nao inclua Pront nem o numero do prontuario.",
+    "2. Para etiqueta hospitalar padrao, convenio: texto depois de 'Convenio:' ate o fim da linha. Nao inclua a palavra Convenio:.",
+    "3. Para etiqueta hospitalar padrao, cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Deve conter somente digitos.",
+    "4. Para etiqueta hospitalar padrao, atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Deve conter somente digitos.",
+    "5. Para o modelo de consulta pre-anestesica em formato de card escuro, extraia apenas nomePaciente e atendimento.",
+    "6. Quando detectar o modelo de consulta pre-anestesica, preencha tipo exatamente como 'Consulta Pré-anestésica' e credor exatamente como 'Caixa'. Nessa situacao, deixe convenio e cirurgia vazios.",
+    "7. Quando detectar a etiqueta hospitalar padrao, deixe tipo e credor vazios para o frontend manter o fluxo atual.",
+    "8. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
+    "9. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
+    "10. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
@@ -529,12 +532,14 @@ function handleAiExtract_(payload) {
         schema: {
           type: "object",
           additionalProperties: false,
-          required: ["nomePaciente", "convenio", "cirurgia", "atendimento"],
+          required: ["nomePaciente", "convenio", "cirurgia", "atendimento", "tipo", "credor"],
           properties: {
             nomePaciente: { type: "string" },
             convenio: { type: "string" },
             cirurgia: { type: "string" },
             atendimento: { type: "string" },
+            tipo: { type: "string" },
+            credor: { type: "string" },
           },
         },
       },
@@ -568,6 +573,8 @@ function handleAiExtract_(payload) {
   const convenio = cleanConvenio_(extracted.convenio);
   const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);
   const atendimento = sanitizeLabelNumber_(extracted.atendimento);
+  const tipo = normalizeConsultaType_(extracted.tipo);
+  const credor = tipo === "Consulta Pré-anestésica" ? "Caixa" : "";
 
   return jsonResponse({
     ok: true,
@@ -577,6 +584,8 @@ function handleAiExtract_(payload) {
     convenio,
     cirurgia,
     atendimento,
+    tipo,
+    credor,
   });
 }
 
@@ -622,6 +631,14 @@ function sanitizeLabelNumber_(value) {
     return "";
   }
   return digits;
+}
+
+function normalizeConsultaType_(value) {
+  const normalized = normalizeCompare_(value);
+  if (normalized === "consulta pre-anestesica" || normalized === "consulta pre anestesica") {
+    return "Consulta Pré-anestésica";
+  }
+  return "";
 }
 
 function ensureWorkbook_() {
