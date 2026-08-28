@@ -797,6 +797,60 @@ label[hidden] {
     linear-gradient(105deg, #76b2ff 0%, #4387ea 54%, #295fbe 100%);
 }
 
+.home-button-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 7px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.button-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.scanner-panel .capture-shutter {
+  flex: 1 1 100%;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8ed9ff 0%, #5aa9ed 56%, #3979cf 100%);
+  color: #f8fcff;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 14px 28px rgba(49, 119, 190, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.scanner-panel .capture-shutter:not(:disabled):hover {
+  background: linear-gradient(135deg, #a1e1ff 0%, #6bb9f5 56%, #4386db 100%);
+  box-shadow: 0 18px 32px rgba(49, 119, 190, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.scanner-panel .scanner-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .layout:has(.form-panel.is-open) .main-return-dock,
 .layout:has(.summary-panel.is-open) .main-return-dock,
 .layout:has(.monthly-panel.is-open) .main-return-dock,
@@ -2448,13 +2502,13 @@ textarea {
   }
 
   .scanner-panel .capture-shutter {
-    flex: 0 0 54px;
-    width: 54px;
-    height: 54px;
+    flex: 1 1 100%;
+    width: 100%;
+    height: auto;
     min-height: 54px;
-    padding: 5px;
-    border-width: 3px;
-    font-size: 0.64rem;
+    padding: 9px 16px;
+    border-width: 2px;
+    font-size: 0.82rem;
   }
 
   .scanner-panel video {

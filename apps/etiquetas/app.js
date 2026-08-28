@@ -117,7 +117,9 @@ function setCaptureButtonIdleState() {
   if (!captureButton) {
     return;
   }
-  captureButton.textContent = "Abrir camera";
+  const label = captureButton.querySelector("span");
+  if (label) label.textContent = "Abrir camera";
+  else captureButton.textContent = "Abrir camera";
   captureButton.setAttribute("aria-label", "Abrir camera");
   captureButton.disabled = false;
 }
@@ -127,7 +129,9 @@ function setCaptureButtonReadyState() {
   if (!captureButton) {
     return;
   }
-  captureButton.textContent = "CAPTURAR IMÁGEM";
+  const label = captureButton.querySelector("span");
+  if (label) label.textContent = "Capturar Etiqueta";
+  else captureButton.textContent = "Capturar Etiqueta";
   captureButton.setAttribute("aria-label", "Capturar imagem");
   captureButton.disabled = false;
 }

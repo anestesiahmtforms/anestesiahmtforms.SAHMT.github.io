@@ -269,6 +269,28 @@ body.folder-open {
   box-shadow: 0 22px 38px rgba(8, 12, 23, 0.4);
 }
 
+.home-button-icon {
+  width: 19px;
+  height: 19px;
+  margin-right: 7px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.main-return-button {
+  background: linear-gradient(135deg, #b9e8ff 0%, #83c9f3 54%, #5b9fe0 100%);
+  border-color: rgba(70, 145, 211, 0.45);
+  color: #0d3d68;
+  box-shadow: 0 16px 32px rgba(71, 137, 194, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.main-return-button:hover {
+  background: linear-gradient(135deg, #c8eeff 0%, #96d5f8 54%, #6ba9e7 100%);
+}
+
 .app-icon {
   appearance: none;
   border: 0;
