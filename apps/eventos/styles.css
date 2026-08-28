@@ -463,6 +463,11 @@ body.modal-open {
   text-shadow: none;
 }
 
+.records-hero > [data-auth-user]::before {
+  content: "Responsável pelo registro: ";
+  color: rgba(20, 50, 84, 0.68);
+}
+
 .monthly-sheet__controls {
   display: grid;
   gap: 8px;
@@ -1255,8 +1260,12 @@ button:hover,
 .siglas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
-  gap: 5px;
-  margin-top: 6px;
+  gap: 6px;
+  margin-top: 7px;
+  padding: 8px 6px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(13, 50, 87, 0.08);
 }
 
 .sigla-item {
@@ -1268,7 +1277,7 @@ button:hover,
 .sigla-token {
   position: relative;
   width: 100%;
-  min-height: 28px;
+  min-height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2351,13 +2360,14 @@ button:hover,
   }
 
   .siglas-grid {
-    gap: 3px;
+    gap: 4px;
     grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
-    margin-top: 3px;
+    margin-top: 4px;
+    padding: 6px 4px 8px;
   }
 
   .sigla-token {
-    min-height: 26px;
+    min-height: 31px;
     padding: 2px 3px;
     font-size: 0.68rem;
   }
