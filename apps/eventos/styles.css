@@ -340,7 +340,9 @@ body.modal-open {
   position: relative;
   width: min(100%, 560px);
   max-height: min(100dvh - 10px, 88vh);
-  overflow-y: auto;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   padding: 10px;
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(249, 244, 233, 0.98) 0%, rgba(237, 227, 207, 0.98) 100%);
@@ -356,7 +358,9 @@ body.modal-open {
 }
 
 .records-panel-footer {
-  margin-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(13, 50, 87, 0.08);
 }
 
 .entry-card {
@@ -416,6 +420,9 @@ body.modal-open {
 .monthly-sheet {
   width: min(100%, 640px);
   max-height: min(100dvh - 10px, 96vh);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
 }
 
 .monthly-sheet__title {
@@ -423,16 +430,38 @@ body.modal-open {
   font-size: 1rem;
   font-weight: 900;
   color: var(--ink);
+  text-align: center;
+}
+
+.monthly-sheet__header-copy {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.records-hero > [data-auth-user],
+.monthly-sheet__header-copy > [data-auth-user] {
+  color: rgba(20, 50, 84, 0.52);
+  font-size: 0.67rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-shadow: none;
 }
 
 .monthly-sheet__controls {
   display: grid;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .monthly-sheet__footer {
-  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(13, 50, 87, 0.08);
 }
 
 .monthly-sheet__share {
@@ -440,10 +469,11 @@ body.modal-open {
 }
 
 .monthly-sheet__summary {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-size: 0.67rem;
   font-weight: 800;
   color: rgba(20, 50, 84, 0.8);
+  text-align: center;
 }
 
 .monthly-sheet__close.records-panel-toggle::after {
@@ -454,7 +484,7 @@ body.modal-open {
   display: grid;
   gap: 8px;
   margin-top: 8px;
-  max-height: min(100dvh - 210px, 62vh);
+  max-height: none;
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
@@ -690,6 +720,9 @@ body.modal-open {
 }
 
 .records-banner {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   padding: 12px;
   border-radius: 22px;
   background:
@@ -703,9 +736,9 @@ body.modal-open {
   display: grid;
   justify-items: center;
   text-align: center;
-  gap: 6px;
-  margin-bottom: 12px;
-  padding: 12px 14px 14px;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 8px 10px 10px;
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 248, 233, 0.58) 100%);
@@ -730,7 +763,7 @@ body.modal-open {
 }
 
 .records-hero__title {
-  font-size: 1.12rem;
+  font-size: 1rem;
   line-height: 1.02;
   font-weight: 900;
   letter-spacing: 0.04em;
@@ -752,7 +785,7 @@ body.modal-open {
   display: grid;
   gap: 8px;
   margin-top: 8px;
-  max-height: 56vh;
+  max-height: none;
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
@@ -1482,6 +1515,7 @@ button:hover,
 
 .main-return-dock {
   width: 100%;
+  margin-bottom: 8px;
   padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
@@ -2136,16 +2170,21 @@ button:hover,
   }
 
   .records-hero {
-    margin-bottom: 6px;
-    padding: 8px 10px;
+    margin-bottom: 4px;
+    padding: 6px 8px 8px;
   }
 
   .records-hero__title {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
   }
 
   .records-list {
-    max-height: 60vh;
+    max-height: none;
+  }
+
+  .records-hero > [data-auth-user],
+  .monthly-sheet__header-copy > [data-auth-user] {
+    font-size: 0.64rem;
   }
 
   .monthly-sheet {
@@ -2154,7 +2193,7 @@ button:hover,
   }
 
   .monthly-records-list {
-    max-height: calc(100dvh - 250px);
+    max-height: none;
   }
 
   .record-card__row {

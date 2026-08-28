@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=20260818-04">
+  <link rel="stylesheet" href="./styles.css?v=20260828-1">
 </head>
 <body>
   <div class="page-shell">
@@ -124,6 +124,7 @@
           <div class="records-panel-sheet__header">
             <div class="records-hero">
               <h2 id="recordsPanelTitle" class="records-hero__title">RELATORIO DIÁRIO</h2>
+              <span data-auth-user hidden></span>
             </div>
           </div>
 
@@ -165,13 +166,13 @@
         <button id="openEventEntryModal" class="entry-open-button" type="button">Abrir lancamento do evento</button>
       </section>
 
-      <footer class="footer-banner">
-        By Francisco Tadeu da Mota Albuquerque
-      </footer>
-
       <div class="main-return-dock" aria-label="Retorno para a pagina principal">
         <a class="main-return-button" href="../../index.html?from=eventos&skipNotice=1">HOME</a>
       </div>
+
+      <footer class="footer-banner">
+        By Francisco Tadeu da Mota Albuquerque
+      </footer>
     </main>
   </div>
 
@@ -264,8 +265,9 @@
     <div id="monthlyRecordsBackdrop" class="entry-modal__backdrop"></div>
     <section class="entry-sheet monthly-sheet" role="dialog" aria-modal="true" aria-labelledby="monthlyRecordsTitle">
       <div class="entry-sheet__header">
-        <div>
+        <div class="monthly-sheet__header-copy">
           <h2 id="monthlyRecordsTitle" class="monthly-sheet__title">RELATORIO MENSAL</h2>
+          <span data-auth-user hidden></span>
         </div>
       </div>
 
@@ -274,9 +276,6 @@
           <span>Mes de referencia</span>
           <input id="monthlyRecordsInput" type="month">
         </label>
-        <button id="shareMonthlyPdfButton" class="entry-submit-button monthly-sheet__share" type="button">
-          Enviar PDF por WhatsApp
-        </button>
       </div>
 
       <p id="monthlyRecordsStatus" class="entry-status hidden" aria-live="polite"></p>
@@ -286,6 +285,9 @@
       </div>
       <div id="monthlyRecordsList" class="monthly-records-list"></div>
       <div class="monthly-sheet__footer">
+        <button id="shareMonthlyPdfButton" class="entry-submit-button monthly-sheet__share" type="button">
+          Enviar PDF por WhatsApp
+        </button>
         <button id="closeMonthlyRecordsModal" class="records-panel-toggle monthly-sheet__close" type="button" aria-label="Voltar">Voltar</button>
       </div>
     </section>
