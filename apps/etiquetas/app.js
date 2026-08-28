@@ -50,6 +50,7 @@ const state = {
   authenticated: false,
   googleButtonRendered: false,
   googleAuthInProgress: false,
+  aiReady: false,
 };
 
 const cameraEl = document.querySelector("#camera");
@@ -130,8 +131,8 @@ function setCaptureButtonReadyState() {
     return;
   }
   const label = captureButton.querySelector("span");
-  if (label) label.textContent = "Capturar Etiqueta";
-  else captureButton.textContent = "Capturar Etiqueta";
+  if (label) label.textContent = "Capturar imagem";
+  else captureButton.textContent = "Capturar imagem";
   captureButton.setAttribute("aria-label", "Capturar imagem");
   captureButton.disabled = false;
 }
@@ -494,8 +495,7 @@ async function handleGoogleCredentialResponse(credential) {
 }
 
 async function initializeAuthorizedApp() {
-  await loadMetadata();
-  await loadAiHealth();
+  await Promise.all([loadMetadata(), loadAiHealth()]);
 }
 
 function waitForGoogleIdentity() {
@@ -820,7 +820,7 @@ function renderAiStatus() {
     return;
   }
 
-  aiStatusEl.textContent = "IA nao verificada";
+  aiStatusEl.textContent = state.authenticated ? "Ativando IA..." : "IA nao verificada";
   aiStatusEl.className = "status-pill neutral";
 }
 
@@ -854,6 +854,8 @@ async function loadMetadata() {
 async function loadAiHealth() {
   if (!state.config.scriptUrl) {
     state.aiHealth = null;
+    state.aiReady = false;
+    document.querySelector("#process-image").disabled = true;
     renderAiStatus();
     return;
   }
@@ -879,6 +881,8 @@ async function loadAiHealth() {
       message: String(result.message || "").trim(),
       checkedAt: new Date().toISOString(),
     };
+    state.aiReady = true;
+    document.querySelector("#process-image").disabled = !state.imageBlob || !state.aiReady;
   } catch (error) {
     console.warn("Falha ao verificar IA:", error);
     state.aiHealth = {
@@ -887,6 +891,8 @@ async function loadAiHealth() {
       message: error instanceof Error ? error.message : String(error || "Falha ao verificar IA."),
       checkedAt: new Date().toISOString(),
     };
+    state.aiReady = false;
+    document.querySelector("#process-image").disabled = true;
   } finally {
     renderAiStatus();
   }
@@ -1002,7 +1008,7 @@ function setImageBlob(blob) {
   previewEl.classList.add("has-image");
   document.querySelector(".camera-stage")?.classList.add("has-capture");
   cameraEl.style.display = "none";
-  document.querySelector("#process-image").disabled = false;
+  document.querySelector("#process-image").disabled = !state.aiReady;
 }
 
 function resetScannerView() {
@@ -1054,6 +1060,11 @@ async function processCurrentImage() {
 
   if (!state.config.scriptUrl) {
     setStatus("Salve primeiro a URL do Google Apps Script.", "error");
+    return;
+  }
+
+  if (!state.aiReady) {
+    setStatus("Aguarde a ativação da IA antes de ler a etiqueta.", "info");
     return;
   }
 
@@ -2891,7 +2902,7 @@ function toggleBusy(isBusy) {
 
   if (!isBusy) {
     document.querySelector("#capture-image").disabled = false;
-    document.querySelector("#process-image").disabled = !state.imageBlob;
+    document.querySelector("#process-image").disabled = !state.imageBlob || !state.aiReady;
     document.querySelector("#open-manual-entry").disabled = false;
     syncPlantonistasRequirement();
   }

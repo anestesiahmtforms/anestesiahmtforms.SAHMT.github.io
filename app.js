@@ -109,6 +109,7 @@
   };
 
   await ensureSharedAccess();
+  preloadLabelsModule();
 
   if (elements.formattedDate) {
     elements.formattedDate.textContent = "Carregando escala...";
@@ -916,7 +917,18 @@
 
   function openLabelsModal() {
     window.SAHMT_AUTH?.track("area_open", "Etiquetas");
-    window.location.href = new URL(labelsUrl, window.location.href).href;
+    preloadLabelsModule();
+    elements.labelsModal.classList.remove("hidden");
+    elements.labelsModal.setAttribute("aria-hidden", "false");
+    updateBodyModalState();
+  }
+
+  function preloadLabelsModule() {
+    if (!elements.labelsFrame || elements.labelsFrame.src) {
+      return;
+    }
+
+    elements.labelsFrame.src = new URL(labelsUrl, window.location.href).href;
   }
 
   function closeLabelsModal() {
