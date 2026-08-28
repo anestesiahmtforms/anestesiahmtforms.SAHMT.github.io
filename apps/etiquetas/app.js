@@ -2045,10 +2045,11 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
     `;
   }).join("");
 
-  summaryListEl.querySelectorAll(".summary-item").forEach((item) => {
+  summaryListEl.querySelectorAll(".summary-item").forEach((item, index) => {
     let tapCount = 0;
     let tapTimer = 0;
-    const open = () => openEditRecord(item.dataset.rowNumber);
+    const row = rows[index];
+    const open = () => openEditRecord(row);
     item.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         open();
@@ -2068,6 +2069,12 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
         tapCount = 0;
       }, 650);
     }, { passive: false });
+    item.addEventListener("click", (event) => {
+      if (event.detail === 3) {
+        event.preventDefault();
+        open();
+      }
+    });
   });
 }
 
@@ -2137,8 +2144,10 @@ function formatEditHistoryLine(line) {
     .replace(/-&gt; ([^;]+)/g, "-&gt; <span class=\"summary-new-value\">$1</span>");
 }
 
-function openEditRecord(rowNumber) {
-  const row = state.summaryRows.find((entry) => String(entry.rowNumber) === String(rowNumber));
+function openEditRecord(rowOrRowNumber) {
+  const row = typeof rowOrRowNumber === "object" && rowOrRowNumber
+    ? rowOrRowNumber
+    : state.summaryRows.find((entry) => String(entry.rowNumber) === String(rowOrRowNumber));
   if (!row || !editOverlayEl || !editSummaryEl) {
     return;
   }
