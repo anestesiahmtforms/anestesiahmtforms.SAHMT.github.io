@@ -752,6 +752,22 @@ label[hidden] {
   justify-content: center;
 }
 
+.footer-banner {
+  order: 11;
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 10px;
+  border-radius: 18px;
+  text-align: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(26, 88, 176, 0.96), rgba(17, 63, 133, 0.96));
+  font-size: 0.63rem;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 24px rgba(16, 53, 113, 0.2);
+}
+
 .main-return-button {
   display: inline-flex;
   align-items: center;
@@ -786,6 +802,14 @@ label[hidden] {
 .layout:has(.monthly-panel.is-open) .main-return-dock,
 body:has(#edit-overlay:not([hidden])) .main-return-dock,
 body:has(#confirm-overlay:not([hidden])) .main-return-dock {
+  display: none;
+}
+
+.layout:has(.form-panel.is-open) .footer-banner,
+.layout:has(.summary-panel.is-open) .footer-banner,
+.layout:has(.monthly-panel.is-open) .footer-banner,
+body:has(#edit-overlay:not([hidden])) .footer-banner,
+body:has(#confirm-overlay:not([hidden])) .footer-banner {
   display: none;
 }
 

@@ -233,6 +233,19 @@ body.folder-open {
   justify-content: center;
 }
 
+.footer-banner {
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 10px;
+  border-radius: 18px;
+  text-align: center;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(13, 50, 87, 0.98), rgba(33, 68, 99, 0.96));
+  font-size: 0.63rem;
+  font-weight: 800;
+  box-shadow: 0 14px 28px rgba(8, 12, 23, 0.22);
+}
+
 .main-return-button {
   display: inline-flex;
   align-items: center;
