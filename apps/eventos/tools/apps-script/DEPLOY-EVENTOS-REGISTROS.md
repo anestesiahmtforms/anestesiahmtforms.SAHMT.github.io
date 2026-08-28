@@ -8,7 +8,7 @@ Referencia operacional atualizada em 14/08/2026.
 
 ## Endpoint atualmente usado pelo app
 
-- `https://script.google.com/macros/s/AKfycbwDZom6t3uMZQdvoitGc6JjOR0PcgYj364VkrOR4V4Ie_JbYna0fXCWqQ8zHQdJhGsH/exec`
++ `https://script.google.com/macros/s/AKfycbxxxOJEr7olF0-n_2LPcppbUj-vTXimoprqCPNDx6pnc5QRALhtndZD9iT0XfTsDrM/exec`
 
 ## Onde o app referencia este endpoint
 

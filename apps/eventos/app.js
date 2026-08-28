@@ -31,11 +31,8 @@
   // Mantemos fallback entre implantacoes validas para o app continuar gravando
   // mesmo quando um deploy antigo deixa de responder temporariamente.
   const eventEntryConfig = {
-    endpointUrl: "https://script.google.com/macros/s/AKfycbwDZom6t3uMZQdvoitGc6JjOR0PcgYj364VkrOR4V4Ie_JbYna0fXCWqQ8zHQdJhGsH/exec",
-    fallbackEndpointUrls: [
-      "https://script.google.com/macros/s/AKfycbxzO8FuAuwCfrE81wuJ9i-6vFc8HWT0ZWzWxlCwYqrntV1SiuWeClbaA6QPZdv_soQQ/exec",
-      "https://script.google.com/macros/s/AKfycbwUT0B5zuLs1GvJTgAoelAvgthLovYNMn61Jm4NjC07Z_LQ-MgL4yqQ91NLqK8Nu00T/exec"
-    ],
+    endpointUrl: "https://script.google.com/macros/s/AKfycbxxxOJEr7olF0-n_2LPcppbUj-vTXimoprqCPNDx6pnc5QRALhtndZD9iT0XfTsDrM/exec",
+    fallbackEndpointUrls: [],
     requestTimeoutMs: 15000
   };
   const highlightedEventPeople = [
