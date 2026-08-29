@@ -658,3 +658,32 @@ body.folder-open {
     font-size: 0.56rem;
   }
 }
+
+/* Keep the management home action next to the footer like Escala Semanal. */
+.iphone-shell {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+.springboard {
+  width: min(100%, 430px);
+  gap: 8px;
+  padding-bottom: 0;
+}
+
+.icon-grid-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.main-return-dock {
+  position: relative;
+  top: 10px;
+  margin-top: 0;
+  margin-bottom: -10px;
+  flex: 0 0 auto;
+}
+
+.footer-banner {
+  margin-top: 0;
+  flex: 0 0 auto;
+}
