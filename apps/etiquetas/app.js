@@ -7,7 +7,7 @@ const CONFIG = {
   trustedDeviceDays: 36500,
   guideWidthRatio: 0.94,
   guideAspectRatio: 3.35,
-  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbwT9QL9YbfC14c5qr3iRzjrT-xKaoC7WWVbWQ8U07jSe4doxztNSRu5NopeF07IWZmkHw/exec",
+  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbzdxPAGKmP4yEru3WrAc5ul2I5tLu07J35Zupzf4ZeCtC1Y090F3IyVFlIxhW1erHHP3A/exec",
   maxSearchResults: 60,
 };
 
