@@ -889,6 +889,40 @@ label[hidden] {
   min-height: 0;
 }
 
+/* Keep the main screen balanced and place HOME directly above the footer. */
+.app-shell {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.scanner-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.quick-actions,
+.main-return-dock,
+.footer-banner {
+  flex: 0 0 auto;
+}
+
+.main-return-dock {
+  position: relative;
+  top: 10px;
+  margin-top: 0;
+  margin-bottom: -10px;
+}
+
+.footer-banner {
+  margin-top: 0;
+}
+
 .layout:has(.form-panel.is-open) .main-return-dock,
 .layout:has(.summary-panel.is-open) .main-return-dock,
 .layout:has(.monthly-panel.is-open) .main-return-dock,
