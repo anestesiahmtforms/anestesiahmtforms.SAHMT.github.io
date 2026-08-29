@@ -2437,3 +2437,14 @@ button:hover,
     padding: 8px;
   }
 }
+
+/* Pull HOME down so it sits immediately above the attribution footer. */
+.app-frame {
+  padding-bottom: 0;
+}
+
+.main-return-dock {
+  position: relative;
+  top: 10px;
+  margin-bottom: -10px;
+}
