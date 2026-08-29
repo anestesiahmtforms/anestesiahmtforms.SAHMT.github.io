@@ -2424,3 +2424,16 @@ button:hover,
   margin-top: 0;
   margin-bottom: 0;
 }
+
+@media (max-width: 600px) {
+  .records-panel-modal {
+    padding: max(4px, env(safe-area-inset-left, 0px));
+  }
+
+  .records-panel-sheet {
+    width: 100%;
+    height: calc(100dvh - 8px);
+    max-height: calc(100dvh - 8px);
+    padding: 8px;
+  }
+}
