@@ -2395,3 +2395,32 @@ button:hover,
   }
 
 }
+
+/* Keep the home return and footer together while the schedule fills the shell. */
+.app-frame {
+  gap: 5px;
+}
+
+.schedule-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.schedule-card .siglas-grid {
+  flex: 1 1 auto;
+  align-content: space-evenly;
+  min-height: 0;
+}
+
+.records-card,
+.main-return-dock,
+.footer-banner {
+  flex: 0 0 auto;
+}
+
+.main-return-dock {
+  margin-top: 0;
+  margin-bottom: 0;
+}
