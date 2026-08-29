@@ -2455,3 +2455,18 @@ button:hover,
   height: min(calc(100dvh - 8px), 900px);
   max-height: min(calc(100dvh - 8px), 900px);
 }
+
+/* Match the Escala Semanal shell dimensions on every screen size. */
+.page-shell {
+  padding:
+    max(12px, env(safe-area-inset-top, 0px))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px));
+}
+
+.app-frame {
+  width: min(100%, 430px);
+  height: 100%;
+  max-height: 100%;
+}

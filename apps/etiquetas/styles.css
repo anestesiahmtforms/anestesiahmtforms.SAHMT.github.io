@@ -873,6 +873,22 @@ label[hidden] {
   max-height: calc(100dvh - 12px);
 }
 
+/* Match the Escala Semanal shell dimensions on every screen size. */
+.app-shell {
+  width: min(100%, 430px);
+  padding:
+    max(12px, env(safe-area-inset-top, 0px))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px));
+}
+
+.layout {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
 .layout:has(.form-panel.is-open) .main-return-dock,
 .layout:has(.summary-panel.is-open) .main-return-dock,
 .layout:has(.monthly-panel.is-open) .main-return-dock,
