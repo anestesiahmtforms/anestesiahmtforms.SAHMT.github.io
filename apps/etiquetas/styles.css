@@ -2956,10 +2956,14 @@ textarea {
 
 /* Final mobile guard: preserve scanner height without moving HOME over the footer. */
 @media (max-width: 680px) {
+  .scanner-panel {
+    gap: 6px;
+  }
+
   .scanner-panel .camera-stage,
   .scanner-panel video {
-    min-height: clamp(230px, 34dvh, 290px);
-    max-height: 290px;
+    min-height: clamp(215px, 32dvh, 250px);
+    max-height: 250px;
   }
 
   .main-return-dock {
