@@ -231,7 +231,7 @@ function parsePayload_(e) {
     turno: pickFirstValue_(payload, ['turno']),
     pagador: pickFirstValue_(payload, ['pagador', 'devedor', 'responsavelPeloOnus']),
     credor: pickFirstValue_(payload, ['credor', 'resultadoCredor']),
-    valor: pickFirstValue_(payload, ['valorAPagar', 'valorPagar']),
+    valor: normalizeCurrency_(pickFirstValue_(payload, ['valorAPagar', 'valorPagar'])),
     origem: pickFirstValue_(payload, ['origem']),
     criadoEm: pickFirstValue_(payload, ['criadoEmIso', 'criadoEm'])
   };
@@ -380,11 +380,29 @@ function buildRow_(payload, history, timestampOverride, registeredByOverride) {
     payload.turno,
     payload.pagador,
     payload.credor,
-    payload.valor,
+    normalizeCurrency_(payload.valor),
     payload.origem || 'PWA Eventos de escala',
     String(history || '').trim(),
     registeredBy
   ];
+}
+
+function normalizeCurrency_(value) {
+  var text = String(value == null ? '' : value).trim();
+  if (!text) {
+    return '';
+  }
+
+  var cleaned = text.replace(/R\$|\s/g, '');
+  var normalized = cleaned.indexOf(',') >= 0
+    ? cleaned.replace(/\./g, '').replace(',', '.')
+    : cleaned;
+  var numeric = Number(normalized);
+  if (!isFinite(numeric)) {
+    return text;
+  }
+
+  return 'R$ ' + numeric.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 function getRegistrosSheet_() {

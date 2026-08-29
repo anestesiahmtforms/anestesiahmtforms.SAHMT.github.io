@@ -142,7 +142,7 @@ function doPost(e) {
       "",
       "",
       "",
-      payload.valor || "",
+      normalizeCurrency_(payload.valor),
     ]);
     const appendedRow = sheet.getLastRow();
     setCompactCellWithNote_(
@@ -453,6 +453,7 @@ function formatRegistros_(sheet) {
   sheet.getRange(2, 10, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
   sheet.getRange(2, 12, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
   sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(2, REGISTROS_HEADERS.indexOf("Valor") + 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("R$ #,##0.00");
   sheet.autoResizeColumns(1, REGISTROS_HEADERS.length);
 }
 
@@ -465,6 +466,25 @@ function applyRowFormats_(sheet, rowNumber) {
   sheet.getRange(rowNumber, 10).setNumberFormat("dd/mm/yyyy hh:mm:ss");
   sheet.getRange(rowNumber, 12).setNumberFormat("dd/mm/yyyy hh:mm:ss");
   sheet.getRange(rowNumber, 14).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setNumberFormat("R$ #,##0.00");
+}
+
+function normalizeCurrency_(value) {
+  const text = String(value ?? "").trim();
+  if (!text) {
+    return "";
+  }
+
+  const cleaned = text.replace(/R\$|\s/g, "");
+  const normalized = cleaned.includes(",")
+    ? cleaned.replace(/\./g, "").replace(",", ".")
+    : cleaned;
+  const numeric = Number(normalized);
+  if (!Number.isFinite(numeric)) {
+    return text;
+  }
+
+  return "R$ " + numeric.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
 function validatePayload_(payload) {
@@ -566,7 +586,7 @@ function handleUpdateRecord_(payload, user) {
   const observationChanged = normalizeCompare_(oldEntry.observacoes || "") !== normalizeCompare_(payload.observacoes || "");
 
   sheet.getRange(rowNumber, 1, 1, 9).setValues([updatedValues]);
-  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setValue(isFinancialType_(payload.tipo) ? (payload.valor || "") : "");
+  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setValue(isFinancialType_(payload.tipo) ? normalizeCurrency_(payload.valor) : "");
   setCompactCellWithNote_(
     sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Observacoes") + 1),
     String(payload.observacoes || "").trim(),
@@ -746,7 +766,7 @@ function rowToEntry_(row, rowNumber, notes) {
     editadoEm: row[13],
     editadoPor: row[14],
     resumoEdicao: notes[15] || row[15],
-    valor: row[16],
+    valor: normalizeCurrency_(row[16]),
   };
 }
 

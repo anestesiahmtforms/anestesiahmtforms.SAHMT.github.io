@@ -154,7 +154,7 @@ document.querySelectorAll("[data-return-home]").forEach((button) => {
 window.addEventListener("popstate", handleBrowserBack);
 fields.tipo.addEventListener("change", syncConditionalEntryFields);
 fields.valor.addEventListener("blur", () => {
-  fields.valor.value = formatCurrencyInput(fields.valor.value);
+  fields.valor.value = formatStoredCurrency(fields.valor.value);
   updateEntryValidationStates();
 });
 Object.values(fields).forEach((field) => {
@@ -1328,7 +1328,7 @@ function collectFormData() {
     cirurgia: fields.cirurgia.value.trim(),
     atendimento: fields.atendimento.value.trim(),
     tipo: fields.tipo.value.trim(),
-    valor: shouldRequireValor(fields.tipo.value) ? formatCurrencyInput(fields.valor.value) : "",
+    valor: shouldRequireValor(fields.tipo.value) ? formatStoredCurrency(fields.valor.value) : "",
     convenio: fields.convenio.value.trim(),
     credor: fields.credor.value.trim(),
     plantonistas: isCaixa ? "" : getSelectedPlantonistasValue(),
@@ -1713,7 +1713,7 @@ function collectConfirmationPayload(basePayload) {
     atendimento: cleanDigits(confirmSummaryEl.querySelector("#confirm-atendimento")?.value || ""),
     tipo: confirmSummaryEl.querySelector("#confirm-tipo")?.value.trim() || "",
     valor: shouldRequireValor(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "")
-      ? formatCurrencyInput(confirmSummaryEl.querySelector("#confirm-valor")?.value || "")
+      ? formatStoredCurrency(confirmSummaryEl.querySelector("#confirm-valor")?.value || "")
       : "",
     convenio: shouldRequireConvenio(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "")
       ? (confirmSummaryEl.querySelector("#confirm-convenio")?.value.trim() || "")
@@ -1893,7 +1893,7 @@ function applyConfirmationPayloadToForm(payload) {
   fields.cirurgia.value = payload.cirurgia || "";
   fields.atendimento.value = payload.atendimento || "";
   fields.tipo.value = payload.tipo || "";
-  fields.valor.value = payload.valor || "";
+  fields.valor.value = formatStoredCurrency(payload.valor);
   fields.convenio.value = payload.convenio || "";
   fields.credor.value = payload.credor || "";
   syncConditionalEntryFields();
@@ -2028,7 +2028,7 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
             <div><span>Cirurgia</span><strong>${escapeHtml(row.cirurgia || "-")}</strong></div>
             <div><span>Atendimento</span><strong>${escapeHtml(row.atendimento || "-")}</strong></div>
             <div><span>Tipo</span><strong>${escapeHtml(row.tipo || "-")}</strong></div>
-            <div><span>Valor</span><strong>${escapeHtml(row.valor || "-")}</strong></div>
+            <div><span>Valor</span><strong>${escapeHtml(formatStoredCurrency(row.valor) || "-")}</strong></div>
             <div><span>Credor</span><strong>${escapeHtml(row.credor || "-")}</strong></div>
             <div><span>Plantonista(s)</span><strong>${escapeHtml(row.plantonistas || "-")}</strong></div>
           </div>
@@ -2073,7 +2073,7 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
           <div><span>Cirurgia</span><strong>${escapeHtml(row.cirurgia || "-")}</strong></div>
           <div><span>Atendimento</span><strong>${escapeHtml(row.atendimento || "-")}</strong></div>
           <div><span>Tipo</span><strong>${escapeHtml(row.tipo || "-")}</strong></div>
-          <div><span>Valor</span><strong>${escapeHtml(row.valor || "-")}</strong></div>
+          <div><span>Valor</span><strong>${escapeHtml(formatStoredCurrency(row.valor) || "-")}</strong></div>
           <div><span>Credor</span><strong>${escapeHtml(row.credor || "-")}</strong></div>
           <div><span>Plantonista(s)</span><strong>${escapeHtml(row.plantonistas || "-")}</strong></div>
           <div><span>Responsável</span><strong>${escapeHtml(row.criadoPor || "Não informado")}</strong></div>
@@ -2229,7 +2229,7 @@ function renderEditRecordFields() {
       </label>
       <label id="edit-valor-field" ${shouldRequireValor(row.tipo) ? "" : "hidden"}>
         <span>Valor em Real</span>
-        <input id="edit-valor" inputmode="decimal" value="${escapeHtml(row.valor || "")}" placeholder="R$ 0,00">
+        <input id="edit-valor" inputmode="decimal" value="${escapeHtml(formatStoredCurrency(row.valor))}" placeholder="R$ 0,00">
       </label>
       <label id="edit-convenio-field">
         <span>Convênio</span>
@@ -2271,7 +2271,7 @@ function collectEditPayload() {
     atendimento: withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-atendimento")?.value || ""), cleanDigits(original.atendimento || "")),
     tipo: mergedTipo,
     valor: shouldRequireValor(mergedTipo)
-      ? withEditingFallback(formatCurrencyInput(editSummaryEl.querySelector("#edit-valor")?.value || ""), original.valor)
+      ? withEditingFallback(formatStoredCurrency(editSummaryEl.querySelector("#edit-valor")?.value || ""), formatStoredCurrency(original.valor))
       : "",
     convenio: withEditingFallback(editSummaryEl.querySelector("#edit-convenio")?.value.trim() || "", original.convenio),
     credor: mergedCredor,
@@ -2291,7 +2291,7 @@ function bindEditConditionalFields() {
   }
   if (valueEl) {
     valueEl.addEventListener("blur", () => {
-      valueEl.value = formatCurrencyInput(valueEl.value);
+      valueEl.value = formatStoredCurrency(valueEl.value);
     });
   }
 }
@@ -2399,7 +2399,7 @@ function generatePdfReport() {
     row.cirurgia || "",
     row.atendimento || "",
     row.tipo || "",
-    row.valor || "-",
+    formatStoredCurrency(row.valor) || "-",
     row.credor || "",
     row.plantonistas || "",
     row.observacoes || "",
@@ -2533,7 +2533,7 @@ function buildMonthlyPdfLegacy(rows, month) {
     row.cirurgia || "",
     row.atendimento || "",
     row.tipo || "",
-    row.valor || "-",
+    formatStoredCurrency(row.valor) || "-",
     row.credor || "",
     row.plantonistas || "-",
     row.criadoPor || "",
@@ -2695,7 +2695,7 @@ function createLabelsMonthlyPdfBlob(month, rows) {
   const records = rows.map((row) => ({
     dataPaciente: `Data: ${formatDate(row.data || "")}\nPaciente: ${row.nomePaciente || "-"}`,
     convenioCirurgia: `Convenio: ${row.convenio || "-"}\nCirurgia: ${row.cirurgia || "-"}\nAtendimento: ${row.atendimento || "-"}`,
-    tipoValorCredor: `Tipo: ${row.tipo || "-"}\nValor: ${row.valor || "-"}\nCredor: ${row.credor || "-"}`,
+    tipoValorCredor: `Tipo: ${row.tipo || "-"}\nValor: ${formatStoredCurrency(row.valor) || "-"}\nCredor: ${row.credor || "-"}`,
     plantonistaResponsavel: `Plantonista(s): ${row.plantonistas || "-"}\nResponsavel: ${row.criadoPor || "-"}${row.editadoPor ? `\nEditado por: ${row.editadoPor}` : ""}${row.observacoes ? `\nObservacao: ${row.observacoes}` : ""}`,
     alert: isAlertType(row.tipo),
   }));
@@ -2811,7 +2811,7 @@ function buildMonthlyPdf(rows, month) {
     row.cirurgia || "-",
     row.atendimento || "-",
     row.tipo || "-",
-    row.valor || "-",
+    formatStoredCurrency(row.valor) || "-",
     row.credor || "-",
     row.plantonistas || "-",
     row.criadoPor || "-",
@@ -2955,7 +2955,7 @@ function shouldRequireConvenio(value) {
 }
 
 function formatCurrencyInput(value) {
-  const text = String(value || "").trim();
+  const text = String(value ?? "").trim();
   if (!text) {
     return "";
   }
@@ -2977,6 +2977,11 @@ function formatCurrencyInput(value) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+function formatStoredCurrency(value) {
+  const text = String(value ?? "").trim();
+  return text ? formatCurrencyInput(text) : "";
 }
 
 function syncPlantonistasRequirement() {

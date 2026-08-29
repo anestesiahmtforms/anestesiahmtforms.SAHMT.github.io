@@ -260,6 +260,10 @@
   elements.payerInput?.addEventListener("change", updateEventEntryState);
   elements.creditorInput?.addEventListener("change", updateEventEntryState);
   elements.amountToPayInput?.addEventListener("input", updateEventEntryState);
+  elements.amountToPayInput?.addEventListener("blur", () => {
+    elements.amountToPayInput.value = formatStoredCurrency(elements.amountToPayInput.value);
+    updateEventEntryState();
+  });
 
   if (elements.installButton) {
     elements.installButton.addEventListener("click", async () => {
@@ -1272,7 +1276,7 @@
     const shift = String(elements.shiftInput?.value || "").trim();
     const payer = String(elements.payerInput?.value || "").trim();
     const creditor = String(elements.creditorInput?.value || "").trim();
-    const amountToPay = String(elements.amountToPayInput?.value || "").trim();
+    const amountToPay = formatStoredCurrency(elements.amountToPayInput?.value);
     const origin = "PWA Eventos de escala";
     const createdAtIso = isEditingEventRecord()
       ? String(activeEventRecordEdit.timestampRaw || activeEventRecordEdit.timestamp || new Date().toISOString()).trim()
@@ -1612,7 +1616,7 @@
         turno: String(row[7] || "").trim(),
         pagador: String(row[8] || "").trim(),
         credor: String(row[9] || "").trim(),
-        valor: String(row[10] || "").trim(),
+        valor: formatStoredCurrency(row[10]),
         origem: String(row[11] || "").trim(),
         history: String(row[12] || "").trim(),
         registeredBy: String(row[13] || "").trim()
@@ -1644,7 +1648,7 @@
       turno: String(payload.turno || "").trim(),
       pagador: String(payload.pagador || payload.devedor || payload.responsavelPeloOnus || "").trim(),
       credor: String(payload.credor || payload.resultadoCredor || "").trim(),
-      valor: String(payload.valorAPagar || payload.valorPagar || "").trim(),
+      valor: formatStoredCurrency(payload.valorAPagar || payload.valorPagar),
       origem: String(payload.origem || "PWA Eventos de escala").trim(),
       history: String(editHistory || activeEventRecordEdit?.history || "").trim(),
       registeredBy: String(activeEventRecordEdit?.record?.registeredBy || payload.updatedBy || "").trim()
@@ -1827,7 +1831,7 @@
         ["Turno", record.turno],
         ["Pagador", record.pagador],
         ["Credor", record.credor],
-        ["Valor a pagar", record.valor],
+        ["Valor a pagar", formatStoredCurrency(record.valor)],
         ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
@@ -1902,7 +1906,7 @@
         ["Turno", record.turno],
         ["Pagador", record.pagador],
         ["Credor", record.credor],
-        ["Valor", record.valor],
+        ["Valor", formatStoredCurrency(record.valor)],
         ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
@@ -2001,7 +2005,7 @@
       setSelectControlValue(elements.creditorInput, record.credor || "");
     }
     if (elements.amountToPayInput) {
-      elements.amountToPayInput.value = record.valor || "";
+      elements.amountToPayInput.value = formatStoredCurrency(record.valor);
     }
 
     openEventEntryModal();
@@ -2136,7 +2140,7 @@
         record.turno || "",
         record.pagador || "",
         record.credor || "",
-        record.valor || ""
+        formatStoredCurrency(record.valor)
       ])),
       theme: "grid",
       styles: {
@@ -2386,7 +2390,7 @@
       turno: String(payload?.turno || "").trim(),
       pagador: String(payload?.pagador || payload?.devedor || payload?.responsavelPeloOnus || "").trim(),
       credor: String(payload?.credor || payload?.resultadoCredor || "").trim(),
-      valor: String(payload?.valorAPagar || payload?.valorPagar || "").trim()
+      valor: formatStoredCurrency(payload?.valorAPagar || payload?.valorPagar)
     };
 
     const changes = [
@@ -2492,7 +2496,7 @@
   }
 
   function parseCurrencyValue(value) {
-    const text = String(value || "").trim();
+    const text = String(value ?? "").trim();
     if (!text) {
       return 0;
     }
@@ -3045,6 +3049,11 @@
       style: "currency",
       currency: "BRL"
     }).format(value);
+  }
+
+  function formatStoredCurrency(value) {
+    const text = String(value ?? "").trim();
+    return text ? formatCurrencyInput(parseCurrencyValue(text)) : "";
   }
 
   async function fetchEventListsRows() {
