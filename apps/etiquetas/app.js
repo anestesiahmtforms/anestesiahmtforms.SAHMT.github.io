@@ -940,7 +940,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js");
+    await navigator.serviceWorker.register("./sw.js?v=159", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -949,6 +949,10 @@ async function registerServiceWorker() {
 async function startCamera() {
   document.querySelector(".camera-stage")?.classList.remove("has-capture");
   try {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      openNativeCameraCapture();
+      return;
+    }
     stopCamera();
     cameraEl.style.display = "block";
     cameraEl.autoplay = true;
@@ -978,7 +982,22 @@ async function startCamera() {
     stopCamera();
     cameraStatusEl.textContent = "Sem acesso";
     cameraStatusEl.className = "status-pill error";
+    if (["NotSupportedError", "SecurityError", "AbortError"].includes(error.name)) {
+      setStatus("Abrindo a camera nativa do celular...", "info");
+      openNativeCameraCapture();
+      return;
+    }
     setStatus(`Nao foi possivel abrir a camera: ${error.message}`, "error");
+  }
+}
+
+function openNativeCameraCapture() {
+  const input = document.querySelector("#upload-image");
+  if (input) {
+    input.value = "";
+    input.click();
+  } else {
+    setStatus("Camera indisponivel neste navegador. Escolha uma imagem.", "error");
   }
 }
 
