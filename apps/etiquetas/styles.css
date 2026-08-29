@@ -1268,13 +1268,13 @@ video {
 }
 
 #process-image.ai-ready {
-  border-color: rgba(22, 163, 74, 0.96);
-  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.42), 0 0 30px rgba(22, 163, 74, 0.82);
+  border-color: #25d366;
+  box-shadow: 0 0 0 7px rgba(37, 211, 102, 0.62), 0 0 34px rgba(18, 140, 126, 0.96);
 }
 
 #process-image.ai-unavailable {
-  border-color: rgba(185, 28, 28, 0.95);
-  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.42), 0 0 30px rgba(220, 38, 38, 0.76);
+  border-color: #ef233c;
+  box-shadow: 0 0 0 7px rgba(239, 35, 60, 0.64), 0 0 34px rgba(185, 28, 28, 0.98);
 }
 
 .actions,
