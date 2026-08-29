@@ -953,6 +953,9 @@ async function startCamera() {
     cameraEl.style.display = "block";
     cameraEl.autoplay = true;
     cameraEl.setAttribute("playsinline", "true");
+    cameraEl.setAttribute("webkit-playsinline", "true");
+    cameraEl.muted = true;
+    cameraEl.controls = false;
     state.stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -1010,7 +1013,7 @@ function waitForCameraVideoReady() {
     const check = async () => {
       if (cameraEl.videoWidth > 0 && cameraEl.videoHeight > 0) {
         cleanup();
-        await cameraEl.play();
+        await cameraEl.play().catch(() => undefined);
         resolve();
       }
     };
@@ -1047,6 +1050,8 @@ async function captureFromCamera() {
     setStatus("A camera ainda esta carregando. Aguarde um instante e tente novamente.", "error");
     return;
   }
+
+  await cameraEl.play().catch(() => undefined);
 
   const crop = getGuideCropRect(cameraEl.videoWidth, cameraEl.videoHeight);
   canvasEl.width = crop.width;

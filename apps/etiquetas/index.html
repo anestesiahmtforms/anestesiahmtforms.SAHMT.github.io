@@ -35,7 +35,7 @@
     <main class="layout">
       <section class="panel scanner-panel">
         <div class="camera-stage">
-          <video id="camera" playsinline muted></video>
+          <video id="camera" playsinline webkit-playsinline="true" muted autoplay disablepictureinpicture></video>
           <div class="guide-overlay" aria-hidden="true">
             <div class="guide-frame">
             </div>
@@ -312,6 +312,6 @@
     })();
   </script>
   <script src="../../auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=134" type="module"></script>
+  <script src="./app.js?v=135" type="module"></script>
 </body>
 </html>
