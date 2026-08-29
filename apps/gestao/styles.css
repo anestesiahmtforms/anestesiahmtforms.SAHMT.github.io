@@ -35,7 +35,7 @@ body {
     radial-gradient(circle at 82% 24%, rgba(90, 119, 255, 0.34), transparent 24%),
     radial-gradient(circle at 12% 80%, rgba(104, 231, 209, 0.26), transparent 22%),
     linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 43%, var(--bg-3) 100%);
-  overflow-x: clip;
+  overflow: hidden;
 }
 
 body {
@@ -94,6 +94,8 @@ body.folder-open {
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
+  height: 100dvh;
+  overflow: hidden;
   padding:
     max(10px, env(safe-area-inset-top, 0px))
     max(12px, env(safe-area-inset-right, 0px))
@@ -104,12 +106,14 @@ body.folder-open {
 .springboard {
   width: min(100%, 430px);
   margin: 0 auto;
+  height: 100%;
   padding-bottom: 6px;
   display: flex;
   flex-direction: column;
   flex: 1;
   gap: 8px;
-  min-height: calc(100dvh - 40px);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .glass-card {
@@ -211,6 +215,7 @@ body.folder-open {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
 }
 
 .icon-grid {
@@ -227,8 +232,8 @@ body.folder-open {
 
 .main-return-dock {
   width: 100%;
-  margin-top: 12px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  margin-top: auto;
+  padding-bottom: max(2px, env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
 }
@@ -384,6 +389,7 @@ body.folder-open {
   display: grid;
   place-items: center;
   padding: 18px;
+  overflow: hidden;
 }
 
 .folder-overlay.hidden {
@@ -413,7 +419,10 @@ body.folder-open {
 .folder-sheet {
   position: relative;
   width: min(100%, 420px);
-  min-height: min(72dvh, 640px);
+  height: min(72dvh, 640px);
+  max-height: calc(100dvh - 36px);
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   border-radius: 34px;
