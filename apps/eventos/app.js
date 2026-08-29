@@ -53,6 +53,9 @@
   const siglaStateStorageKey = "sahmt-sigla-checks-v1";
   const siglaEventStateStorageKey = "sahmt-sigla-events-v1";
   const clientIdStorageKey = "sahmt-client-id-v1";
+  const scheduleSyncStorageKey = "sahmt-eventos-schedule-cache-v1";
+  const listsSyncStorageKey = "sahmt-eventos-lists-cache-v1";
+  const recordsSyncStorageKey = "sahmt-eventos-records-cache-v1";
   const sharedStateEndpoint = normalizeEndpoint(syncConfig.endpoint);
   const syncPollIntervalMs = Number(syncConfig.pollIntervalMs) > 0 ? Number(syncConfig.pollIntervalMs) : 20000;
   const sharedPendingTtlMs = Number(syncConfig.pendingTtlMs) > 0 ? Number(syncConfig.pendingTtlMs) : 180000;
@@ -153,7 +156,7 @@
     elements.formattedDate.textContent = "Carregando escala...";
   }
 
-  data = fallbackData;
+  data = loadSyncCache(scheduleSyncStorageKey) || fallbackData;
 
   if (!data || !Array.isArray(data.days) || data.days.length === 0) {
     try {
@@ -335,6 +338,7 @@
         }
 
         const selectedDate = elements.dateInput.value;
+        saveSyncCache(scheduleSyncStorageKey, liveData);
         applyScheduleData(liveData);
         render(clampKey(selectedDate));
       })
@@ -1496,7 +1500,11 @@
 
   async function hydrateMemberDirectory() {
     try {
-      const rows = await fetchEventListsRows();
+      const cachedRows = loadSyncCache(listsSyncStorageKey);
+      const rows = Array.isArray(cachedRows) ? cachedRows : await fetchEventListsRows();
+      if (!Array.isArray(cachedRows)) {
+        saveSyncCache(listsSyncStorageKey, rows);
+      }
       const nextDirectory = new Map();
       const nextDcOptions = [];
       const nextFieldOptions = {
@@ -1562,6 +1570,13 @@
       if (nextEventTypeDefaults.size) {
         eventTypeDefaults = nextEventTypeDefaults;
       }
+
+      if (Array.isArray(cachedRows)) {
+        fetchEventListsRows().then((freshRows) => {
+          saveSyncCache(listsSyncStorageKey, freshRows);
+          hydrateMemberDirectoryFromRows(freshRows);
+        }).catch(() => {});
+      }
     } catch (error) {
       // Keep the built-in directory when the list sheet is temporarily unavailable.
     }
@@ -1571,15 +1586,72 @@
     toggle(elements.recordsLoadingState, true);
 
     try {
+      const cachedRecords = loadSyncCache(recordsSyncStorageKey);
+      if (Array.isArray(cachedRecords)) {
+        eventRecords = cachedRecords;
+        renderRecordsForDate(elements.recordsDateInput?.value || todayKey);
+        if (isMonthlyRecordsModalOpen()) {
+          renderMonthlyRecordsForMonth(elements.monthlyRecordsInput?.value || todayKey.slice(0, 7));
+        }
+      }
       eventRecords = await fetchEventRecordsRows();
+      saveSyncCache(recordsSyncStorageKey, eventRecords);
     } catch (error) {
-      eventRecords = [];
+      // Preserve cached records when the live spreadsheet is temporarily slow.
     } finally {
       toggle(elements.recordsLoadingState, false);
       renderRecordsForDate(elements.recordsDateInput?.value || todayKey);
       if (isMonthlyRecordsModalOpen()) {
         renderMonthlyRecordsForMonth(elements.monthlyRecordsInput?.value || todayKey.slice(0, 7));
       }
+    }
+  }
+
+  function hydrateMemberDirectoryFromRows(rows) {
+    if (!Array.isArray(rows)) {
+      return;
+    }
+    const nextDirectory = new Map();
+    const nextDcOptions = [];
+    const nextFieldOptions = { eventTypes: [], delayMultiples: [], substitutes: [], shifts: [], payers: [], creditors: [] };
+    const nextEventTypeDefaults = new Map();
+    rows.forEach((row) => {
+      const devedorEntry = parseSiglaNameEntry(row[1]);
+      if (devedorEntry) nextDirectory.set(devedorEntry.sigla, devedorEntry);
+      const dcEntry = parseSiglaNameEntry(row[5]);
+      if (dcEntry && !nextDcOptions.some((option) => option.sigla === dcEntry.sigla)) nextDcOptions.push(dcEntry);
+      pushUniqueOption(nextFieldOptions.eventTypes, row[0]);
+      pushUniqueOption(nextFieldOptions.delayMultiples, row[4]);
+      pushUniqueOption(nextFieldOptions.shifts, row[3]);
+      pushUniqueOption(nextFieldOptions.payers, row[1]);
+      pushUniqueOption(nextFieldOptions.creditors, row[2]);
+      const devedorName = extractDisplayName(row[1]);
+      const creditorName = extractDisplayName(row[2]);
+      if (devedorName && devedorName !== "CAIXA DA EQUIPE") pushUniqueOption(nextFieldOptions.substitutes, devedorName);
+      if (creditorName && creditorName !== "CAIXA DA EQUIPE") pushUniqueOption(nextFieldOptions.substitutes, creditorName);
+      const eventType = String(row[0] || "").trim();
+      if (eventType) nextEventTypeDefaults.set(eventType, { delayMultiple: String(row[4] || "").trim(), shift: String(row[3] || "").trim(), payer: String(row[1] || "").trim(), creditor: String(row[2] || "").trim() });
+    });
+    if (nextDirectory.size) memberDirectory = nextDirectory;
+    if (nextDcOptions.length) dcMemberOptions = nextDcOptions;
+    if (nextFieldOptions.eventTypes.length) { eventFieldOptions = nextFieldOptions; populateEventEntryOptionLists(); }
+    if (nextEventTypeDefaults.size) eventTypeDefaults = nextEventTypeDefaults;
+  }
+
+  function loadSyncCache(key) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw ? JSON.parse(raw).value : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveSyncCache(key, value) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value }));
+    } catch (error) {
+      // Storage can be unavailable in private browsing; network sync still works.
     }
   }
 

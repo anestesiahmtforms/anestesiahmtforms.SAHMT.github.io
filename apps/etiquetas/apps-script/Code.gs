@@ -38,7 +38,8 @@ function setup() {
 
 function doGet(e) {
   try {
-    const spreadsheet = ensureWorkbook_();
+    // Reads must not rebuild lists, validations, formatting, or column widths.
+    const spreadsheet = getSpreadsheet_();
     const action = (e && e.parameter && e.parameter.action) || "";
 
     if (action === "metadata") {
@@ -108,7 +109,7 @@ function doPost(e) {
     }
 
     payload.tipo = normalizeTipoValue_(payload.tipo);
-    ensureWorkbook_();
+    prepareWriteWorkbook_();
 
     if (action === "updateObservation") {
       return handleUpdateObservation_(payload, getRequestUser_(payload));
@@ -385,6 +386,16 @@ function ensureWorkbook_() {
   applyValidations_(registros, listas);
   formatRegistros_(registros);
 
+  return spreadsheet;
+}
+
+function prepareWriteWorkbook_() {
+  const spreadsheet = getSpreadsheet_();
+  const registros = spreadsheet.getSheetByName(REGISTROS_SHEET);
+  const listas = spreadsheet.getSheetByName(LISTAS_SHEET);
+  if (!registros || !listas) {
+    return ensureWorkbook_();
+  }
   return spreadsheet;
 }
 
