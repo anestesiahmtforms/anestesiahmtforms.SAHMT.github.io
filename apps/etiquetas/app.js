@@ -124,7 +124,9 @@ function setCaptureButtonIdleState() {
   if (!captureButton) {
     return;
   }
-  captureButton.textContent = "Abrir camera";
+  const label = captureButton.querySelector("span");
+  if (label) label.textContent = "Abrir camera";
+  else captureButton.textContent = "Abrir camera";
   captureButton.setAttribute("aria-label", "Abrir camera");
   captureButton.disabled = false;
 }
@@ -134,7 +136,9 @@ function setCaptureButtonReadyState() {
   if (!captureButton) {
     return;
   }
-  captureButton.textContent = "Capturar";
+  const label = captureButton.querySelector("span");
+  if (label) label.textContent = "Capturar Etiqueta";
+  else captureButton.textContent = "Capturar Etiqueta";
   captureButton.setAttribute("aria-label", "Capturar etiqueta");
   captureButton.disabled = false;
 }
@@ -959,10 +963,11 @@ async function startCamera() {
     });
 
     cameraEl.srcObject = state.stream;
-    await cameraEl.play();
+    // Change the same button as soon as the camera stream is granted.
+    setCaptureButtonReadyState();
+    await cameraEl.play().catch(() => undefined);
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
-    setCaptureButtonReadyState();
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
   } catch (error) {
     cameraStatusEl.textContent = "Sem acesso";
