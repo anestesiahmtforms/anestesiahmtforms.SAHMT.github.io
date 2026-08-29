@@ -459,9 +459,9 @@ function formatRegistros_(sheet) {
     .setFontColor("#ffffff")
     .setFontWeight("bold");
   sheet.getRange(2, 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy");
-  sheet.getRange(2, 10, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
-  sheet.getRange(2, 12, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
-  sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(2, 10, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
+  sheet.getRange(2, 12, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
+  sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
   sheet.getRange(2, REGISTROS_HEADERS.indexOf("Valor") + 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("R$ #,##0.00");
   sheet.autoResizeColumns(1, REGISTROS_HEADERS.length);
 }
@@ -472,9 +472,9 @@ function applyRowFormats_(sheet, rowNumber) {
   }
 
   sheet.getRange(rowNumber, 1).setNumberFormat("dd/mm/yyyy");
-  sheet.getRange(rowNumber, 10).setNumberFormat("dd/mm/yyyy hh:mm:ss");
-  sheet.getRange(rowNumber, 12).setNumberFormat("dd/mm/yyyy hh:mm:ss");
-  sheet.getRange(rowNumber, 14).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(rowNumber, 10).setNumberFormat("dd/mm/yyyy hh:mm");
+  sheet.getRange(rowNumber, 12).setNumberFormat("dd/mm/yyyy hh:mm");
+  sheet.getRange(rowNumber, 14).setNumberFormat("dd/mm/yyyy hh:mm");
   sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setNumberFormat("R$ #,##0.00");
 }
 
@@ -623,9 +623,9 @@ function handleUpdateRecord_(payload, user) {
     sheet.getRange(rowNumber, observacaoAtualizadaEmColumn).setValue(new Date());
     sheet.getRange(rowNumber, observacaoAtualizadaPorColumn).setValue(user.email);
   }
+  sheet.getRange(rowNumber, editadoEmColumn).setValue(new Date());
+  sheet.getRange(rowNumber, editadoPorColumn).setValue(user.email);
   if (changeSummary) {
-    sheet.getRange(rowNumber, editadoEmColumn).setValue(new Date());
-    sheet.getRange(rowNumber, editadoPorColumn).setValue(user.email);
     setCompactCellWithNote_(
       sheet.getRange(rowNumber, resumoEdicaoColumn),
       appendEditHistory_(
@@ -678,7 +678,7 @@ function formatEditValue_(value) {
 }
 
 function appendEditHistory_(previousHistory, changeSummary, userEmail) {
-  const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
   const line = timestamp + " - " + userEmail + ": " + String(changeSummary || "").trim();
   const previous = String(previousHistory || "").trim();
   const history = previous ? line + "\n" + previous : line;
