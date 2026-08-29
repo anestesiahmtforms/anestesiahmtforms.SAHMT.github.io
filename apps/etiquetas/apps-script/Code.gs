@@ -297,8 +297,11 @@ function handleAiExtract_(payload) {
   const convenio = cleanConvenio_(extracted.convenio);
   const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);
   const atendimento = sanitizeLabelNumber_(extracted.atendimento);
-  const tipo = normalizeConsultaType_(extracted.tipo);
-  const credor = tipo === "Consulta Pré-anestésica" ? "Caixa" : "";
+  const extractedTipo = normalizeConsultaType_(extracted.tipo);
+  const isConsultaModel = extractedTipo === "Consulta Pré-anestésica" ||
+    (!extractedTipo && !convenio && !cirurgia && nomePaciente && atendimento);
+  const tipo = isConsultaModel ? "Consulta Pré-anestésica" : "";
+  const credor = isConsultaModel ? "Caixa" : "";
 
   return jsonResponse({
     ok: true,

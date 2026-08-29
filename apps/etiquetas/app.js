@@ -1157,7 +1157,14 @@ async function extractLabelWithAi(imageBlob) {
     convenio: String(result.convenio || "").trim(),
     cirurgia: cleanDigits(result.cirurgia || ""),
     atendimento: cleanDigits(result.atendimento || ""),
-    tipo: String(result.tipo || "").trim(),
+    tipo: String(result.tipo || "").trim() || (
+      !String(result.convenio || "").trim() &&
+      !String(result.cirurgia || "").trim() &&
+      String(result.nomePaciente || "").trim() &&
+      String(result.atendimento || "").trim()
+        ? CONSULTA_TYPE
+        : ""
+    ),
     credor: String(result.credor || "").trim(),
   };
 }
@@ -2185,9 +2192,10 @@ function formatEditHistoryLine(line) {
 }
 
 function openEditRecord(rowOrRowNumber) {
-  const row = typeof rowOrRowNumber === "object" && rowOrRowNumber
+  const sourceRow = typeof rowOrRowNumber === "object" && rowOrRowNumber
     ? rowOrRowNumber
     : state.summaryRows.find((entry) => String(entry.rowNumber) === String(rowOrRowNumber));
+  const row = normalizeEditableRow(sourceRow);
   if (!row || !editOverlayEl || !editSummaryEl) {
     return;
   }
@@ -2197,6 +2205,35 @@ function openEditRecord(rowOrRowNumber) {
   setEditFeedback("", "neutral");
   editOverlayEl.hidden = false;
   editContextEl.textContent = `Lancado por: ${row.criadoPor || "Nao informado"} | Criado em: ${row.criadoEm || "Nao informado"}`;
+}
+
+function normalizeEditableRow(source) {
+  if (!source) return null;
+  if (Array.isArray(source)) {
+    return {
+      rowNumber: source[0] || "", data: source[1] || "", nomePaciente: source[2] || "",
+      convenio: source[3] || "", cirurgia: source[4] || "", atendimento: source[5] || "",
+      tipo: source[6] || "", credor: source[7] || "", plantonistas: source[8] || "",
+      observacoes: source[9] || "", criadoEm: source[10] || "", criadoPor: source[11] || "",
+      valor: source[16] || ""
+    };
+  }
+  return {
+    ...source,
+    rowNumber: source.rowNumber || source.rowIndex || source.linha || "",
+    data: source.data || source.date || source.dataRegistro || "",
+    nomePaciente: source.nomePaciente || source.nome || source.paciente || "",
+    convenio: source.convenio || source.plano || "",
+    cirurgia: source.cirurgia || "",
+    atendimento: source.atendimento || source.numeroAtendimento || "",
+    tipo: source.tipo || source.tipoRegistro || "",
+    credor: source.credor || "",
+    plantonistas: source.plantonistas || source.plantonista || "",
+    observacoes: source.observacoes || source.observacao || "",
+    criadoEm: source.criadoEm || source.timestamp || "",
+    criadoPor: source.criadoPor || source.responsavel || "",
+    valor: source.valor ?? source.valorEmReal ?? ""
+  };
 }
 
 function renderEditRecordFields() {
@@ -2226,6 +2263,7 @@ function renderEditRecordFields() {
           ${renderOption("Particular", "Particular", row.tipo)}
           ${renderOption("Complementação", "Complementação", row.tipo)}
           ${renderOption("Convênio", "Convênio", row.tipo)}
+          ${renderOption("Consulta Pré-anestésica", "Consulta Pré-anestésica", row.tipo)}
         </select>
       </label>
       <label id="edit-valor-field" ${shouldRequireValor(row.tipo) ? "" : "hidden"}>
