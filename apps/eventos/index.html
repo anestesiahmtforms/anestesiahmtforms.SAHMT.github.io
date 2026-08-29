@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=20260828-7">
+  <link rel="stylesheet" href="./styles.css?v=20260828-8">
 </head>
 <body>
   <div class="page-shell">
@@ -184,7 +184,6 @@
           <h2 id="eventEntryTitle" class="entry-sheet__title">Lançamento do evento</h2>
           <span class="entry-sheet__auth" data-auth-user></span>
         </div>
-        <button id="closeEventEntryModal" class="entry-sheet__close" type="button" aria-label="Voltar ao app">Voltar</button>
       </div>
 
       <form id="eventEntryForm" class="entry-form" autocomplete="on" novalidate>
@@ -243,6 +242,9 @@
           <button id="submitEventEntryButton" class="entry-submit-button" type="submit">Salvar na planilha</button>
         </div>
       </form>
+      <div class="entry-sheet__footer">
+        <button id="closeEventEntryModal" class="records-panel-toggle monthly-sheet__close entry-sheet__back-button" type="button" aria-label="Voltar ao app">Voltar</button>
+      </div>
     </section>
   </div>
 
@@ -298,6 +300,6 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="../../auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=20260828-10"></script>
+  <script src="./app.js?v=20260828-11"></script>
 </body>
 </html>

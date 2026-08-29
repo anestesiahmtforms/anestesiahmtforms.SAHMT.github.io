@@ -1323,6 +1323,7 @@
       valorAPagar: amountToPay,
       origem: origin,
       updatedBy,
+      userEmail: updatedBy,
       criadoEm: createdAtIso,
       criadoEmIso: createdAtIso,
       ...editMetadata
@@ -1586,7 +1587,7 @@
     const url = new URL(`https://docs.google.com/spreadsheets/d/${eventListsSpreadsheetId}/gviz/tq`);
     url.searchParams.set("tqx", "out:csv");
     url.searchParams.set("sheet", recordsSheetTitle);
-    url.searchParams.set("range", "A2:M2000");
+    url.searchParams.set("range", "A2:N2000");
 
     const response = await fetch(url.toString(), {
       method: "GET",
@@ -1651,7 +1652,13 @@
       valor: formatStoredCurrency(payload.valorAPagar || payload.valorPagar),
       origem: String(payload.origem || "PWA Eventos de escala").trim(),
       history: String(editHistory || activeEventRecordEdit?.history || "").trim(),
-      registeredBy: String(activeEventRecordEdit?.record?.registeredBy || payload.updatedBy || "").trim()
+      registeredBy: String(
+        activeEventRecordEdit?.record?.registeredBy
+          || payload.userEmail
+          || payload.updatedBy
+          || getAuthenticatedEmail()
+          || ""
+      ).trim().toLowerCase()
     };
 
     if (!nextRecord.dataDoEventoKey) {
@@ -1832,7 +1839,7 @@
         ["Pagador", record.pagador],
         ["Credor", record.credor],
         ["Valor a pagar", formatStoredCurrency(record.valor)],
-        ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
+        ["Responsável pelo Registro", `${getRecordResponsible(record)}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
@@ -1907,7 +1914,7 @@
         ["Pagador", record.pagador],
         ["Credor", record.credor],
         ["Valor", formatStoredCurrency(record.valor)],
-        ["Responsável pelo Registro", `${record.registeredBy || "Acesso local"}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
+        ["Responsável pelo Registro", `${getRecordResponsible(record)}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
         ["Ultima edicao", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
@@ -2363,7 +2370,7 @@
     }
 
     if (!entry.responsavel) {
-      entry.responsavel = "Acesso local";
+      entry.responsavel = getAuthenticatedEmail() || "Responsável não informado";
     }
 
     if (!entry.alteracao) {
@@ -2437,6 +2444,16 @@
 
   function getEventEntryEditorLabel() {
     return getAuthenticatedEmail() || "";
+  }
+
+  function getRecordResponsible(record) {
+    return String(
+      record?.registeredBy
+        || record?.responsavelPeloRegistro
+        || record?.userEmail
+        || getAuthenticatedEmail()
+        || "Responsável não informado"
+    ).trim().toLowerCase();
   }
 
   function getAuthenticatedEmail() {
