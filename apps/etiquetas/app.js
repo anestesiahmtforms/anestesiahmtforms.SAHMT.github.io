@@ -135,9 +135,9 @@ function setCaptureButtonReadyState() {
     return;
   }
   const label = captureButton.querySelector("span");
-  if (label) label.textContent = "Capturar imagem";
-  else captureButton.textContent = "Capturar imagem";
-  captureButton.setAttribute("aria-label", "Capturar imagem");
+  if (label) label.textContent = "Capturar Etiqueta";
+  else captureButton.textContent = "Capturar Etiqueta";
+  captureButton.setAttribute("aria-label", "Capturar Etiqueta");
   captureButton.disabled = false;
 }
 
