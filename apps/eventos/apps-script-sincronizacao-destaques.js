@@ -1,5 +1,9 @@
 const SPREADSHEET_ID = "11ayJbQFmFPzLegFZHL8kPKCvudpPo60O4NyR3i7aofA";
 const HIGHLIGHTS_SHEET = "DESTAQUES APP";
+const HIGHLIGHTS_WRITE_USERS = new Set([
+  "wx2064@gmail.com",
+  "marcio.henrique82@gmail.com"
+]);
 
 function doGet(e) {
   try {
@@ -41,6 +45,11 @@ function setHighlight_(sheet, params) {
     throw new Error("Data e sigla sao obrigatorias.");
   }
 
+  const updatedBy = String(params.updatedBy || "").trim().toLowerCase();
+  if (!HIGHLIGHTS_WRITE_USERS.has(updatedBy)) {
+    throw new Error("Apenas os usuarios autorizados podem alterar as marcacoes das siglas.");
+  }
+
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
 
@@ -56,14 +65,14 @@ function setHighlight_(sheet, params) {
     });
 
     const now = new Date();
-    const updatedBy = String(params.updatedBy || "PWA").slice(0, 120);
+    const updatedByValue = updatedBy.slice(0, 120);
 
     if (matchingRows.length) {
       matchingRows.forEach((rowNumber) => {
-        sheet.getRange(rowNumber, 1, 1, 5).setValues([[dateKey, sigla, marked, now, updatedBy]]);
+        sheet.getRange(rowNumber, 1, 1, 5).setValues([[dateKey, sigla, marked, now, updatedByValue]]);
       });
     } else {
-      sheet.appendRow([dateKey, sigla, marked, now, updatedBy]);
+      sheet.appendRow([dateKey, sigla, marked, now, updatedByValue]);
     }
   } finally {
     lock.releaseLock();

@@ -5,6 +5,10 @@
 // https://script.google.com/macros/s/AKfycbym0KGPTJDYzLfVBgJsNTNBi2DveOHtEbZZ2m_cEx0uhSeK60LH_uuMbCEwTbIQZYxn/exec
 const EVENTOS_SPREADSHEET_ID = '1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg';
 const EVENTOS_REGISTROS_SHEET = 'Registros';
+const EVENTOS_WRITE_USERS = new Set([
+  'wx2064@gmail.com',
+  'marcio.henrique82@gmail.com'
+]);
 const EVENTOS_HEADERS = [
   'Timestamp',
   'Data do Evento',
@@ -34,6 +38,7 @@ function doGet() {
 function doPost(e) {
   try {
     const payload = parsePayload_(e);
+    assertWriteAccess_(payload.userEmail || payload.updatedBy);
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
     var result;
@@ -122,6 +127,13 @@ function parsePayload_(e) {
 
 function shouldUpdateRow_(payload) {
   return String(payload.operation || '').toLowerCase() === 'update' && Number(payload.rowIndex) > 1;
+}
+
+function assertWriteAccess_(email) {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!EVENTOS_WRITE_USERS.has(normalizedEmail)) {
+    throw new Error('Apenas os usuarios autorizados podem lancar ou editar eventos.');
+  }
 }
 
 function appendNewRow_(sheet, payload) {
@@ -368,7 +380,7 @@ function buildHistoryEntry_(currentRow, nextRow, updatedBy) {
   }
 
   var now = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
-  return 'Data: ' + now + '\nResponsável: ' + String(updatedBy || 'Acesso local').trim() + '\nAlteração: ' + changes.join('; ');
+  return 'Data: ' + now + '\nResponsável: ' + String(updatedBy || '').trim() + '\nAlteração: ' + changes.join('; ');
 }
 
 function jsonResponse_(payload) {

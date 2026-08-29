@@ -35,6 +35,10 @@
     fallbackEndpointUrls: [],
     requestTimeoutMs: 15000
   };
+  const eventWriteUsers = new Set([
+    "wx2064@gmail.com",
+    "marcio.henrique82@gmail.com"
+  ]);
   const highlightedEventPeople = [
     "Fernando Astrogildo",
     "Bernardo Guimaraes",
@@ -471,6 +475,10 @@
   }
 
   async function toggleSiglaCheck(token, dateKey, sigla) {
+    if (!canWriteEventData()) {
+      showReadOnlyNotice();
+      return;
+    }
     const marked = !token.classList.contains("sigla-token--checked");
     applySiglaCheckAppearance(token, marked);
 
@@ -614,8 +622,10 @@
         returnUrl: window.location.href
       });
       currentAccessLabel = String(auth?.email || "").trim();
+      applyWriteAccessUi();
       window.SAHMT_AUTH.onChange((nextAuth) => {
         currentAccessLabel = String(nextAuth?.email || "").trim();
+        applyWriteAccessUi();
       });
     }
 
@@ -634,6 +644,25 @@
 
   function clearAuthStatus() {
     setAuthStatus("");
+  }
+
+  function applyWriteAccessUi() {
+    const canWrite = canWriteEventData();
+    [elements.openSupportLaunchButton, elements.openEventEntryModal].forEach((button) => {
+      if (!button) {
+        return;
+      }
+      button.disabled = !canWrite;
+      button.setAttribute("aria-disabled", canWrite ? "false" : "true");
+    });
+  }
+
+  function canWriteEventData() {
+    return eventWriteUsers.has(getAuthenticatedEmail());
+  }
+
+  function showReadOnlyNotice() {
+    window.alert("Apenas os usuarios autorizados podem lancar, editar ou alterar dados do EVENTOS DE ESCALA.");
   }
 
   function loadSiglaEventState() {
@@ -975,6 +1004,10 @@
   }
 
   async function handleSiglaClick(sigla, weekdayLabel, dateKey) {
+    if (!canWriteEventData()) {
+      showReadOnlyNotice();
+      return;
+    }
     beginEventLaunch(sigla, dateKey);
     const choices = getMemberChoicesForSigla(sigla, weekdayLabel);
 
@@ -1004,6 +1037,10 @@
   }
 
   function openSupportEventLaunch() {
+    if (!canWriteEventData()) {
+      showReadOnlyNotice();
+      return;
+    }
     const activeDate = String(elements.dateInput?.value || todayKey).trim() || todayKey;
     resetEventEntryForm(activeDate);
     supportShortcutLaunchActive = true;
@@ -1917,6 +1954,10 @@
   }
 
   function startEventRecordEdit(record) {
+    if (!canWriteEventData()) {
+      showReadOnlyNotice();
+      return;
+    }
     if (!record) {
       return;
     }
