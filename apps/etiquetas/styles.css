@@ -914,13 +914,24 @@ label[hidden] {
 
 .main-return-dock {
   position: relative;
-  top: 10px;
-  margin-top: 0;
-  margin-bottom: -10px;
+  top: 0;
+  margin-top: 6px;
+  margin-bottom: 0;
 }
 
 .footer-banner {
-  margin-top: 0;
+  margin-top: 6px;
+}
+
+.scanner-panel {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.scanner-panel .camera-stage,
+.scanner-panel video {
+  min-height: clamp(230px, 34dvh, 290px);
+  max-height: 290px;
 }
 
 .layout:has(.form-panel.is-open) .main-return-dock,
@@ -2942,4 +2953,24 @@ textarea {
 
 .summary-item.monthly-record-card .summary-history-block {
   grid-column: 2 / -1;
+}
+
+/* Final mobile guard: preserve scanner height without moving HOME over the footer. */
+@media (max-width: 680px) {
+  .scanner-panel .camera-stage,
+  .scanner-panel video {
+    min-height: clamp(230px, 34dvh, 290px);
+    max-height: 290px;
+  }
+
+  .main-return-dock {
+    position: relative;
+    top: 0;
+    margin-top: 6px;
+    margin-bottom: 0;
+  }
+
+  .footer-banner {
+    margin-top: 6px;
+  }
 }
