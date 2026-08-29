@@ -5,6 +5,8 @@
 // https://script.google.com/macros/s/AKfycbym0KGPTJDYzLfVBgJsNTNBi2DveOHtEbZZ2m_cEx0uhSeK60LH_uuMbCEwTbIQZYxn/exec
 const EVENTOS_SPREADSHEET_ID = '1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg';
 const EVENTOS_REGISTROS_SHEET = 'Registros';
+const EVENTOS_HIGHLIGHTS_SPREADSHEET_ID = '11ayJbQFmFPzLegFZHL8kPKCvudpPo60O4NyR3i7aofA';
+const EVENTOS_HIGHLIGHTS_SHEET = 'DESTAQUES APP';
 const EVENTOS_WRITE_USERS = new Set([
   'wx2064@gmail.com',
   'marcio.henrique82@gmail.com'
@@ -26,13 +28,144 @@ const EVENTOS_HEADERS = [
   'RESPONSAVEL PELO REGISTRO'
 ];
 
-function doGet() {
+function doGet(e) {
+  const params = e && e.parameter ? e.parameter : {};
+  const action = String(params.action || 'get').toLowerCase();
+
+  if (action === 'set' || action === 'toggle' || params.sheetName === EVENTOS_HIGHLIGHTS_SHEET) {
+    const sheet = getHighlightsSheet_();
+    if (action === 'set' || action === 'toggle') {
+      setHighlight_(sheet, params);
+    }
+    return jsonResponse_({
+      ok: true,
+      highlights: readHighlights_(sheet)
+    });
+  }
+
   return jsonResponse_({
     ok: true,
     spreadsheetId: EVENTOS_SPREADSHEET_ID,
     sheetName: EVENTOS_REGISTROS_SHEET,
     message: 'Apps Script de registros ativo.'
   });
+}
+
+function getHighlightsSheet_() {
+  const spreadsheet = SpreadsheetApp.openById(EVENTOS_HIGHLIGHTS_SPREADSHEET_ID);
+  let sheet = spreadsheet.getSheetByName(EVENTOS_HIGHLIGHTS_SHEET);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(EVENTOS_HIGHLIGHTS_SHEET);
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['Data', 'Sigla', 'Marcado', 'Atualizado em', 'Atualizado por']);
+  }
+
+  return sheet;
+}
+
+function setHighlight_(sheet, params) {
+  const dateKey = normalizeHighlightDateKey_(params.date);
+  const sigla = String(params.sigla || '').trim().toUpperCase();
+  const marked = String(params.marked).toLowerCase() === 'true';
+  const updatedBy = String(params.updatedBy || '').trim().toLowerCase();
+
+  if (!dateKey || !sigla) {
+    throw new Error('Data e sigla sao obrigatorias.');
+  }
+
+  if (!EVENTOS_WRITE_USERS.has(updatedBy)) {
+    throw new Error('Apenas os usuarios autorizados podem alterar as marcacoes das siglas.');
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+
+  try {
+    const lastRow = sheet.getLastRow();
+    const values = lastRow > 1
+      ? sheet.getRange(2, 1, lastRow - 1, 2).getValues()
+      : [];
+    const matchingRows = [];
+
+    values.forEach((row, index) => {
+      if (
+        normalizeHighlightDateKey_(row[0]) === dateKey &&
+        String(row[1] || '').trim().toUpperCase() === sigla
+      ) {
+        matchingRows.push(index + 2);
+      }
+    });
+
+    const now = new Date();
+    const updatedByValue = updatedBy.slice(0, 120);
+
+    if (matchingRows.length) {
+      matchingRows.forEach((rowNumber) => {
+        sheet.getRange(rowNumber, 1, 1, 5).setValues([
+          [dateKey, sigla, marked, now, updatedByValue]
+        ]);
+      });
+    } else {
+      sheet.appendRow([dateKey, sigla, marked, now, updatedByValue]);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function readHighlights_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    return {};
+  }
+
+  const rows = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+  const state = {};
+
+  rows.forEach((row) => {
+    const dateKey = normalizeHighlightDateKey_(row[0]);
+    const sigla = String(row[1] || '').trim().toUpperCase();
+    if (!dateKey || !sigla) {
+      return;
+    }
+    if (!state[dateKey]) {
+      state[dateKey] = {};
+    }
+    state[dateKey][sigla] = isHighlightMarked_(row[2]);
+  });
+
+  return Object.keys(state).reduce((highlights, dateKey) => {
+    const siglas = Object.keys(state[dateKey])
+      .filter((sigla) => state[dateKey][sigla])
+      .sort();
+    if (siglas.length) {
+      highlights[dateKey] = siglas;
+    }
+    return highlights;
+  }, {});
+}
+
+function isHighlightMarked_(value) {
+  return value === true || /^(true|1|sim|x)$/i.test(String(value || '').trim());
+}
+
+function normalizeHighlightDateKey_(value) {
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+
+  const text = String(value || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return text;
+  }
+
+  const brMatch = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return brMatch
+    ? brMatch[3] + '-' + brMatch[2] + '-' + brMatch[1]
+    : '';
 }
 
 function doPost(e) {
