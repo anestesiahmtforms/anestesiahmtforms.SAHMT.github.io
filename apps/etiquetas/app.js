@@ -2244,6 +2244,18 @@ function normalizeEditableRow(source) {
 
 function renderEditRecordFields() {
   const row = state.editingRow || {};
+  const isConsulta = normalizeTipoValue(row.tipo) === CONSULTA_TYPE;
+  const cirurgiaField = isConsulta ? "" : `
+      <label>
+        <span>Cirurgia</span>
+        <input id="edit-cirurgia" inputmode="numeric" value="${escapeHtml(row.cirurgia || "")}" required>
+      </label>`;
+  const plantonistasField = isConsulta ? "" : `
+      <label class="full-width">
+        <span>Plantonista(s)</span>
+        <input id="edit-plantonistas" type="text" value="${escapeHtml(row.plantonistas || "")}" placeholder="Nao necessario quando Credor for Caixa">
+      </label>`;
+
   editSummaryEl.innerHTML = `
     <div class="confirm-edit-grid">
       <label>
@@ -2254,10 +2266,7 @@ function renderEditRecordFields() {
         <span>Nome do Paciente</span>
         <input id="edit-nomePaciente" type="text" value="${escapeHtml(row.nomePaciente || "")}" required>
       </label>
-      <label>
-        <span>Cirurgia</span>
-        <input id="edit-cirurgia" inputmode="numeric" value="${escapeHtml(row.cirurgia || "")}" required>
-      </label>
+      ${cirurgiaField}
       <label>
         <span>Atendimento</span>
         <input id="edit-atendimento" inputmode="numeric" value="${escapeHtml(row.atendimento || "")}" required>
@@ -2289,13 +2298,10 @@ function renderEditRecordFields() {
           ${renderOption("Plantão/Caixa", "Plantão/Caixa", row.credor)}
         </select>
       </label>
-      <label class="full-width">
-        <span>Plantonista(s)</span>
-        <input id="edit-plantonistas" type="text" value="${escapeHtml(row.plantonistas || "")}" placeholder="Nao necessario quando Credor for Caixa">
-      </label>
+      ${plantonistasField}
       <label class="full-width">
         <span>Observacoes</span>
-        <textarea id="edit-observacoes" rows="3">${escapeHtml(row.observacoes || "")}</textarea>
+        <textarea id="edit-observacoes" rows="3" placeholder="Opcional">${escapeHtml(row.observacoes || "")}</textarea>
       </label>
     </div>
   `;
