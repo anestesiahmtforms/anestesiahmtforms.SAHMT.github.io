@@ -341,14 +341,14 @@ body.folder-open {
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     inset 0 -16px 24px rgba(0, 0, 0, 0.16),
     0 18px 30px rgba(13, 50, 87, 0.18);
-  color: #fff;
+  color: var(--text-main);
   font-size: 0.76rem;
   font-weight: 900;
   line-height: 1.02;
   letter-spacing: 0.01em;
   white-space: pre-line;
   text-wrap: balance;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  text-shadow: none;
   overflow: hidden;
 }
 
@@ -413,6 +413,9 @@ body.folder-open {
 .folder-sheet {
   position: relative;
   width: min(100%, 420px);
+  min-height: min(72dvh, 640px);
+  display: flex;
+  flex-direction: column;
   border-radius: 34px;
   padding: 16px 16px 18px;
   background:
@@ -461,6 +464,7 @@ body.folder-open {
 }
 
 .folder-sheet__hero {
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 14px;
@@ -493,7 +497,7 @@ body.folder-open {
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     inset 0 -18px 24px rgba(0, 0, 0, 0.16),
     0 18px 28px rgba(13, 50, 87, 0.16);
-  color: #fff;
+  color: var(--text-main);
   font-size: 0.68rem;
   font-weight: 900;
   line-height: 1.06;
@@ -534,19 +538,20 @@ body.folder-open {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 18px;
+  flex: 0 0 auto;
 }
 
 .folder-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 76px;
   padding: 12px 14px;
   border-radius: 18px;
   border: 1px solid rgba(246, 234, 212, 0.42);
   text-decoration: none;
-  color: #fff;
+  color: var(--text-main);
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -563,14 +568,14 @@ body.folder-open {
 
 .folder-action--gestor {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)),
-    linear-gradient(135deg, #0d3257, #214463 56%, #2d6887);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, #dce8ee, #b9d4e1 56%, #8fb9cf);
 }
 
 .folder-action--equipe {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)),
-    linear-gradient(135deg, #1b466d, #237a57 64%, #18b7b7);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, #d8ebe8, #bfded9 64%, #9fc9c1);
 }
 
 .folder-action:focus-visible,

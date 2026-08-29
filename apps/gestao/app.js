@@ -62,14 +62,10 @@ const managementItems = [
 ];
 
 const themes = [
-  ["#ff7b49", "#ff2d74", "#a249ff"],
-  ["#40f2ff", "#166cff", "#0639d0"],
-  ["#73ffb8", "#19c87f", "#0b8a72"],
-  ["#ffd333", "#ff8a00", "#e95a00"],
-  ["#f59bff", "#be32ff", "#6d4dff"],
-  ["#5ddfff", "#338cff", "#2350ff"],
-  ["#ffe05d", "#ffb21f", "#ff7500"],
-  ["#60f5e0", "#24c9ba", "#06969d"]
+  ["#dce8ee", "#c7dce5", "#a8c9d8"],
+  ["#f5ecdb", "#eadfc9", "#d8c5a2"],
+  ["#d8ebe8", "#bfded9", "#9fc9c1"],
+  ["#e3edf2", "#c7dce8", "#a5c5d6"]
 ];
 
 const iconGrid = document.querySelector("#iconGrid");
@@ -210,7 +206,7 @@ function renderCards() {
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js?v=20260823-7", { updateViaCache: "none" }).catch(() => {
+      navigator.serviceWorker.register("./sw.js?v=20260828-8", { updateViaCache: "none" }).catch(() => {
         // The app still works without the service worker.
       });
     });
