@@ -73,10 +73,9 @@ body.modal-open::after {
   inset: 0;
   z-index: 30;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 4%, rgba(217, 119, 6, 0.2), transparent 28%),
-    linear-gradient(160deg, rgba(8, 63, 61, 0.72), rgba(15, 23, 42, 0.54));
-  backdrop-filter: blur(12px);
+  background: rgba(8, 18, 31, 0.56);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 body::before {
