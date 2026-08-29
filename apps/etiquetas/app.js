@@ -39,6 +39,7 @@ const TOP_LEVEL_LOGIN_PARAM = "topLogin";
 
 const state = {
   stream: null,
+  cameraOpen: false,
   imageBlob: null,
   imageUrl: "",
   metadata: null,
@@ -960,13 +961,15 @@ async function startCamera() {
       audio: false,
     });
 
+    state.cameraOpen = true;
+    setCaptureButtonReadyState();
     cameraEl.srcObject = state.stream;
     await cameraEl.play();
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
-    setCaptureButtonReadyState();
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
   } catch (error) {
+    stopCamera();
     cameraStatusEl.textContent = "Sem acesso";
     cameraStatusEl.className = "status-pill error";
     setStatus(`Nao foi possivel abrir a camera: ${error.message}`, "error");
@@ -974,7 +977,7 @@ async function startCamera() {
 }
 
 async function handleCameraCaptureButton() {
-  if (state.stream) {
+  if (state.cameraOpen && state.stream) {
     await captureFromCamera();
     return;
   }
@@ -983,6 +986,7 @@ async function handleCameraCaptureButton() {
 }
 
 function stopCamera() {
+  state.cameraOpen = false;
   if (state.stream) {
     state.stream.getTracks().forEach((track) => track.stop());
     state.stream = null;
