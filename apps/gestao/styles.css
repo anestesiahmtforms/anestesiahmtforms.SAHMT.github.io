@@ -687,3 +687,17 @@ body.folder-open {
   margin-top: 0;
   flex: 0 0 auto;
 }
+
+/* Use the same background surface as Escala Semanal. */
+html,
+body {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 22%),
+    radial-gradient(circle at left 80%, rgba(255, 183, 77, 0.12), transparent 18%),
+    linear-gradient(180deg, #0d3257 0%, #214463 44%, #eee4d1 100%);
+}
+
+.wallpaper,
+.halo {
+  display: none;
+}
