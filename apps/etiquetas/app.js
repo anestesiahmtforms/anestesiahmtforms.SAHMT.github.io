@@ -124,9 +124,7 @@ function setCaptureButtonIdleState() {
   if (!captureButton) {
     return;
   }
-  const label = captureButton.querySelector("span");
-  if (label) label.textContent = "Abrir camera";
-  else captureButton.textContent = "Abrir camera";
+  captureButton.textContent = "Abrir camera";
   captureButton.setAttribute("aria-label", "Abrir camera");
   captureButton.disabled = false;
 }
@@ -136,10 +134,8 @@ function setCaptureButtonReadyState() {
   if (!captureButton) {
     return;
   }
-  const label = captureButton.querySelector("span");
-  if (label) label.textContent = "Capturar Etiqueta";
-  else captureButton.textContent = "Capturar Etiqueta";
-  captureButton.setAttribute("aria-label", "Capturar Etiqueta");
+  captureButton.textContent = "Capturar";
+  captureButton.setAttribute("aria-label", "Capturar etiqueta");
   captureButton.disabled = false;
 }
 
@@ -940,7 +936,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=159", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js");
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -948,18 +944,9 @@ async function registerServiceWorker() {
 
 async function startCamera() {
   document.querySelector(".camera-stage")?.classList.remove("has-capture");
+  cameraEl.style.display = "block";
   try {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      openNativeCameraCapture();
-      return;
-    }
     stopCamera();
-    cameraEl.style.display = "block";
-    cameraEl.autoplay = true;
-    cameraEl.setAttribute("playsinline", "true");
-    cameraEl.setAttribute("webkit-playsinline", "true");
-    cameraEl.muted = true;
-    cameraEl.controls = false;
     state.stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -971,22 +958,15 @@ async function startCamera() {
       audio: false,
     });
 
-    state.cameraOpen = true;
-    setCaptureButtonReadyState();
     cameraEl.srcObject = state.stream;
-    await waitForCameraVideoReady();
+    await cameraEl.play();
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
+    setCaptureButtonReadyState();
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
   } catch (error) {
-    stopCamera();
     cameraStatusEl.textContent = "Sem acesso";
     cameraStatusEl.className = "status-pill error";
-    if (["NotSupportedError", "SecurityError", "AbortError"].includes(error.name)) {
-      setStatus("Abrindo a camera nativa do celular...", "info");
-      openNativeCameraCapture();
-      return;
-    }
     setStatus(`Nao foi possivel abrir a camera: ${error.message}`, "error");
   }
 }
@@ -1002,56 +982,22 @@ function openNativeCameraCapture() {
 }
 
 async function handleCameraCaptureButton() {
-  if (state.cameraOpen && state.stream) {
-    const captureButton = document.querySelector("#capture-image");
-    if (captureButton) captureButton.disabled = true;
-    try {
-      await captureFromCamera();
-    } finally {
-      if (state.cameraOpen) setCaptureButtonReadyState();
-    }
+  if (state.stream) {
+    await captureFromCamera();
     return;
   }
 
   await startCamera();
 }
 
-function waitForCameraVideoReady() {
-  return new Promise((resolve, reject) => {
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("A camera nao ficou pronta a tempo."));
-    }, 8000);
-
-    const cleanup = () => {
-      window.clearTimeout(timeout);
-      cameraEl.removeEventListener("loadedmetadata", check);
-      cameraEl.removeEventListener("canplay", check);
-    };
-
-    const check = async () => {
-      if (cameraEl.videoWidth > 0 && cameraEl.videoHeight > 0) {
-        cleanup();
-        await cameraEl.play().catch(() => undefined);
-        resolve();
-      }
-    };
-
-    cameraEl.addEventListener("loadedmetadata", check);
-    cameraEl.addEventListener("canplay", check);
-    check();
-  });
-}
-
 function stopCamera() {
-  state.cameraOpen = false;
-  if (state.stream) {
-    state.stream.getTracks().forEach((track) => track.stop());
-    state.stream = null;
+  if (!state.stream) {
+    return;
   }
 
+  state.stream.getTracks().forEach((track) => track.stop());
+  state.stream = null;
   cameraEl.srcObject = null;
-  cameraEl.style.display = "none";
   if (cameraStatusEl) {
     cameraStatusEl.textContent = "Camera desligada";
     cameraStatusEl.className = "status-pill neutral";
@@ -1065,13 +1011,6 @@ async function captureFromCamera() {
     return;
   }
 
-  if (!cameraEl.videoWidth || !cameraEl.videoHeight) {
-    setStatus("A camera ainda esta carregando. Aguarde um instante e tente novamente.", "error");
-    return;
-  }
-
-  await cameraEl.play().catch(() => undefined);
-
   const crop = getGuideCropRect(cameraEl.videoWidth, cameraEl.videoHeight);
   canvasEl.width = crop.width;
   canvasEl.height = crop.height;
@@ -1080,11 +1019,6 @@ async function captureFromCamera() {
   context.drawImage(cameraEl, crop.x, crop.y, crop.width, crop.height, 0, 0, crop.width, crop.height);
 
   const blob = await new Promise((resolve) => canvasEl.toBlob(resolve, "image/jpeg", 0.98));
-  if (!blob) {
-    setStatus("Nao foi possivel gerar a imagem capturada. Tente novamente.", "error");
-    return;
-  }
-
   stopCamera();
   setImageBlob(blob);
   setStatus("Etiqueta capturada. Toque em Ler Etiqueta.", "success");
