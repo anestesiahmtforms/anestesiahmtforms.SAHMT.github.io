@@ -2589,7 +2589,7 @@ function buildMonthlyPdfLegacy(rows, month) {
   }
 
   const doc = new jsPdf({ orientation: "landscape", unit: "mm", format: "a4" });
-  const title = `ETIQUETAS SAHMT - RELATORIO MENSAL - ${formatMonth(month)}`;
+  const title = `ETIQUETAS SAHMT - RELATÓRIO MENSAL - ETIQUETAS - ${formatMonth(month)}`;
   const alertCount = rows.filter((row) => isAlertType(row.tipo)).length;
   const tableRows = rows.map((row, index) => [
     String(index + 1),
