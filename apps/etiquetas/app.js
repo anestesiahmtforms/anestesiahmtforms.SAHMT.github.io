@@ -964,7 +964,7 @@ async function startCamera() {
     state.cameraOpen = true;
     setCaptureButtonReadyState();
     cameraEl.srcObject = state.stream;
-    await cameraEl.play();
+    await cameraEl.play().catch(() => undefined);
     cameraStatusEl.textContent = "Camera ativa";
     cameraStatusEl.className = "status-pill";
     setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
