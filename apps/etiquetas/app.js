@@ -154,7 +154,10 @@ document.querySelectorAll("[data-return-home]").forEach((button) => {
   button.addEventListener("click", returnToAppHome);
 });
 window.addEventListener("popstate", handleBrowserBack);
-fields.tipo.addEventListener("change", syncConditionalEntryFields);
+fields.tipo.addEventListener("change", () => {
+  fields.tipo.value = normalizeTipoValue(fields.tipo.value);
+  syncConditionalEntryFields();
+});
 fields.valor.addEventListener("blur", () => {
   fields.valor.value = formatStoredCurrency(fields.valor.value);
   updateEntryValidationStates();
@@ -1207,7 +1210,7 @@ function applyDataToForm(data) {
   }
 
   if (data.tipo) {
-    fields.tipo.value = data.tipo;
+    fields.tipo.value = normalizeTipoValue(data.tipo);
   }
 
   if (data.credor) {
@@ -1330,18 +1333,19 @@ function movePanelToModalLayer(panel) {
 }
 
 function collectFormData() {
+  const tipo = normalizeTipoValue(fields.tipo.value);
   const isCaixa = fields.credor.value.trim() === CREDOR_CAIXA;
   return {
     data: fields.data.value,
     nomePaciente: fields.nomePaciente.value.trim(),
     cirurgia: fields.cirurgia.value.trim(),
     atendimento: fields.atendimento.value.trim(),
-    tipo: fields.tipo.value.trim(),
-    valor: shouldRequireValor(fields.tipo.value) ? formatStoredCurrency(fields.valor.value) : "",
+    tipo,
+    valor: shouldRequireValor(tipo) ? formatStoredCurrency(fields.valor.value) : "",
     convenio: fields.convenio.value.trim(),
     credor: fields.credor.value.trim(),
     plantonistas: isCaixa ? "" : getSelectedPlantonistasValue(),
-    consulta: isConsultaMode(),
+    consulta: tipo === CONSULTA_TYPE,
     observacoes: "",
     userEmail: state.auth?.email || "",
     userAgent: navigator.userAgent,
@@ -1605,6 +1609,7 @@ function confirmSubmissionEditable(payload, duplicateRows = []) {
             ${renderOption("Particular", "Particular", currentPayload.tipo)}
             ${renderOption("Complementação", "Complementação", currentPayload.tipo)}
             ${renderOption("Convênio", "Convênio", currentPayload.tipo)}
+            ${renderOption(CONSULTA_TYPE, CONSULTA_TYPE, currentPayload.tipo)}
           </select>
         </label>
         <label id="confirm-valor-field" ${shouldRequireValor(currentPayload.tipo) ? "" : "hidden"}>
@@ -1720,7 +1725,7 @@ function collectConfirmationPayload(basePayload) {
     nomePaciente: confirmSummaryEl.querySelector("#confirm-nomePaciente")?.value.trim() || "",
     cirurgia: cleanDigits(confirmSummaryEl.querySelector("#confirm-cirurgia")?.value || ""),
     atendimento: cleanDigits(confirmSummaryEl.querySelector("#confirm-atendimento")?.value || ""),
-    tipo: confirmSummaryEl.querySelector("#confirm-tipo")?.value.trim() || "",
+    tipo: normalizeTipoValue(confirmSummaryEl.querySelector("#confirm-tipo")?.value || ""),
     valor: shouldRequireValor(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "")
       ? formatStoredCurrency(confirmSummaryEl.querySelector("#confirm-valor")?.value || "")
       : "",
@@ -1901,7 +1906,7 @@ function applyConfirmationPayloadToForm(payload) {
   fields.nomePaciente.value = payload.nomePaciente || "";
   fields.cirurgia.value = payload.cirurgia || "";
   fields.atendimento.value = payload.atendimento || "";
-  fields.tipo.value = payload.tipo || "";
+  fields.tipo.value = normalizeTipoValue(payload.tipo || "");
   fields.valor.value = formatStoredCurrency(payload.valor);
   fields.convenio.value = payload.convenio || "";
   fields.credor.value = payload.credor || "";
@@ -2214,7 +2219,7 @@ function normalizeEditableRow(source) {
     return {
       rowNumber: source[0] || "", data: source[1] || "", nomePaciente: source[2] || "",
       convenio: source[3] || "", cirurgia: source[4] || "", atendimento: source[5] || "",
-      tipo: source[6] || "", credor: source[7] || "", plantonistas: source[8] || "",
+      tipo: normalizeTipoValue(source[6] || ""), credor: source[7] || "", plantonistas: source[8] || "",
       observacoes: source[9] || "", criadoEm: source[10] || "", criadoPor: source[11] || "",
       valor: source[16] || ""
     };
@@ -2227,7 +2232,7 @@ function normalizeEditableRow(source) {
     convenio: source.convenio || source.plano || "",
     cirurgia: source.cirurgia || "",
     atendimento: source.atendimento || source.numeroAtendimento || "",
-    tipo: source.tipo || source.tipoRegistro || "",
+    tipo: normalizeTipoValue(source.tipo || source.tipoRegistro || ""),
     credor: source.credor || "",
     plantonistas: source.plantonistas || source.plantonista || "",
     observacoes: source.observacoes || source.observacao || "",
@@ -2301,23 +2306,26 @@ function collectEditPayload() {
   const original = state.editingRow || {};
   const credor = editSummaryEl.querySelector("#edit-credor")?.value.trim() || "";
   const tipo = editSummaryEl.querySelector("#edit-tipo")?.value.trim() || "";
-  const mergedTipo = withEditingFallback(tipo, original.tipo);
-  const mergedCredor = withEditingFallback(credor, original.credor);
+  const mergedTipo = normalizeTipoValue(withEditingFallback(tipo, original.tipo));
+  const mergedCredor = mergedTipo === CONSULTA_TYPE
+    ? CREDOR_CAIXA
+    : withEditingFallback(credor, original.credor);
   return {
     rowNumber: original.rowNumber || "",
     data: withEditingFallback(editSummaryEl.querySelector("#edit-data")?.value || "", original.data),
     nomePaciente: withEditingFallback(editSummaryEl.querySelector("#edit-nomePaciente")?.value.trim() || "", original.nomePaciente),
-    cirurgia: withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-cirurgia")?.value || ""), cleanDigits(original.cirurgia || "")),
+    cirurgia: mergedTipo === CONSULTA_TYPE ? "" : withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-cirurgia")?.value || ""), cleanDigits(original.cirurgia || "")),
     atendimento: withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-atendimento")?.value || ""), cleanDigits(original.atendimento || "")),
     tipo: mergedTipo,
     valor: shouldRequireValor(mergedTipo)
       ? withEditingFallback(formatStoredCurrency(editSummaryEl.querySelector("#edit-valor")?.value || ""), formatStoredCurrency(original.valor))
       : "",
-    convenio: withEditingFallback(editSummaryEl.querySelector("#edit-convenio")?.value.trim() || "", original.convenio),
+    convenio: mergedTipo === CONSULTA_TYPE ? "" : withEditingFallback(editSummaryEl.querySelector("#edit-convenio")?.value.trim() || "", original.convenio),
     credor: mergedCredor,
     plantonistas: mergedCredor === CREDOR_CAIXA
       ? ""
       : withEditingFallback(editSummaryEl.querySelector("#edit-plantonistas")?.value.trim() || "", original.plantonistas),
+    consulta: mergedTipo === CONSULTA_TYPE,
     observacoes: editSummaryEl.querySelector("#edit-observacoes")?.value.trim() || "",
   };
 }
@@ -2326,7 +2334,14 @@ function bindEditConditionalFields() {
   const typeEl = editSummaryEl?.querySelector("#edit-tipo");
   const valueEl = editSummaryEl?.querySelector("#edit-valor");
   if (typeEl) {
-    typeEl.addEventListener("change", () => syncInlineConditionalFields(editSummaryEl, "edit"));
+    typeEl.addEventListener("change", () => {
+      typeEl.value = normalizeTipoValue(typeEl.value);
+      if (typeEl.value === CONSULTA_TYPE) {
+        const credorEl = editSummaryEl.querySelector("#edit-credor");
+        if (credorEl) credorEl.value = CREDOR_CAIXA;
+      }
+      syncInlineConditionalFields(editSummaryEl, "edit");
+    });
     syncInlineConditionalFields(editSummaryEl, "edit");
   }
   if (valueEl) {
@@ -2983,6 +2998,18 @@ function isAlertType(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   return normalized === "particular" || normalized === "complementacao";
+}
+
+function normalizeTipoValue(value) {
+  const text = String(value || "").trim();
+  const normalized = normalizeCompare(text);
+  if (normalized === "consulta pre-anestesica" || normalized === "consulta pre anestesica") {
+    return CONSULTA_TYPE;
+  }
+  if (normalized === "particular") return "Particular";
+  if (normalized === "complementacao") return "Complementação";
+  if (normalized === "convenio") return "Convênio";
+  return text;
 }
 
 function shouldRequireValor(value) {

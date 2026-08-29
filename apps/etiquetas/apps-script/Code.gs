@@ -107,6 +107,7 @@ function doPost(e) {
       return handleAiExtract_(payload);
     }
 
+    payload.tipo = normalizeTipoValue_(payload.tipo);
     ensureWorkbook_();
 
     if (action === "updateObservation") {
@@ -368,6 +369,11 @@ function normalizeConsultaType_(value) {
   return "";
 }
 
+function normalizeTipoValue_(value) {
+  const text = String(value || "").trim();
+  return normalizeConsultaType_(text) || text;
+}
+
 function ensureWorkbook_() {
   const spreadsheet = getSpreadsheet_();
   const registros = spreadsheet.getSheetByName(REGISTROS_SHEET) || spreadsheet.insertSheet(REGISTROS_SHEET);
@@ -518,6 +524,18 @@ function validatePayload_(payload) {
 }
 
 function validateUpdatePayload_(payload) {
+  if (normalizeTipoValue_(payload.tipo) === "Consulta Pré-anestésica") {
+    const consultaRequired = ["data", "nomePaciente", "atendimento", "credor"];
+    const consultaMissing = consultaRequired.filter((key) => !String(payload[key] || "").trim());
+    if (consultaMissing.length) {
+      throw new Error("Campos obrigatorios ausentes: " + consultaMissing.join(", "));
+    }
+    if (String(payload.credor || "").trim() !== "Caixa") {
+      throw new Error("Consultas devem usar o credor Caixa.");
+    }
+    return;
+  }
+
   const required = ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (payload.credor !== "Caixa") {
     required.push("plantonistas");
