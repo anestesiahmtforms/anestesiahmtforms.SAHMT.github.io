@@ -866,6 +866,13 @@ label[hidden] {
   gap: 8px;
 }
 
+/* Match the report area to the full-height Eventos report modal. */
+.summary-panel.modal-panel,
+.monthly-panel.modal-panel {
+  height: calc(100dvh - 12px);
+  max-height: calc(100dvh - 12px);
+}
+
 .layout:has(.form-panel.is-open) .main-return-dock,
 .layout:has(.summary-panel.is-open) .main-return-dock,
 .layout:has(.monthly-panel.is-open) .main-return-dock,

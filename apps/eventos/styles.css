@@ -2448,3 +2448,10 @@ button:hover,
   top: 10px;
   margin-bottom: -10px;
 }
+
+/* Use the same full-height report surface for daily and monthly reports. */
+.records-panel-sheet,
+.monthly-sheet {
+  height: min(calc(100dvh - 8px), 900px);
+  max-height: min(calc(100dvh - 8px), 900px);
+}
