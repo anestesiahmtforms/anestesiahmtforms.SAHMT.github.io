@@ -940,7 +940,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js");
+    await navigator.serviceWorker.register("./sw.js?v=20260830-2", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
