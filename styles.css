@@ -1577,3 +1577,12 @@ button:hover,
   }
 
 }
+
+/* Show which authenticated email is active without changing the existing label. */
+[data-auth-user]:not([hidden]) {
+  padding-left: 12px;
+  background-image: radial-gradient(circle, #22c55e 0 3px, transparent 3.5px);
+  background-position: 3px 50%;
+  background-repeat: no-repeat;
+  background-size: 8px 8px;
+}

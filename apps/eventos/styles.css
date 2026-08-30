@@ -2741,3 +2741,12 @@ button:hover,
 .premium-title-logo:focus-visible { transform: translateY(-3px) scale(1.025); filter: saturate(1.12) brightness(1.04); }
 .premium-title-logo:active { transform: translateY(2px) scale(0.975); }
 .premium-title-logo > img { position: relative; z-index: 1; filter: drop-shadow(0 9px 10px rgba(12, 43, 62, 0.28)); }
+
+/* Show which authenticated email is active without changing the report labels. */
+[data-auth-user]:not([hidden]) {
+  padding-left: 12px;
+  background-image: radial-gradient(circle, #22c55e 0 3px, transparent 3.5px);
+  background-position: 3px 50%;
+  background-repeat: no-repeat;
+  background-size: 8px 8px;
+}
