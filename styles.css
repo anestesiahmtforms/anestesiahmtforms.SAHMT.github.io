@@ -1588,6 +1588,19 @@ button:hover,
 }
 
 .hero-copy > [data-auth-user]:not([hidden]) {
-  padding-left: 18px;
-  background-position: 0 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 0;
+  background-image: none;
+}
+
+.hero-copy > [data-auth-user]:not([hidden])::before {
+  content: "";
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), 0 1px 4px rgba(21, 128, 61, 0.24);
 }
