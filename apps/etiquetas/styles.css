@@ -3546,9 +3546,14 @@ body::before {
 
 /* Show which authenticated email is active in the app and its reports. */
 [data-auth-user]:not([hidden]) {
-  padding-left: 12px;
-  background-image: radial-gradient(circle, #22c55e 0 3px, transparent 3.5px);
-  background-position: 3px 50%;
+  padding-left: 20px;
+  background-image: radial-gradient(circle, #22c55e 0 6px, transparent 7px);
+  background-position: 0 50%;
   background-repeat: no-repeat;
-  background-size: 8px 8px;
+  background-size: 16px 16px;
+}
+
+.hero-copy > [data-auth-user]:not([hidden]) {
+  padding-left: 18px;
+  background-position: 0 50%;
 }
