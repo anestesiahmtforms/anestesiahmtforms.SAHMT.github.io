@@ -86,6 +86,7 @@ body.modal-open {
 }
 
 .hero-side-icon {
+  position: relative;
   margin-left: auto;
   width: 112px;
   height: 112px;
@@ -106,6 +107,23 @@ body.modal-open {
   width: 98px;
   height: 98px;
   object-fit: contain;
+}
+
+.operational-logo-label {
+  position: absolute;
+  z-index: 2;
+  right: 7px;
+  bottom: 4px;
+  left: 7px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1762a1;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-align: center;
 }
 
 .hero-logo-wrap {
