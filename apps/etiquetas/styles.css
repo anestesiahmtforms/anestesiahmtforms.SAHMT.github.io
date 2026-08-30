@@ -3466,3 +3466,43 @@ body::before {
     font-size: 0.5rem;
   }
 }
+
+/* Mobile scanner fit: preserve the central guide and remove outer dead space. */
+@media (max-width: 680px) {
+  .scanner-panel {
+    flex: 0 0 auto;
+    gap: 4px;
+    padding: 7px;
+  }
+
+  .scanner-panel .camera-stage,
+  .scanner-panel video,
+  .scanner-panel .camera-stage.has-capture {
+    min-height: 150px;
+    height: 150px;
+    max-height: 150px;
+  }
+
+  .scanner-panel .guide-frame {
+    width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+    height: clamp(58px, 20vw, 72px);
+    min-height: 58px;
+    aspect-ratio: auto;
+  }
+
+  .scanner-panel .capture-shutter,
+  .scanner-panel #process-image,
+  .scanner-panel .scanner-action {
+    min-height: 38px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .scanner-panel .scanner-actions,
+  .scanner-panel #process-image,
+  .scanner-panel .scanner-secondary-actions,
+  .scanner-panel .hint {
+    flex: 0 0 auto;
+  }
+}
