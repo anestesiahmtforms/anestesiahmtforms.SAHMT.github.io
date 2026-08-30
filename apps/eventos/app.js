@@ -361,8 +361,8 @@
       const token = document.createElement("button");
       token.className = "sigla-token sigla-button";
       token.type = "button";
-      token.setAttribute("aria-label", `Mantenha pressionado por 3 segundos para marcar ou desmarcar a sigla ${sigla}.`);
-      token.title = "Mantenha pressionado por 3 segundos para destacar.";
+      token.setAttribute("aria-label", `Abrir lançamento de evento para a sigla ${sigla}.`);
+      token.title = "Abrir lançamento de evento.";
       bindSiglaInteractions(token, sigla, weekdayLabel, dateKey);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
@@ -389,12 +389,7 @@
         token.classList.add("sigla-token--vacation");
       }
 
-      if (isSiglaChecked(dateKey, sigla)) {
-        token.classList.add("sigla-token--checked");
-        token.setAttribute("aria-pressed", "true");
-      }
-
-      if (!isWholeSiglaOnVacation(sigla, vacationSiglas) && shouldHighlightEventSigla(dateKey, sigla)) {
+      if (shouldHighlightEventSigla(dateKey, sigla)) {
         token.classList.add("sigla-token--event");
       }
 
@@ -418,6 +413,9 @@
     supportButton.setAttribute("aria-disabled", canWriteEventData() ? "false" : "true");
     supportButton.setAttribute("aria-label", "Abrir lançamento de evento de Suporte.");
     supportButton.title = "Abrir lançamento de evento de Suporte.";
+    if (shouldHighlightEventSigla(dateKey, "SUPORTE")) {
+      supportButton.classList.add("sigla-token--event");
+    }
     supportButton.addEventListener("click", openSupportEventLaunch);
 
     const supportCounter = document.createElement("div");
@@ -430,48 +428,7 @@
   }
 
   function bindSiglaInteractions(token, sigla, weekdayLabel, dateKey) {
-    const holdDurationMs = 3000;
-    let holdTimer = null;
-    let holdCompleted = false;
-
-    const clearHold = () => {
-      if (holdTimer) {
-        clearTimeout(holdTimer);
-        holdTimer = null;
-      }
-      token.classList.remove("sigla-button--pressing");
-    };
-
-    token.addEventListener("pointerdown", (event) => {
-      if (event.button !== undefined && event.button !== 0) {
-        return;
-      }
-
-      holdCompleted = false;
-      token.setPointerCapture?.(event.pointerId);
-      token.classList.add("sigla-button--pressing");
-      holdTimer = window.setTimeout(async () => {
-        holdTimer = null;
-        holdCompleted = true;
-        token.classList.remove("sigla-button--pressing");
-        await toggleSiglaCheck(token, dateKey, sigla);
-      }, holdDurationMs);
-    });
-
-    token.addEventListener("pointerup", () => {
-      clearHold();
-    });
-
-    token.addEventListener("pointercancel", clearHold);
-    token.addEventListener("lostpointercapture", clearHold);
-    token.addEventListener("click", async () => {
-      if (holdCompleted) {
-        holdCompleted = false;
-        return;
-      }
-
-      await handleSiglaClick(sigla, weekdayLabel, dateKey);
-    });
+    token.addEventListener("click", () => handleSiglaClick(sigla, weekdayLabel, dateKey));
     token.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -1048,6 +1005,7 @@
     }
     const activeDate = String(elements.dateInput?.value || todayKey).trim() || todayKey;
     resetEventEntryForm(activeDate);
+    beginEventLaunch("SUPORTE", activeDate);
     supportShortcutLaunchActive = true;
     populateEventEntryOptionLists();
 
