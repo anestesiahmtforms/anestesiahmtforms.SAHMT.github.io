@@ -1090,12 +1090,14 @@ function getGuideCropRect(sourceWidth, sourceHeight) {
   const y = (guideTop + offsetY) / scale;
   const width = guideRect.width / scale;
   const height = guideRect.height / scale;
+  const safeX = Math.max(0, Math.min(sourceWidth - 1, Math.round(x)));
+  const safeY = Math.max(0, Math.min(sourceHeight - 1, Math.round(y)));
 
   return {
-    x: Math.max(0, Math.round(x)),
-    y: Math.max(0, Math.round(y)),
-    width: Math.min(sourceWidth, Math.round(width)),
-    height: Math.min(sourceHeight, Math.round(height)),
+    x: safeX,
+    y: safeY,
+    width: Math.max(1, Math.min(sourceWidth - safeX, Math.round(width))),
+    height: Math.max(1, Math.min(sourceHeight - safeY, Math.round(height))),
   };
 }
 
