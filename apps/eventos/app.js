@@ -88,7 +88,6 @@
     authPasswordInput: document.getElementById("authPasswordInput"),
     authStatus: document.getElementById("authStatus"),
     appFrame: document.getElementById("appFrame"),
-    openSupportLaunchButton: document.getElementById("openSupportLaunchButton"),
     dateInput: document.getElementById("dateInput"),
     eventDateInput: document.getElementById("eventDateInput"),
     eventEntryForm: document.getElementById("eventEntryForm"),
@@ -204,7 +203,6 @@
     });
   }
 
-  elements.openSupportLaunchButton?.addEventListener("click", openSupportEventLaunch);
 
   if (elements.closeEventEntryModal) {
     elements.closeEventEntryModal.addEventListener("click", closeEventEntryModal);
@@ -411,6 +409,27 @@
       item.appendChild(counter);
       elements.siglasGrid.appendChild(item);
     });
+
+    const supportItem = document.createElement("div");
+    supportItem.className = "sigla-item sigla-item--support";
+
+    const supportButton = document.createElement("button");
+    supportButton.className = "sigla-token sigla-button sigla-token--support";
+    supportButton.type = "button";
+    supportButton.textContent = "Suporte";
+    supportButton.disabled = !canWriteEventData();
+    supportButton.setAttribute("aria-disabled", canWriteEventData() ? "false" : "true");
+    supportButton.setAttribute("aria-label", "Abrir lançamento de evento de Suporte.");
+    supportButton.title = "Abrir lançamento de evento de Suporte.";
+    supportButton.addEventListener("click", openSupportEventLaunch);
+
+    const supportCounter = document.createElement("div");
+    supportCounter.className = "sigla-index";
+    supportCounter.textContent = String(siglas.length + 1);
+
+    supportItem.appendChild(supportButton);
+    supportItem.appendChild(supportCounter);
+    elements.siglasGrid.appendChild(supportItem);
   }
 
   function bindSiglaInteractions(token, sigla, weekdayLabel, dateKey) {
@@ -637,7 +656,7 @@
 
   function applyWriteAccessUi() {
     const canWrite = canWriteEventData();
-    [elements.openSupportLaunchButton, elements.openEventEntryModal].forEach((button) => {
+    [elements.openEventEntryModal, elements.siglasGrid?.querySelector(".sigla-token--support")].forEach((button) => {
       if (!button) {
         return;
       }

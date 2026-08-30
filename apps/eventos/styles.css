@@ -1352,6 +1352,21 @@ button:hover,
   content: none;
 }
 
+.sigla-token--support {
+  background: linear-gradient(180deg, #b9e8ff 0%, #83c9f3 54%, #5b9fe0 100%);
+  border-color: rgba(70, 145, 211, 0.5);
+  color: #0d3d68;
+  font-size: 0.62rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.82),
+    0 10px 20px rgba(71, 137, 194, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.sigla-token--support:hover {
+  background: linear-gradient(180deg, #c8eeff 0%, #96d5f8 54%, #6ba9e7 100%);
+}
+
 .sigla-token--vacation {
   color: #17833c !important;
   background:
