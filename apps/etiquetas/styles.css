@@ -104,7 +104,7 @@ body::before {
 .topbar {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(118px, auto) minmax(0, 1fr) minmax(68px, auto);
+  grid-template-columns: minmax(118px, auto) minmax(0, 1fr) minmax(118px, auto);
   align-items: center;
   justify-items: stretch;
   gap: 4px 8px;
@@ -130,7 +130,7 @@ body::before {
   grid-column: 3;
   grid-row: 1;
   width: 100%;
-  min-width: min(68px, 16vw);
+  min-width: 118px;
   justify-content: flex-end;
   gap: 5px;
   position: relative;
@@ -139,10 +139,10 @@ body::before {
 }
 
 .topbar-brand-icon {
-  width: 78px;
-  height: 78px;
+  width: 118px;
+  height: 118px;
   object-fit: contain;
-  border-radius: 16px;
+  border-radius: 24px;
   filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.16));
 }
 
@@ -2595,7 +2595,7 @@ textarea {
 
   .topbar {
     display: grid;
-    grid-template-columns: minmax(102px, auto) minmax(0, 1fr) minmax(64px, auto);
+    grid-template-columns: minmax(102px, auto) minmax(0, 1fr) minmax(102px, auto);
     justify-items: stretch;
     gap: 3px 6px;
     padding: 18px 12px;
@@ -2605,14 +2605,14 @@ textarea {
     grid-column: 3;
     grid-row: 1;
     width: 100%;
-    min-width: min(64px, 16vw);
+    min-width: 102px;
     justify-content: flex-end;
   }
 
   .topbar-brand-icon {
-    width: 64px;
-    height: 62px;
-    border-radius: 13px;
+    width: 102px;
+    height: 102px;
+    border-radius: 22px;
   }
 
   .home-logo-link {
