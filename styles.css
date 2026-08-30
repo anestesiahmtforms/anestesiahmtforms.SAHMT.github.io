@@ -14,6 +14,19 @@
   --shadow: 0 18px 40px rgba(8, 18, 31, 0.18);
 }
 
+/* Expand calendar controls into the free schedule space for easier tapping. */
+.schedule-card .date-field input,
+.schedule-card .soft-button,
+.schedule-card .primary-button {
+  min-height: 58px;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.schedule-card .quick-actions {
+  gap: 8px;
+}
+
 /* Final title-logo treatment: a visible iPhone-style 3D button. */
 .premium-title-logo {
   position: relative;
