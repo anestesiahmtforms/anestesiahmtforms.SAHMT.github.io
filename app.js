@@ -228,7 +228,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260830-2", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260830-4", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -366,6 +366,24 @@
       item.appendChild(counter);
       elements.siglasGrid.appendChild(item);
     });
+
+    const offlineItem = document.createElement("div");
+    offlineItem.className = "sigla-item";
+
+    const offlineLink = document.createElement("a");
+    offlineLink.className = "sigla-token sigla-button offline-sigla";
+    offlineLink.href = "./escala-ferias-imagens.html";
+    offlineLink.textContent = "OFF LINE";
+    offlineLink.setAttribute("aria-label", "Abrir escala e ferias em modo off line");
+    offlineLink.title = "Abrir escala e ferias sem conexão";
+
+    const offlineCounter = document.createElement("div");
+    offlineCounter.className = "sigla-index";
+    offlineCounter.textContent = String(siglas.length + 1);
+
+    offlineItem.appendChild(offlineLink);
+    offlineItem.appendChild(offlineCounter);
+    elements.siglasGrid.appendChild(offlineItem);
   }
 
   function bindSiglaInteractions(token, sigla, dateKey) {
