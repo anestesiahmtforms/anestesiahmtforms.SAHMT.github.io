@@ -3510,3 +3510,36 @@ body::before {
     margin-top: -4px;
   }
 }
+
+/* Lift the lower navigation group so the full footer remains visible. */
+@media (max-width: 680px) {
+  .quick-actions {
+    gap: 4px;
+    margin-top: -8px;
+  }
+
+  .quick-action-card {
+    padding: 3px;
+  }
+
+  .home-action-button {
+    min-height: 36px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .module-link-strip {
+    min-height: 90px;
+    margin-top: -4px;
+    margin-bottom: 2px;
+    padding: 4px;
+  }
+
+  .module-link-card {
+    min-height: 80px;
+  }
+
+  .module-link-card__image {
+    height: 58px;
+  }
+}
