@@ -38,6 +38,10 @@
 .schedule-card .date-field input {
   width: calc(100% - 4px);
   justify-self: center;
+  box-sizing: border-box;
+  border: 2px solid rgba(23, 98, 161, 0.56) !important;
+  border-radius: 12px;
+  outline: 1px solid rgba(255, 255, 255, 0.72);
 }
 
 .schedule-card .date-field input:focus,
