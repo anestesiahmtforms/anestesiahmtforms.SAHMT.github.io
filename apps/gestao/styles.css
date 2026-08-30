@@ -158,7 +158,8 @@ body.folder-open {
   z-index: 1;
   display: grid;
   place-items: center;
-  min-height: 84px;
+  height: 118px;
+  min-height: 118px;
   padding: 7px 10px 36px;
   border-radius: 22px;
   background:
@@ -175,7 +176,9 @@ body.folder-open {
 .hero__logo-image {
   position: relative;
   z-index: 1;
-  width: min(100%, 102px);
+  width: min(100%, 82px);
+  max-height: 74px;
+  object-fit: contain;
   height: auto;
   filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.18));
 }
@@ -628,12 +631,14 @@ body.folder-open {
   }
 
   .hero__logo-lockup {
-    min-height: 84px;
+    height: 102px;
+    min-height: 102px;
     padding: 6px 8px 34px;
   }
 
   .hero__logo-image {
-    width: min(100%, 102px);
+    width: min(100%, 72px);
+    max-height: 62px;
   }
 
   .hero__logo-ribbon {
