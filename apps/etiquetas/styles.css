@@ -2994,12 +2994,17 @@ body::before {
 
   .scanner-panel .camera-stage,
   .scanner-panel video {
-    min-height: clamp(215px, 32dvh, 250px);
-    max-height: 250px;
+    min-height: clamp(200px, 30dvh, 230px);
+    max-height: 230px;
   }
 
   .scanner-panel .camera-stage.has-capture {
-    height: clamp(215px, 32dvh, 250px);
+    height: clamp(200px, 30dvh, 230px);
+  }
+
+  .scanner-panel .guide-frame {
+    min-height: 140px;
+    aspect-ratio: 2.55 / 1;
   }
 
   .scanner-panel .preview-wrap,
@@ -3036,9 +3041,9 @@ body::before {
   }
 
   .home-action-button {
-    min-height: 34px;
-    padding: 5px 8px;
-    font-size: 0.68rem;
+    min-height: 40px;
+    padding: 6px 8px;
+    font-size: 0.72rem;
     line-height: 1.05;
   }
 
