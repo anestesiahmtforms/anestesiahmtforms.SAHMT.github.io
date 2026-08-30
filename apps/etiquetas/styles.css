@@ -3130,7 +3130,26 @@ body::before {
 /* Final mobile guard: preserve scanner height without moving HOME over the footer. */
 @media (max-width: 680px) {
   .scanner-panel {
+    flex: 0 0 auto;
     gap: 6px;
+  }
+
+  .scanner-panel .camera-stage {
+    flex: 0 0 clamp(200px, 30dvh, 230px);
+    height: clamp(200px, 30dvh, 230px);
+  }
+
+  .scanner-panel .scanner-actions,
+  .scanner-panel #process-image,
+  .scanner-panel .scanner-secondary-actions,
+  .scanner-panel .hint {
+    flex: 0 0 auto;
+  }
+
+  .scanner-panel .capture-shutter,
+  .scanner-panel #process-image,
+  .scanner-panel .scanner-action {
+    min-height: 42px;
   }
 
   .scanner-panel .camera-stage,
