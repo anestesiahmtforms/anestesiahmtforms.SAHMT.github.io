@@ -191,12 +191,14 @@ body.modal-open {
 }
 
 .search-banner .card-header {
-  display: grid;
-  justify-items: center;
+  display: block;
+  position: relative;
+  width: 100%;
   text-align: center;
 }
 
 .search-banner .card-title {
+  width: 100%;
   text-align: center;
 }
 
