@@ -3505,4 +3505,8 @@ body::before {
   .scanner-panel .hint {
     flex: 0 0 auto;
   }
+
+  .quick-actions {
+    margin-top: -4px;
+  }
 }
