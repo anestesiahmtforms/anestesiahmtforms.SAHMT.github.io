@@ -174,7 +174,7 @@ body.modal-open {
 
 .hero-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   min-height: 0;
@@ -2302,7 +2302,7 @@ button:hover,
   }
 
   .hero-card {
-    grid-template-columns: 102px minmax(0, 1fr) 94px;
+    grid-template-columns: 102px minmax(0, 1fr);
     gap: 10px;
     padding: 18px 12px;
   }

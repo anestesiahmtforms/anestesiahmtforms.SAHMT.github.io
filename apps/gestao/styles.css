@@ -131,7 +131,7 @@ body.folder-open {
   overflow: hidden;
   border-radius: 28px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   padding: 18px 16px;
@@ -231,6 +231,7 @@ body.folder-open {
 }
 
 .hero-side-icon {
+  order: -1;
   width: 112px;
   height: 112px;
   border-radius: 24px;
@@ -929,7 +930,7 @@ body {
 
 @media (max-width: 480px) {
   .hero-card {
-    grid-template-columns: 102px minmax(0, 1fr) 94px;
+    grid-template-columns: 102px minmax(0, 1fr);
     gap: 10px;
     padding: 18px 12px;
   }
