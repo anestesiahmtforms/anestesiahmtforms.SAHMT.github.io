@@ -1,10 +1,13 @@
-const CACHE_NAME = "etiqueta-sahmt-ia-v174";
+const CACHE_NAME = "etiqueta-sahmt-ia-v175";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "../../sahmt_option1.png",
+  "../../gestao_operacional.png",
+  "../gestao/assets/selo-qga-accredited-qmentum-diamond.png"
 ];
 
 self.addEventListener("install", (event) => {
