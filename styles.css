@@ -695,6 +695,55 @@ button:hover,
     0 22px 40px rgba(7, 72, 93, 0.42);
 }
 
+.module-link-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  min-height: 122px;
+  margin: 8px 0;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 14px 28px rgba(8, 18, 31, 0.12);
+}
+
+.module-link-card {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  min-width: 0;
+  min-height: 106px;
+  padding: 4px 3px 7px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1762a1;
+  text-decoration: none;
+  transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+}
+
+.module-link-card:hover,
+.module-link-card:focus-visible {
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(23, 98, 161, 0.16);
+}
+
+.module-link-card__image {
+  display: block;
+  width: min(100%, 92px);
+  height: 82px;
+  object-fit: contain;
+}
+
+.module-link-card span {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+}
+
 .footer-banner {
   padding: 12px 10px;
   text-align: center;
@@ -1245,6 +1294,29 @@ button:hover,
 
   .quick-actions {
     gap: 5px;
+  }
+
+  .module-link-strip {
+    gap: 5px;
+    min-height: 100px;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 18px;
+  }
+
+  .module-link-card {
+    min-height: 88px;
+    padding: 3px 2px 6px;
+    border-radius: 14px;
+  }
+
+  .module-link-card__image {
+    width: min(100%, 70px);
+    height: 66px;
+  }
+
+  .module-link-card span {
+    font-size: 0.54rem;
   }
 
   .soft-button,

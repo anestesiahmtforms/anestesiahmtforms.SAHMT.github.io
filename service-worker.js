@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v81";
+const CACHE_NAME = "sahmt-pwa-v82";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -57,6 +57,7 @@ const APP_SHELL = [
   "./apps/gestao/assets/icon-192.svg",
   "./apps/gestao/assets/icon-512.svg",
   "./apps/gestao/assets/sahmt-logo.png",
+  "./apps/gestao/assets/selo-qga-accredited-qmentum-diamond.png",
   "./eventos/index.html",
   "./eventos/styles.css",
   "./eventos/app.js",
