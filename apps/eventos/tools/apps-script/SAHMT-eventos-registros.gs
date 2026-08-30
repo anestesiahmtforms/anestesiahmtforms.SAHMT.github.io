@@ -7,6 +7,7 @@ const EVENTOS_SPREADSHEET_ID = '1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg';
 const EVENTOS_REGISTROS_SHEET = 'Registros';
 const EVENTOS_HIGHLIGHTS_SPREADSHEET_ID = '11ayJbQFmFPzLegFZHL8kPKCvudpPo60O4NyR3i7aofA';
 const EVENTOS_HIGHLIGHTS_SHEET = 'DESTAQUES APP';
+const EVENTOS_AUTH_VALIDATION_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzdtxNDDOwGyZ44oMbx4LPktnQvdKemF0c2kdbpD63rmzAsF-tiUDOtheBAgej1SWaH/exec';
 const EVENTOS_WRITE_USERS = new Set([
   'wx2064@gmail.com',
   'marcio.henrique82@gmail.com'
@@ -32,11 +33,15 @@ function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
   const action = String(params.action || 'get').toLowerCase();
 
-  if (action === 'set' || action === 'toggle' || params.sheetName === EVENTOS_HIGHLIGHTS_SHEET) {
+  if (action === 'set' || action === 'toggle') {
+    return jsonResponse_({
+      ok: false,
+      message: 'Alteracoes de siglas devem ser enviadas por POST com a sessao autenticada.'
+    });
+  }
+
+  if (params.sheetName === EVENTOS_HIGHLIGHTS_SHEET) {
     const sheet = getHighlightsSheet_();
-    if (action === 'set' || action === 'toggle') {
-      setHighlight_(sheet, params);
-    }
     return jsonResponse_({
       ok: true,
       highlights: readHighlights_(sheet)
@@ -66,11 +71,11 @@ function getHighlightsSheet_() {
   return sheet;
 }
 
-function setHighlight_(sheet, params) {
+function setHighlight_(sheet, params, authenticatedEmail) {
   const dateKey = normalizeHighlightDateKey_(params.date);
   const sigla = String(params.sigla || '').trim().toUpperCase();
   const marked = String(params.marked).toLowerCase() === 'true';
-  const updatedBy = String(params.updatedBy || '').trim().toLowerCase();
+  const updatedBy = String(authenticatedEmail || params.updatedBy || '').trim().toLowerCase();
 
   if (!dateKey || !sigla) {
     throw new Error('Data e sigla sao obrigatorias.');
@@ -170,8 +175,23 @@ function normalizeHighlightDateKey_(value) {
 
 function doPost(e) {
   try {
-    const payload = parsePayload_(e);
-    assertWriteAccess_(payload.userEmail || payload.updatedBy);
+    const rawPayload = parseJsonPayload_(e);
+    if (['set', 'toggle'].includes(String(rawPayload.action || '').toLowerCase())) {
+      const authenticatedUser = validateAuthenticatedUser_(rawPayload);
+      assertWriteAccess_(authenticatedUser.email);
+      const sheet = getHighlightsSheet_();
+      setHighlight_(sheet, rawPayload, authenticatedUser.email);
+      return jsonResponse_({
+        ok: true,
+        highlights: readHighlights_(sheet)
+      });
+    }
+
+    const authenticatedUser = validateAuthenticatedUser_(rawPayload);
+    const payload = parsePayload_(rawPayload);
+    payload.userEmail = authenticatedUser.email;
+    payload.updatedBy = authenticatedUser.email;
+    assertWriteAccess_(authenticatedUser.email);
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
     var result;
@@ -201,9 +221,12 @@ function doPost(e) {
   }
 }
 
-function parsePayload_(e) {
+function parseJsonPayload_(e) {
   const raw = e && e.postData && e.postData.contents ? e.postData.contents : '{}';
-  const payload = JSON.parse(raw);
+  return JSON.parse(raw);
+}
+
+function parsePayload_(payload) {
 
   const normalized = {
     operation: pickFirstValue_(payload, ['operation']),
@@ -260,6 +283,51 @@ function parsePayload_(e) {
 
 function shouldUpdateRow_(payload) {
   return String(payload.operation || '').toLowerCase() === 'update' && Number(payload.rowIndex) > 1;
+}
+
+function validateAuthenticatedUser_(payload) {
+  const authToken = String(payload && payload.authToken || '').trim();
+  const deviceToken = String(payload && payload.deviceToken || '').trim();
+  const userEmail = String(payload && payload.userEmail || '').trim().toLowerCase();
+
+  if (!authToken && !deviceToken) {
+    throw new Error('Sessao autenticada ausente ou expirada. Entre novamente no app.');
+  }
+
+  const response = UrlFetchApp.fetch(EVENTOS_AUTH_VALIDATION_ENDPOINT, {
+    method: 'post',
+    contentType: 'text/plain;charset=utf-8',
+    payload: JSON.stringify({
+      action: 'auth',
+      authToken: authToken,
+      deviceToken: deviceToken,
+      userEmail: userEmail,
+      moduleId: 'EVENTOS',
+      pageId: 'eventos',
+      path: '/apps/eventos/',
+      embedded: false
+    }),
+    muteHttpExceptions: true
+  });
+
+  const status = response.getResponseCode();
+  const text = response.getContentText() || '{}';
+  let result;
+  try {
+    result = JSON.parse(text);
+  } catch (error) {
+    result = null;
+  }
+
+  const email = String(result && result.email || '').trim().toLowerCase();
+  if (status < 200 || status >= 300 || !result || result.ok !== true || !email) {
+    throw new Error((result && result.message) || 'Sessao autenticada invalida ou expirada. Entre novamente no app.');
+  }
+
+  return {
+    email: email,
+    name: String(result.name || '').trim()
+  };
 }
 
 function assertWriteAccess_(email) {

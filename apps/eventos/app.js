@@ -793,21 +793,29 @@
   }
 
   async function pushSharedSiglaCheck(dateKey, sigla, marked) {
-    const url = new URL(sharedStateEndpoint);
     const authUser = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
-    url.searchParams.set("action", "set");
-    url.searchParams.set("spreadsheetId", scheduleSpreadsheetId);
-    url.searchParams.set("sheetName", "DESTAQUES APP");
-    url.searchParams.set("date", dateKey);
-    url.searchParams.set("sigla", sigla);
-    url.searchParams.set("marked", marked ? "true" : "false");
-    url.searchParams.set("updatedBy", authUser || clientId);
-    url.searchParams.set("source", "PWA");
+    const requestPayload = {
+      action: "set",
+      spreadsheetId: scheduleSpreadsheetId,
+      sheetName: "DESTAQUES APP",
+      date: dateKey,
+      sigla,
+      marked: Boolean(marked),
+      updatedBy: authUser || clientId,
+      source: "PWA"
+    };
+    const requestBody = window.SAHMT_AUTH?.withPayload
+      ? window.SAHMT_AUTH.withPayload(requestPayload)
+      : requestPayload;
 
-    const response = await fetch(url.toString(), {
-      method: "GET",
+    const response = await fetch(sharedStateEndpoint, {
+      method: "POST",
       mode: "cors",
-      cache: "no-store"
+      cache: "no-store",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
