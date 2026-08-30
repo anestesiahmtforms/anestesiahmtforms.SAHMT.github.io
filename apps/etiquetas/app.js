@@ -6,7 +6,7 @@ const CONFIG = {
   googleClientId: "908976987584-o59p0obmvq013lg3t9726itf06e15v2c.apps.googleusercontent.com",
   trustedDeviceDays: 36500,
   guideWidthRatio: 0.94,
-  guideAspectRatio: 3.35,
+  guideAspectRatio: 4,
   defaultScriptUrl: "https://script.google.com/macros/s/AKfycbzdxPAGKmP4yEru3WrAc5ul2I5tLu07J35Zupzf4ZeCtC1Y090F3IyVFlIxhW1erHHP3A/exec",
   maxSearchResults: 60,
 };

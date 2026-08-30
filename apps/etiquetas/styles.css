@@ -1298,9 +1298,9 @@ video {
   width: calc(100% - 24px);
   max-width: calc(100% - 24px);
   margin-inline: auto;
-  height: min(140px, calc((100vw - 24px) / 2.55));
-  min-height: 104px;
-  aspect-ratio: auto;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 1;
   border: 2px solid rgba(255, 255, 255, 0.98);
   border-radius: var(--radius);
   box-shadow:
@@ -2674,9 +2674,9 @@ textarea {
   .guide-frame {
     width: calc(100% - 24px);
     max-width: calc(100% - 24px);
-    height: min(140px, calc((100vw - 24px) / 2.55));
-    min-height: 104px;
-    aspect-ratio: auto;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 1;
   }
 
   .scanner-panel #preview.has-image {
@@ -3045,9 +3045,9 @@ body::before {
     min-width: 0;
     width: calc(100% - 24px);
     max-width: calc(100% - 24px);
-    height: min(140px, calc((100vw - 24px) / 2.55));
-    min-height: 104px;
-    aspect-ratio: auto;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 1;
   }
 
   .scanner-panel .preview-wrap,
