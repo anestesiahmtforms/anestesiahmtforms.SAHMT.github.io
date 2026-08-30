@@ -1083,12 +1083,13 @@ body.modal-open {
 }
 
 .search-banner .card-header {
-  justify-content: center;
-  align-items: center;
+  display: block;
+  width: 100%;
   text-align: center;
 }
 
-.search-banner .range-label {
+.search-banner .card-title {
+  width: 100%;
   text-align: center;
 }
 
@@ -1178,6 +1179,11 @@ body.modal-open {
   background: var(--mist);
   font: inherit;
   color: var(--ink);
+  text-align: center;
+}
+
+.date-field input::-webkit-datetime-edit {
+  text-align: center;
 }
 
 .quick-actions {
@@ -1205,10 +1211,16 @@ button:hover,
 .primary-button {
   flex: 1 1 0;
   min-width: 0;
-  padding: 8px 6px;
-  font-size: 0.59rem;
+  min-height: 48px;
+  padding: 10px 8px;
+  font-size: 0.66rem;
   line-height: 1.05;
   text-align: center;
+}
+
+#todayButton {
+  white-space: pre-line;
+  line-height: 1.05;
 }
 
 .soft-button {
@@ -2252,8 +2264,9 @@ button:hover,
 
   .soft-button,
   .primary-button {
-    padding: 7px 5px;
-    font-size: 0.56rem;
+    min-height: 48px;
+    padding: 10px 5px;
+    font-size: 0.62rem;
   }
 
   .events-sheet {

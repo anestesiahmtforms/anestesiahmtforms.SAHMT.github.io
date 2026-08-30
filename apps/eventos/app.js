@@ -138,12 +138,6 @@
     monthlyRecordsSummary: document.getElementById("monthlyRecordsSummary"),
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
-    rangeLabel: document.getElementById("rangeLabel"),
-    outOfRangeNotice: document.getElementById("outOfRangeNotice"),
-    scheduleHeading: document.getElementById("scheduleHeading"),
-    formattedDate: document.getElementById("formattedDate"),
-    todayBadge: document.getElementById("todayBadge"),
-    weekdayBadge: document.getElementById("weekdayBadge"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid"),
     vacationCard: document.getElementById("vacationCard")
@@ -151,10 +145,6 @@
   let currentAccessLabel = "";
 
   await ensureSharedAuthorizedAccess();
-
-  if (elements.formattedDate) {
-    elements.formattedDate.textContent = "Carregando escala...";
-  }
 
   data = loadSyncCache(scheduleSyncStorageKey) || fallbackData;
 
@@ -325,7 +315,6 @@
     data = scheduleData;
     byDate = new Map(data.days.map((day) => [day.date, day]));
     orderedDates = data.days.map((day) => day.date).sort();
-    elements.rangeLabel.textContent = `${formatShort(orderedDates[0])} - ${formatShort(orderedDates[orderedDates.length - 1])}`;
     elements.dateInput.min = orderedDates[0];
     elements.dateInput.max = orderedDates[orderedDates.length - 1];
   }
@@ -348,23 +337,15 @@
   function render(dateKey) {
     const activeDate = syncDailyDateInputs(dateKey);
     const day = byDate.get(activeDate);
-    const isToday = activeDate === todayKey;
-
-    elements.scheduleHeading.textContent = isToday ? "Data atual" : "Dia selecionado";
-    toggle(elements.todayBadge, isToday);
-    toggle(elements.outOfRangeNotice, !day);
+    elements.todayButton.textContent = `HOJE\n${(day?.weekdayLabel || getWeekdayLabel(activeDate)).toUpperCase()}`;
 
     if (!day) {
-      elements.formattedDate.textContent = formatLong(activeDate);
-      elements.weekdayBadge.textContent = "";
       elements.emptyState.classList.remove("hidden");
       elements.siglasGrid.innerHTML = "";
       renderVacationLabel();
       return;
     }
 
-    elements.formattedDate.textContent = formatLong(day.date);
-    elements.weekdayBadge.textContent = day.weekdayLabel;
     elements.emptyState.classList.add("hidden");
     renderSiglas(day.siglas, day.weekdayLabel, day.date);
     renderVacationLabel();
@@ -3521,6 +3502,12 @@
       year: "numeric"
     }).format(new Date(`${dateKey}T12:00:00`));
 
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function getWeekdayLabel(dateKey) {
+    const value = new Intl.DateTimeFormat("pt-BR", { weekday: "long" })
+      .format(new Date(`${dateKey}T12:00:00`));
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
