@@ -3038,7 +3038,7 @@ function shouldRequireValor(value) {
 }
 
 function shouldRequireConvenio(value) {
-  return false;
+  return normalizeTipoValue(value) !== CONSULTA_TYPE;
 }
 
 function formatCurrencyInput(value) {
