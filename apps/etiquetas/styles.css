@@ -1286,8 +1286,9 @@ video {
 .guide-frame {
   position: relative;
   box-sizing: border-box;
-  width: calc(100% - 12px);
+  width: 94%;
   max-width: 100%;
+  margin-inline: auto;
   min-height: 114px;
   aspect-ratio: 3.05 / 1;
   border: 2px solid rgba(255, 255, 255, 0.98);
@@ -2655,7 +2656,7 @@ textarea {
   }
 
   .guide-frame {
-    width: calc(100% - 12px);
+    width: 94%;
     min-height: 104px;
   }
 
@@ -3022,6 +3023,7 @@ body::before {
   }
 
   .scanner-panel .guide-frame {
+    width: 94%;
     min-height: 140px;
     aspect-ratio: 2.55 / 1;
   }
