@@ -1,10 +1,11 @@
-const CACHE_NAME = "etiqueta-sahmt-ia-v170";
+const CACHE_NAME = "etiqueta-sahmt-ia-v171";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "../../sahmt-monetario.png"
 ];
 
 self.addEventListener("install", (event) => {

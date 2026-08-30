@@ -138,6 +138,14 @@ body::before {
   margin: 0;
 }
 
+.topbar-brand-icon {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  border-radius: 16px;
+  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.16));
+}
+
 .home-logo-link {
   position: relative;
   z-index: 1;
@@ -2599,6 +2607,12 @@ textarea {
     width: 100%;
     min-width: min(64px, 16vw);
     justify-content: flex-end;
+  }
+
+  .topbar-brand-icon {
+    width: 64px;
+    height: 62px;
+    border-radius: 13px;
   }
 
   .home-logo-link {
