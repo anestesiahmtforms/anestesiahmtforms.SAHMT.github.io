@@ -104,14 +104,14 @@ body::before {
 .topbar {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(68px, auto) minmax(0, 1fr) minmax(68px, auto);
+  grid-template-columns: minmax(118px, auto) minmax(0, 1fr) minmax(68px, auto);
   align-items: center;
   justify-items: stretch;
   gap: 4px 8px;
   overflow: hidden;
   margin-bottom: 5px;
-  min-height: 84px;
-  padding: 8px 10px;
+  min-height: 0;
+  padding: 18px 16px;
   border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: var(--radius-lg);
   background:
@@ -150,8 +150,8 @@ body::before {
 .home-logo-link {
   position: relative;
   z-index: 1;
-  width: min(68px, 16vw);
-  height: min(68px, 16vw);
+  width: 118px;
+  height: 118px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -2574,10 +2574,10 @@ textarea {
 
   .topbar {
     display: grid;
-    grid-template-columns: minmax(64px, auto) minmax(0, 1fr) minmax(64px, auto);
+    grid-template-columns: minmax(102px, auto) minmax(0, 1fr) minmax(64px, auto);
     justify-items: stretch;
     gap: 3px 6px;
-    padding: 4px 6px;
+    padding: 18px 12px;
   }
 
   .topbar-status {
@@ -2589,8 +2589,8 @@ textarea {
   }
 
   .home-logo-link {
-    width: min(64px, 16vw);
-    height: min(64px, 16vw);
+    width: 102px;
+    height: 102px;
   }
 
   .hero-copy {
