@@ -257,6 +257,11 @@ body.modal-open {
   background: var(--mist);
   font: inherit;
   color: var(--ink);
+  text-align: center;
+}
+
+.date-field input::-webkit-datetime-edit {
+  text-align: center;
 }
 
 .quick-actions {

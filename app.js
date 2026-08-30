@@ -280,7 +280,7 @@
   function render(dateKey) {
     elements.dateInput.value = dateKey;
     const day = byDate.get(dateKey);
-    elements.todayButton.textContent = `HOJE\n${getWeekdayLabel(todayKey).toUpperCase()}`;
+    elements.todayButton.textContent = `HOJE\n${(day?.weekdayLabel || getWeekdayLabel(dateKey)).toUpperCase()}`;
 
     if (!day) {
       elements.emptyState.classList.remove("hidden");
