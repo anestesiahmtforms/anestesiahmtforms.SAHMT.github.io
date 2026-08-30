@@ -196,6 +196,10 @@ body.modal-open {
   text-align: center;
 }
 
+.search-banner .card-title {
+  text-align: center;
+}
+
 .card-title,
 .eyebrow,
 .sub-banner-title {
@@ -255,15 +259,6 @@ body.modal-open {
   color: var(--ink);
 }
 
-.calendar-date-label {
-  display: block;
-  min-height: 1.2em;
-  color: var(--ink);
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-align: center;
-}
-
 .quick-actions {
   flex-wrap: nowrap;
   align-items: stretch;
@@ -294,6 +289,11 @@ button:hover,
   font-size: 0.66rem;
   line-height: 1.05;
   text-align: center;
+}
+
+#todayButton {
+  white-space: pre-line;
+  line-height: 1.05;
 }
 
 .soft-button {

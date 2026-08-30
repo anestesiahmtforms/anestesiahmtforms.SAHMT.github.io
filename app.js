@@ -69,9 +69,6 @@
     installButton: document.getElementById("installButton"),
     pageShell: document.querySelector(".page-shell"),
     appFrame: document.querySelector(".app-frame"),
-    rangeLabel: document.getElementById("rangeLabel"),
-    calendarDateLabel: document.getElementById("calendarDateLabel"),
-    weekdayBadge: document.getElementById("weekdayBadge"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid"),
     vacationCard: document.getElementById("vacationCard"),
@@ -262,7 +259,6 @@
     data = scheduleData;
     byDate = new Map(data.days.map((day) => [day.date, day]));
     orderedDates = data.days.map((day) => day.date).sort();
-    elements.rangeLabel.textContent = `${formatShort(orderedDates[0])} - ${formatShort(orderedDates[orderedDates.length - 1])}`;
     elements.dateInput.min = orderedDates[0];
     elements.dateInput.max = orderedDates[orderedDates.length - 1];
   }
@@ -284,10 +280,9 @@
   function render(dateKey) {
     elements.dateInput.value = dateKey;
     const day = byDate.get(dateKey);
-    elements.calendarDateLabel.textContent = `${formatShort(dateKey)} - ${day?.weekdayLabel || getWeekdayLabel(dateKey)}`;
+    elements.todayButton.textContent = `HOJE\n${getWeekdayLabel(todayKey).toUpperCase()}`;
 
     if (!day) {
-      elements.weekdayBadge.textContent = "";
       elements.emptyState.classList.remove("hidden");
       elements.siglasGrid.innerHTML = "";
       renderVacationLabel(null);
@@ -295,7 +290,6 @@
       return;
     }
 
-    elements.weekdayBadge.textContent = day.weekdayLabel;
     elements.emptyState.classList.add("hidden");
     renderSiglas(day.siglas, day.weekdayLabel);
     renderVacationLabel(day.vacationLabel);
