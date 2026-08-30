@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=20260827-1">
+  <link rel="stylesheet" href="./styles.css?v=20260830-01">
 </head>
 <body>
   <div class="page-shell">
@@ -31,7 +31,7 @@
           <img src="./sahmt_option1_clean.png" alt="Logo SAHMT" class="hero-logo">
         </a>
         <div class="hero-copy">
-          <span class="hero-kicker">Escala semanal</span>
+          <span class="hero-kicker">ESCALA SEMANAL</span>
           <h1>SAHMT</h1>
           <span data-auth-user hidden></span>
         </div>
@@ -49,19 +49,15 @@
         <section class="search-banner">
           <div class="card-header">
             <div>
-              <p class="card-title">Buscar qualquer dia</p>
+              <p class="card-title">CALENDÁRIO</p>
             </div>
             <p id="rangeLabel" class="range-label"></p>
           </div>
 
-          <div id="outOfRangeNotice" class="notice hidden">
-            A data escolhida nao esta na escala.
-          </div>
-
           <div class="controls-grid">
             <label class="date-field" for="dateInput">
-              <span>Data</span>
               <input id="dateInput" type="date">
+              <span id="calendarDateLabel" class="calendar-date-label" aria-live="polite"></span>
             </label>
 
             <button id="installButton" class="install-banner hidden" type="button">
@@ -76,17 +72,8 @@
           </div>
         </section>
 
-        <div class="schedule-top">
-          <div>
-            <p id="scheduleHeading" class="eyebrow"></p>
-            <h2 id="formattedDate" class="date-title"></h2>
-          </div>
-          <span id="todayBadge" class="today-badge hidden">Hoje</span>
-        </div>
-
         <div class="badge-row">
           <span id="weekdayBadge" class="capsule capsule-green"></span>
-          <span class="capsule capsule-blue">Anestesistas do dia</span>
         </div>
 
         <div id="emptyState" class="empty-state hidden">
@@ -212,6 +199,6 @@
   <script src="./sync-config.js?v=20260804-3"></script>
   <script src="./notices.js?v=20260803-2"></script>
   <script src="./auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=20260827-1"></script>
+  <script src="./app.js?v=20260830-01"></script>
 </body>
 </html>

@@ -70,10 +70,7 @@
     pageShell: document.querySelector(".page-shell"),
     appFrame: document.querySelector(".app-frame"),
     rangeLabel: document.getElementById("rangeLabel"),
-    outOfRangeNotice: document.getElementById("outOfRangeNotice"),
-    scheduleHeading: document.getElementById("scheduleHeading"),
-    formattedDate: document.getElementById("formattedDate"),
-    todayBadge: document.getElementById("todayBadge"),
+    calendarDateLabel: document.getElementById("calendarDateLabel"),
     weekdayBadge: document.getElementById("weekdayBadge"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid"),
@@ -110,10 +107,6 @@
 
   await ensureSharedAccess();
   preloadLabelsModule();
-
-  if (elements.formattedDate) {
-    elements.formattedDate.textContent = "Carregando escala...";
-  }
 
   if (elements.closeNoticeModal) {
     elements.closeNoticeModal.addEventListener("click", closeNoticeModal);
@@ -291,14 +284,9 @@
   function render(dateKey) {
     elements.dateInput.value = dateKey;
     const day = byDate.get(dateKey);
-    const isToday = dateKey === todayKey;
-
-    elements.scheduleHeading.textContent = isToday ? "Data atual" : "Dia selecionado";
-    toggle(elements.todayBadge, isToday);
-    toggle(elements.outOfRangeNotice, !day);
+    elements.calendarDateLabel.textContent = `${formatShort(dateKey)} - ${day?.weekdayLabel || getWeekdayLabel(dateKey)}`;
 
     if (!day) {
-      elements.formattedDate.textContent = formatLong(dateKey);
       elements.weekdayBadge.textContent = "";
       elements.emptyState.classList.remove("hidden");
       elements.siglasGrid.innerHTML = "";
@@ -307,7 +295,6 @@
       return;
     }
 
-    elements.formattedDate.textContent = formatLong(day.date);
     elements.weekdayBadge.textContent = day.weekdayLabel;
     elements.emptyState.classList.add("hidden");
     renderSiglas(day.siglas, day.weekdayLabel);
@@ -1204,6 +1191,12 @@
       year: "numeric"
     }).format(new Date(`${dateKey}T12:00:00`));
 
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function getWeekdayLabel(dateKey) {
+    const value = new Intl.DateTimeFormat("pt-BR", { weekday: "long" })
+      .format(new Date(`${dateKey}T12:00:00`));
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
 

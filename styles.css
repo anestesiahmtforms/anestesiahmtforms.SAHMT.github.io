@@ -136,6 +136,7 @@ body.modal-open {
 .hero-copy {
   min-width: 0;
   flex: 1 1 auto;
+  text-align: center;
 }
 
 .hero-kicker {
@@ -187,6 +188,12 @@ body.modal-open {
 .schedule-top {
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.search-banner .card-header {
+  display: grid;
+  justify-items: center;
+  text-align: center;
 }
 
 .card-title,
@@ -241,10 +248,20 @@ body.modal-open {
   width: 100%;
   border: 0;
   border-radius: 12px;
-  padding: 8px 10px;
+  min-height: 48px;
+  padding: 12px 10px;
   background: var(--mist);
   font: inherit;
   color: var(--ink);
+}
+
+.calendar-date-label {
+  display: block;
+  min-height: 1.2em;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
 }
 
 .quick-actions {
@@ -272,8 +289,9 @@ button:hover,
 .primary-button {
   flex: 1 1 0;
   min-width: 0;
-  padding: 8px 6px;
-  font-size: 0.59rem;
+  min-height: 48px;
+  padding: 10px 8px;
+  font-size: 0.66rem;
   line-height: 1.05;
   text-align: center;
 }
@@ -1206,8 +1224,9 @@ button:hover,
 
   .soft-button,
   .primary-button {
-    padding: 7px 5px;
-    font-size: 0.56rem;
+    min-height: 48px;
+    padding: 10px 5px;
+    font-size: 0.62rem;
   }
 
   .events-frame {
