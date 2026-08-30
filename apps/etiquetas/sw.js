@@ -1,4 +1,4 @@
-const CACHE_NAME = "etiqueta-sahmt-ia-v162";
+const CACHE_NAME = "etiqueta-sahmt-ia-v163";
 const ASSETS = [
   "./",
   "./index.html",
