@@ -35,6 +35,11 @@
   box-shadow: 0 0 0 3px rgba(219, 241, 255, 0.44), 0 8px 16px rgba(23, 98, 161, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
+.schedule-card .date-field input {
+  width: calc(100% - 4px);
+  justify-self: center;
+}
+
 .schedule-card .date-field input:focus,
 .schedule-card #prevButton:focus-visible,
 .schedule-card #nextButton:focus-visible {
