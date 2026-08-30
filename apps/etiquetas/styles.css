@@ -1286,6 +1286,7 @@ video {
 .guide-frame {
   position: relative;
   box-sizing: border-box;
+  min-width: 0;
   width: 94%;
   max-width: 100%;
   margin-inline: auto;
@@ -3023,6 +3024,7 @@ body::before {
   }
 
   .scanner-panel .guide-frame {
+    min-width: 0;
     width: 94%;
     min-height: 140px;
     aspect-ratio: 2.55 / 1;
