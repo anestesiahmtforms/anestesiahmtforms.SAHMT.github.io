@@ -3168,9 +3168,9 @@ textarea {
   .scanner-panel .camera-stage,
   .scanner-panel video,
   .scanner-panel .camera-stage.has-capture {
-    min-height: 160px;
-    height: 160px;
-    max-height: 160px;
+    min-height: 128px;
+    height: 128px;
+    max-height: 128px;
   }
 
   .scanner-panel .capture-shutter,
@@ -3412,9 +3412,15 @@ body::before {
   .scanner-panel .camera-stage,
   .scanner-panel video,
   .scanner-panel .camera-stage.has-capture {
-    min-height: 160px;
-    height: 160px;
-    max-height: 160px;
+    min-height: 128px;
+    height: 128px;
+    max-height: 128px;
+  }
+
+  .scanner-panel .guide-frame {
+    height: clamp(58px, 20vw, 72px);
+    min-height: 58px;
+    aspect-ratio: auto;
   }
 
   .scanner-panel .capture-shutter,
