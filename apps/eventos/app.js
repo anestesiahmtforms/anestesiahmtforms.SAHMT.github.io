@@ -138,8 +138,7 @@
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
     emptyState: document.getElementById("emptyState"),
-    siglasGrid: document.getElementById("siglasGrid"),
-    vacationCard: document.getElementById("vacationCard")
+    siglasGrid: document.getElementById("siglasGrid")
   };
   let currentAccessLabel = "";
 
@@ -340,13 +339,11 @@
     if (!day) {
       elements.emptyState.classList.remove("hidden");
       elements.siglasGrid.innerHTML = "";
-      renderVacationLabel();
       return;
     }
 
     elements.emptyState.classList.add("hidden");
     renderSiglas(day.siglas, day.weekdayLabel, day.date);
-    renderVacationLabel();
     renderRecordsForDate(activeDate);
   }
 
@@ -3361,10 +3358,6 @@
     }
 
     return String(value || "").trim();
-  }
-
-  function renderVacationLabel() {
-    toggle(elements.vacationCard, true);
   }
 
   function getVacationSiglasForDate(dateKey) {

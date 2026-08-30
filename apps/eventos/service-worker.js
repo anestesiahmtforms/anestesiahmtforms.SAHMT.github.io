@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v106";
+const CACHE_NAME = "sahmt-pwa-v107";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -31,6 +31,8 @@ const APP_SHELL = [
   "./escala-imagens/ferias-2026.jpg",
   "./sahmt_option1_clean.png",
   "./gestao_operacional.png",
+  "../../sahmt_option1.png",
+  "../gestao/assets/selo-qga-accredited-qmentum-diamond.png",
   "./eventos/index.html",
   "./eventos/styles.css",
   "./eventos/app.js",
