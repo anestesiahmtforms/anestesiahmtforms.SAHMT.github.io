@@ -27,6 +27,18 @@
   gap: 8px;
 }
 
+/* Use the remaining schedule space to enlarge the sigla touch targets. */
+.schedule-card .siglas-grid {
+  gap: 9px 7px;
+  grid-auto-rows: minmax(42px, auto);
+}
+
+.schedule-card .sigla-token {
+  min-height: 42px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
 /* Final title-logo treatment: a visible iPhone-style 3D button. */
 .premium-title-logo {
   position: relative;
