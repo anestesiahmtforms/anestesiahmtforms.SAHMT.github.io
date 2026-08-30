@@ -14,6 +14,47 @@
   --shadow: 0 18px 40px rgba(8, 18, 31, 0.18);
 }
 
+/* Final title-logo treatment: a visible iPhone-style 3D button. */
+.premium-title-logo {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.96) !important;
+  background: linear-gradient(145deg, #ffffff 0%, #e9f5fb 48%, #a8c7d6 100%) !important;
+  box-shadow: 0 0 0 3px rgba(116, 190, 226, 0.28), 0 18px 30px rgba(8, 35, 55, 0.34), inset 0 3px 0 rgba(255, 255, 255, 0.98), inset 0 -10px 16px rgba(33, 77, 101, 0.22) !important;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.premium-title-logo::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -38% -24% auto;
+  height: 66%;
+  border-radius: 50%;
+  background: linear-gradient(105deg, transparent 16%, rgba(255, 255, 255, 0.94) 50%, transparent 84%);
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+.premium-title-logo:hover,
+.premium-title-logo:focus-visible {
+  filter: saturate(1.12) brightness(1.04);
+  transform: translateY(-3px) scale(1.025);
+  box-shadow: 0 0 0 4px rgba(116, 190, 226, 0.42), 0 24px 38px rgba(8, 35, 55, 0.38), inset 0 3px 0 rgba(255, 255, 255, 1), inset 0 -10px 16px rgba(33, 77, 101, 0.16) !important;
+}
+
+.premium-title-logo:active {
+  transform: translateY(2px) scale(0.975);
+  box-shadow: 0 0 0 3px rgba(116, 190, 226, 0.34), 0 8px 13px rgba(8, 35, 55, 0.24), inset 0 4px 8px rgba(33, 77, 101, 0.24) !important;
+}
+
+.premium-title-logo > img {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 9px 10px rgba(12, 43, 62, 0.28));
+}
+
 * {
   box-sizing: border-box;
 }
