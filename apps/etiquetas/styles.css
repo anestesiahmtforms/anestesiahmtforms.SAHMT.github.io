@@ -1287,11 +1287,12 @@ video {
   position: relative;
   box-sizing: border-box;
   min-width: 0;
-  width: 94%;
-  max-width: 100%;
+  width: calc(100% - 24px);
+  max-width: calc(100% - 24px);
   margin-inline: auto;
-  min-height: 114px;
-  aspect-ratio: 3.05 / 1;
+  height: min(140px, calc((100vw - 24px) / 2.55));
+  min-height: 104px;
+  aspect-ratio: auto;
   border: 2px solid rgba(255, 255, 255, 0.98);
   border-radius: var(--radius);
   box-shadow:
@@ -2657,8 +2658,11 @@ textarea {
   }
 
   .guide-frame {
-    width: 94%;
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    height: min(140px, calc((100vw - 24px) / 2.55));
     min-height: 104px;
+    aspect-ratio: auto;
   }
 
   .scanner-panel #preview.has-image {
@@ -3025,9 +3029,11 @@ body::before {
 
   .scanner-panel .guide-frame {
     min-width: 0;
-    width: 94%;
-    min-height: 140px;
-    aspect-ratio: 2.55 / 1;
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    height: min(140px, calc((100vw - 24px) / 2.55));
+    min-height: 104px;
+    aspect-ratio: auto;
   }
 
   .scanner-panel .preview-wrap,
