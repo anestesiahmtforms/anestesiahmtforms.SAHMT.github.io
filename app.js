@@ -71,8 +71,6 @@
     appFrame: document.querySelector(".app-frame"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid"),
-    vacationCard: document.getElementById("vacationCard"),
-    siteBanner: document.getElementById("siteBanner"),
     eventsLauncher: document.getElementById("eventsLauncher"),
     eventsModal: document.getElementById("eventsModal"),
     eventsBackdrop: document.getElementById("eventsBackdrop"),
@@ -170,10 +168,6 @@
       event.preventDefault();
       openLabelsModal();
     });
-  }
-
-  if (elements.siteBanner) {
-    elements.siteBanner.addEventListener("click", openManagementModal);
   }
 
   if (elements.closeEventsModal) {
@@ -285,14 +279,12 @@
     if (!day) {
       elements.emptyState.classList.remove("hidden");
       elements.siglasGrid.innerHTML = "";
-      renderVacationLabel(null);
       requestViewportFit();
       return;
     }
 
     elements.emptyState.classList.add("hidden");
     renderSiglas(day.siglas, day.weekdayLabel);
-    renderVacationLabel(day.vacationLabel);
     requestViewportFit();
   }
 
@@ -755,10 +747,6 @@
   function normalizeEndpoint(value) {
     const trimmed = String(value || "").trim();
     return trimmed || "";
-  }
-
-  function renderVacationLabel(label) {
-    toggle(elements.vacationCard, true);
   }
 
   function getVacationSiglasForDate(dateKey) {
