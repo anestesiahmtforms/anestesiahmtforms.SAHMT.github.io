@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-gestao-shell-v24";
+const CACHE_NAME = "sahmt-gestao-shell-v25";
 const APP_SHELL = [
   "./",
   "./index.html",
