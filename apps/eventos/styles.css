@@ -2648,6 +2648,14 @@ button:hover,
   box-sizing: border-box;
 }
 
+/* Return a little vertical room to the siglas without shrinking report labels. */
+.records-card .records-panel-toggle {
+  min-height: 36px;
+  padding: 7px 10px;
+  line-height: 1.05;
+  box-sizing: border-box;
+}
+
 .records-card,
 .main-return-dock,
 .footer-banner {
