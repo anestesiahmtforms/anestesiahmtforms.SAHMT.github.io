@@ -109,6 +109,42 @@ body.modal-open {
   object-fit: contain;
 }
 
+.ecosystem-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 12px 24px rgba(8, 18, 31, 0.1);
+}
+
+.ecosystem-nav__link {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 2px;
+  border-radius: 18px;
+  text-decoration: none;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.ecosystem-nav__link:hover,
+.ecosystem-nav__link:focus-visible {
+  filter: saturate(1.08);
+  transform: translateY(-1px);
+}
+
+.ecosystem-nav__icon {
+  display: block;
+  width: 100%;
+  max-width: 126px;
+  aspect-ratio: 11 / 12;
+  object-fit: contain;
+}
+
 .operational-logo-label {
   position: absolute;
   z-index: 2;
@@ -1245,6 +1281,17 @@ button:hover,
 
   .quick-actions {
     gap: 5px;
+  }
+
+  .ecosystem-nav {
+    gap: 4px;
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 18px;
+  }
+
+  .ecosystem-nav__link {
+    border-radius: 14px;
   }
 
   .soft-button,
