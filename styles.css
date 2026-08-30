@@ -109,42 +109,6 @@ body.modal-open {
   object-fit: contain;
 }
 
-.ecosystem-nav {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin: 8px 0;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 0 12px 24px rgba(8, 18, 31, 0.1);
-}
-
-.ecosystem-nav__link {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  padding: 2px;
-  border-radius: 18px;
-  text-decoration: none;
-  transition: transform 180ms ease, filter 180ms ease;
-}
-
-.ecosystem-nav__link:hover,
-.ecosystem-nav__link:focus-visible {
-  filter: saturate(1.08);
-  transform: translateY(-1px);
-}
-
-.ecosystem-nav__icon {
-  display: block;
-  width: 100%;
-  max-width: 126px;
-  aspect-ratio: 11 / 12;
-  object-fit: contain;
-}
-
 .operational-logo-label {
   position: absolute;
   z-index: 2;
@@ -588,47 +552,6 @@ button:hover,
   background: linear-gradient(180deg, #72a7ea 0%, #4d82cc 100%);
   color: #ffffff;
   text-shadow: 0 1px 1px rgba(14, 48, 92, 0.38);
-}
-
-.module-mini-links {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 38px;
-  gap: 4px;
-  padding: 2px;
-  border: 1px solid rgba(147, 197, 253, 0.9);
-  border-radius: 13px;
-  background: linear-gradient(180deg, #d7edff 0%, #9cc8ef 100%);
-  box-shadow: 0 0 0 2px rgba(191, 219, 254, 0.62), 0 0 12px rgba(96, 165, 250, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.54);
-}
-
-.module-mini-link {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: transform 180ms ease, filter 180ms ease;
-}
-
-.module-mini-link:hover,
-.module-mini-link:focus-visible {
-  filter: saturate(1.08);
-  transform: translateY(-1px);
-}
-
-.module-mini-link:active {
-  transform: scale(0.96);
-}
-
-.module-mini-icon {
-  display: block;
-  width: 100%;
-  height: 34px;
-  object-fit: contain;
 }
 
 .dc-vacation-sigla {
@@ -1322,17 +1245,6 @@ button:hover,
 
   .quick-actions {
     gap: 5px;
-  }
-
-  .ecosystem-nav {
-    gap: 4px;
-    margin: 5px 0;
-    padding: 5px;
-    border-radius: 18px;
-  }
-
-  .ecosystem-nav__link {
-    border-radius: 14px;
   }
 
   .soft-button,

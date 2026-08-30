@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v80";
+const CACHE_NAME = "sahmt-pwa-v81";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -70,11 +70,7 @@ const APP_SHELL = [
   "./logo_gestao.png",
   "./logo_equipe.png",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./assets/icones/sahmt-home.png",
-  "./assets/icones/eventos-operacional.png",
-  "./assets/icones/etiquetas.png",
-  "./assets/icones/gestao-diamond.png"
+  "./icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
