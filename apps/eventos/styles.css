@@ -2616,6 +2616,30 @@ button:hover,
   min-height: 0;
 }
 
+/* Keep the calendar date field fully outlined on narrow iPhone viewports. */
+.schedule-card > .search-banner .date-field {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  padding: 0;
+}
+
+.schedule-card > .search-banner .date-field input[type="date"] {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid #1762a1 !important;
+  border-radius: 12px;
+  outline: 1px solid rgba(255, 255, 255, 0.86) !important;
+  background-clip: padding-box;
+}
+
 .records-card,
 .main-return-dock,
 .footer-banner {
