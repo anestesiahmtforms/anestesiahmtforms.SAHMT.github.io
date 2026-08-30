@@ -200,6 +200,43 @@ body.folder-open {
   text-align: center;
 }
 
+/* Premium 3D logo button for the title. */
+.hero-side-icon {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: linear-gradient(145deg, #ffffff 0%, #e8f2f7 52%, #b9d0dc 100%);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.48), 0 16px 28px rgba(12, 49, 72, 0.26), inset 0 2px 0 rgba(255, 255, 255, 0.98), inset 0 -8px 14px rgba(37, 78, 101, 0.14);
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.hero-side-icon::before {
+  content: "";
+  position: absolute;
+  inset: -35% -20% auto;
+  height: 58%;
+  border-radius: 50%;
+  background: linear-gradient(100deg, transparent 12%, rgba(255, 255, 255, 0.82) 50%, transparent 86%);
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.hero-side-icon:hover,
+.hero-side-icon:focus-visible {
+  filter: saturate(1.08);
+  transform: translateY(-2px) scale(1.015);
+}
+
+.hero-side-icon:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.hero-side-icon__image {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 9px rgba(20, 52, 75, 0.2));
+}
+
 .hero-copy {
   min-width: 0;
   display: grid;
