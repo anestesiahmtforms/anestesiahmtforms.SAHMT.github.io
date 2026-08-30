@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-gestao-shell-v20";
+const CACHE_NAME = "sahmt-gestao-shell-v21";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,7 +7,9 @@ const APP_SHELL = [
   "./manifest.webmanifest",
   "./assets/icon-192.svg",
   "./assets/icon-512.svg",
-  "./assets/selo-qga-accredited-qmentum-diamond.png"
+  "./assets/selo-qga-accredited-qmentum-diamond.png",
+  "../../sahmt_option1.png",
+  "../../gestao_operacional.png"
 ];
 
 self.addEventListener("install", (event) => {
