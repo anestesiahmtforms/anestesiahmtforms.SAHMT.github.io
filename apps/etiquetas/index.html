@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=126">
+  <link rel="stylesheet" href="./styles.css?v=127">
 </head>
 <body>
   <div class="app-shell">
@@ -40,6 +40,9 @@
             <div class="guide-frame">
             </div>
           </div>
+          <div class="preview-wrap">
+            <img id="preview" alt="Previa da etiqueta capturada">
+          </div>
         </div>
 
         <canvas id="snapshot" hidden></canvas>
@@ -49,9 +52,6 @@
             <svg class="button-icon button-icon-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg>
             <span>Abrir camera</span>
           </button>
-        </div>
-        <div class="preview-wrap">
-          <img id="preview" alt="Previa da etiqueta capturada">
         </div>
         <button id="process-image" type="button" class="wide-button ai-unavailable" disabled>Ler Etiqueta</button>
         <div class="scanner-secondary-actions">
