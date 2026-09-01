@@ -2152,20 +2152,21 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
     const editedClass = row.editadoEm || row.editadoPor || row.resumoEdicao || row.observacaoAtualizadaEm || row.observacaoAtualizadaPor ? " edited-row" : "";
     const editBlock = renderSummaryEditBlock(row);
     const observationBlock = renderSummaryObservationBlock(row);
+    const dailyTone = ["a", "b", "c", "d"][index % 4];
     return `
-      <article class="monthly-record-card summary-item daily-table-card daily-tone-${index % 2 === 0 ? "a" : "b"}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
+      <article class="monthly-record-card summary-item daily-table-card daily-tone-${dailyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
         <div class="monthly-record-number">${index + 1}</div>
         <div class="monthly-record-fields">
-          <div><span>Data</span><strong>${escapeHtml(formatDate(row.data || ""))}</strong></div>
-          <div><span>Nome do Paciente</span><strong>${escapeHtml(row.nomePaciente || "-")}</strong></div>
-          <div><span>Convênio</span><strong>${escapeHtml(row.convenio || "-")}</strong></div>
-          <div><span>Cirurgia</span><strong>${escapeHtml(row.cirurgia || "-")}</strong></div>
-          <div><span>Atendimento</span><strong>${escapeHtml(row.atendimento || "-")}</strong></div>
-          <div><span>Tipo</span><strong>${escapeHtml(row.tipo || "-")}</strong></div>
-          <div><span>Valor</span><strong>${escapeHtml(formatStoredCurrency(row.valor) || "-")}</strong></div>
-          <div><span>Credor</span><strong>${escapeHtml(row.credor || "-")}</strong></div>
-          <div><span>Plantonista(s)</span><strong>${escapeHtml(row.plantonistas || "-")}</strong></div>
-          <div><span>Responsável</span><strong>${escapeHtml(row.criadoPor || "Não informado")}</strong></div>
+          ${renderSummaryField("Data", formatDate(row.data || ""))}
+          ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
+          ${renderSummaryField("Convênio", row.convenio)}
+          ${renderSummaryField("Cirurgia", row.cirurgia)}
+          ${renderSummaryField("Atendimento", row.atendimento)}
+          ${renderSummaryField("Tipo", row.tipo)}
+          ${renderSummaryField("Valor", row.valor ? formatStoredCurrency(row.valor) : "")}
+          ${renderSummaryField("Credor", row.credor)}
+          ${renderSummaryField("Plantonista(s)", row.plantonistas)}
+          ${renderSummaryField("Responsável", row.criadoPor)}
         </div>
         ${editBlock}
         ${observationBlock}
@@ -2204,6 +2205,14 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
       }
     });
   });
+}
+
+function renderSummaryField(label, value) {
+  const text = String(value == null ? "" : value).trim();
+  if (!text || text === "-") {
+    return "";
+  }
+  return `<div class="summary-data-field"><span>${escapeHtml(label)}</span><strong>${escapeHtml(text)}</strong></div>`;
 }
 
 function renderSummaryObservationBlock(row) {

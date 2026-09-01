@@ -2679,6 +2679,14 @@ textarea {
   background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(234, 243, 250, 0.92));
 }
 
+.daily-tone-c {
+  background: linear-gradient(135deg, rgba(255, 251, 244, 0.98), rgba(247, 237, 224, 0.94));
+}
+
+.daily-tone-d {
+  background: linear-gradient(135deg, rgba(247, 246, 255, 0.98), rgba(234, 237, 249, 0.94));
+}
+
 .empty-state {
   margin: 0;
   padding: 18px;
@@ -3556,4 +3564,89 @@ body::before {
 .hero-copy > [data-auth-user]:not([hidden]) {
   padding-left: 18px;
   background-position: 0 50%;
+}
+
+/* Premium daily report: compact filled fields and fully readable edit history. */
+.summary-item.daily-table-card {
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px 12px;
+  padding: 13px;
+}
+
+.summary-item.daily-table-card .monthly-record-fields {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.summary-item.daily-table-card .summary-data-field {
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid rgba(13, 122, 108, 0.12);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.summary-item.daily-table-card .summary-data-field span {
+  display: block;
+  color: var(--brand);
+  font-size: 0.64rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.summary-item.daily-table-card .summary-data-field strong {
+  display: block;
+  margin-top: 2px;
+  color: #183d3a;
+  font-size: 0.86rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.summary-item.daily-table-card .summary-history-block {
+  grid-column: 1 / -1;
+}
+
+.summary-item.daily-table-card .summary-edit-block {
+  border-color: rgba(217, 119, 6, 0.48);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 237, 213, 0.94));
+}
+
+.summary-item.daily-table-card .summary-edit-block strong,
+.summary-item.daily-table-card .summary-edit-block small,
+.summary-item.daily-table-card .summary-edit-note {
+  color: #b45309 !important;
+}
+
+.summary-item.daily-table-card .summary-edit-note {
+  border-top-color: rgba(217, 119, 6, 0.24);
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.summary-item.daily-tone-a.edited-row {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 248, 244, 0.94));
+}
+
+.summary-item.daily-tone-b.edited-row {
+  background: linear-gradient(135deg, rgba(250, 252, 255, 0.98), rgba(234, 243, 250, 0.92));
+}
+
+.summary-item.daily-tone-c.edited-row {
+  background: linear-gradient(135deg, rgba(255, 251, 244, 0.98), rgba(247, 237, 224, 0.94));
+}
+
+.summary-item.daily-tone-d.edited-row {
+  background: linear-gradient(135deg, rgba(247, 246, 255, 0.98), rgba(234, 237, 249, 0.94));
+}
+
+@media (max-width: 680px) {
+  .summary-item.daily-table-card .monthly-record-fields {
+    grid-template-columns: 1fr;
+  }
 }
