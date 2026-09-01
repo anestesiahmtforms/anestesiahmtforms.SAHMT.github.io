@@ -97,6 +97,7 @@
     noticeEyebrow: document.getElementById("noticeEyebrow"),
     noticeTitle: document.getElementById("noticeTitle"),
     noticeMessage: document.getElementById("noticeMessage"),
+    noticeMedia: document.getElementById("noticeMedia"),
     noticeCountdown: document.getElementById("noticeCountdown"),
     closeNoticeModal: document.getElementById("closeNoticeModal")
   };
@@ -988,6 +989,7 @@
     elements.noticeEyebrow.textContent = activeNotice.eyebrow || "Comunicado SAHMT";
     elements.noticeTitle.textContent = activeNotice.title || "Aviso";
     elements.noticeMessage.textContent = activeNotice.message || "";
+    renderNoticeMedia(activeNotice);
     elements.closeNoticeModal.disabled = true;
     elements.noticeModal.classList.remove("hidden");
     elements.noticeModal.setAttribute("aria-hidden", "false");
@@ -1008,6 +1010,43 @@
       elements.noticeCountdown.textContent = "Aviso pronto para ser fechado";
       elements.closeNoticeModal.disabled = false;
     }, 1000);
+  }
+
+  function renderNoticeMedia(notice) {
+    if (!elements.noticeMedia) {
+      return;
+    }
+
+    elements.noticeMedia.replaceChildren();
+    const media = notice?.media || {};
+    const imageUrl = getSafeNoticeUrl(notice?.imageUrl || notice?.bannerUrl || (media.type === "image" ? media.url : ""));
+    const videoUrl = getSafeNoticeUrl(notice?.videoUrl || (media.type === "video" ? media.url : ""));
+
+    if (imageUrl) {
+      const imageLink = document.createElement("a");
+      imageLink.className = "notice-card__image-link";
+      imageLink.href = imageUrl;
+      imageLink.target = "_blank";
+      imageLink.rel = "noopener noreferrer";
+      const image = document.createElement("img");
+      image.className = "notice-card__image";
+      image.src = imageUrl;
+      image.alt = String(notice?.mediaAlt || notice?.title || "Imagem do comunicado");
+      imageLink.appendChild(image);
+      elements.noticeMedia.appendChild(imageLink);
+    }
+
+    if (videoUrl) {
+      const videoLink = document.createElement("a");
+      videoLink.className = "notice-card__video-link";
+      videoLink.href = videoUrl;
+      videoLink.target = "_blank";
+      videoLink.rel = "noopener noreferrer";
+      videoLink.textContent = "ASSISTIR AO VÍDEO";
+      elements.noticeMedia.appendChild(videoLink);
+    }
+
+    elements.noticeMedia.hidden = !elements.noticeMedia.childElementCount;
   }
 
   function closeNoticeModal() {

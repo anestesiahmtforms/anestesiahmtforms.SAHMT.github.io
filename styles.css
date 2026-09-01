@@ -1261,6 +1261,55 @@ button:hover,
   white-space: pre-wrap;
 }
 
+.notice-card__media {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.notice-card__media[hidden] {
+  display: none;
+}
+
+.notice-card__image-link {
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(13, 99, 128, 0.24);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 18px rgba(6, 72, 98, 0.12);
+}
+
+.notice-card__image {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+}
+
+.notice-card__video-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid rgba(13, 99, 128, 0.38);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d8f4f0, #a9dce4);
+  box-shadow: 0 8px 16px rgba(6, 72, 98, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  color: #0c607c;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+.notice-card__video-link:hover,
+.notice-card__video-link:focus-visible {
+  background: linear-gradient(135deg, #e4faf7, #b8e7ed);
+  transform: translateY(-1px);
+}
+
 .notice-card__footer {
   display: flex;
   align-items: center;
