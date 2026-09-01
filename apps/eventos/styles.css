@@ -2755,3 +2755,74 @@ button:hover,
   padding-left: 18px;
   background-position: 0 50%;
 }
+
+/* Premium daily and monthly report cards. */
+.record-card {
+  position: relative;
+  padding: 11px;
+  border: 1px solid rgba(13, 50, 87, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 14px 26px rgba(13, 50, 87, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.record-card--tone-1 {
+  background: linear-gradient(135deg, #f8fcfa 0%, #e8f4f0 100%);
+}
+
+.record-card--tone-2 {
+  background: linear-gradient(135deg, #f5f9ff 0%, #e6eff8 100%);
+}
+
+.record-card--tone-3 {
+  background: linear-gradient(135deg, #fffaf2 0%, #f8ecdc 100%);
+}
+
+.record-card--tone-4 {
+  background: linear-gradient(135deg, #f8f7ff 0%, #ececf8 100%);
+}
+
+.record-card__number {
+  width: fit-content;
+  min-width: 19px;
+  height: 17px;
+  margin: 0 0 4px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #0d7a6c, #155e75);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: 0 4px 9px rgba(13, 122, 108, 0.18);
+}
+
+.record-card__row {
+  border: 1px solid rgba(13, 122, 108, 0.1);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.record-card__row--history {
+  border-color: rgba(217, 119, 6, 0.44);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 237, 213, 0.94));
+}
+
+.record-card__label--history,
+.record-card__value--history,
+.record-card__history-label,
+.record-card__history-value {
+  color: #b45309;
+}
+
+.record-card__history-value {
+  max-height: none;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.record-card__history-entry {
+  border-color: rgba(217, 119, 6, 0.22);
+  background: rgba(255, 255, 255, 0.68);
+}

@@ -1855,10 +1855,10 @@
       card.setAttribute("aria-label", `Editar registro de ${record.membro || record.tipo || "evento"}`);
       card.addEventListener("dblclick", () => startEventRecordEdit(record));
 
-      const title = document.createElement("p");
-      title.className = "record-card__title";
-      title.textContent = `${record.tipo || "Registro"}${record.timestamp ? ` - ${record.timestamp}` : ""}`;
-      card.appendChild(title);
+      const number = document.createElement("div");
+      number.className = "record-card__number";
+      number.textContent = String(index + 1);
+      card.appendChild(number);
 
       const rows = document.createElement("div");
       rows.className = "record-card__rows";
@@ -1932,18 +1932,20 @@
       const card = document.createElement("article");
       card.className = `record-card record-card--tone-${(index % 4) + 1}`;
 
-      const title = document.createElement("p");
-      title.className = "record-card__title";
-      title.textContent = `${record.tipo || "Registro"}${record.dataDoEvento ? ` - ${record.dataDoEvento}` : ""}`;
-      card.appendChild(title);
+      const number = document.createElement("div");
+      number.className = "record-card__number";
+      number.textContent = String(index + 1);
+      card.appendChild(number);
 
       const rows = document.createElement("div");
       rows.className = "record-card__rows";
 
       [
+        ["Data do Evento", record.dataDoEvento],
         ["Membro", record.membro],
         ["Tipo de Evento", record.tipo],
         ["Descricao", record.descricao],
+        ["Multiplo do atraso", record.multiplo],
         ["Substituto", record.substituto],
         ["Turno", record.turno],
         ["Pagador", record.pagador],
@@ -2160,30 +2162,27 @@
     pdf.text(`Gerado em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date())}`, 40, 62);
     pdf.setTextColor(20, 50, 84);
 
+    const optionalPdfColumns = [
+      ["Descrição", (record) => record.descricao],
+      ["Múltiplo do atraso", (record) => record.multiplo],
+      ["Substituto", (record) => record.substituto],
+      ["Turno", (record) => record.turno],
+      ["Pagador", (record) => record.pagador],
+      ["Credor", (record) => record.credor],
+      ["Valor", (record) => formatStoredCurrency(record.valor)],
+    ].filter(([, getValue]) => records.some((record) => String(getValue(record) || "").trim()));
+    const pdfColumns = [
+      ["#", (record, index) => String(index + 1)],
+      ["Data", (record) => record.dataDoEvento],
+      ["Membro", (record) => record.membro],
+      ["Tipo de Evento", (record) => record.tipo],
+      ...optionalPdfColumns,
+    ];
+
     pdf.autoTable({
       startY: 100,
-      head: [[
-        "Data",
-        "Membro",
-        "Tipo de Evento",
-        "Descricao",
-        "Substituto",
-        "Turno",
-        "Pagador",
-        "Credor",
-        "Valor"
-      ]],
-      body: records.map((record) => ([
-        record.dataDoEvento || "",
-        record.membro || "",
-        record.tipo || "",
-        record.descricao || "",
-        record.substituto || "",
-        record.turno || "",
-        record.pagador || "",
-        record.credor || "",
-        formatStoredCurrency(record.valor)
-      ])),
+      head: [pdfColumns.map(([label]) => label)],
+      body: records.map((record, index) => pdfColumns.map(([, getValue]) => getValue(record, index) || "")),
       theme: "grid",
       styles: {
         fontSize: 8,
@@ -2200,6 +2199,16 @@
       },
       alternateRowStyles: {
         fillColor: [247, 242, 232]
+      },
+      didParseCell(data) {
+        if (data.section === "body") {
+          const fills = [[248, 252, 250], [242, 247, 252], [255, 249, 240], [245, 246, 253]];
+          const record = records[data.row.index];
+          data.cell.styles.fillColor = fills[data.row.index % fills.length];
+          if (record?.history) {
+            data.cell.styles.fillColor = [255, 237, 213];
+          }
+        }
       },
       margin: {
         left: 24,
