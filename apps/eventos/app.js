@@ -2178,6 +2178,19 @@
       ["Tipo de Evento", (record) => record.tipo],
       ...optionalPdfColumns,
     ];
+    const dateGroups = [];
+    const dateGroupByRecord = records.map((record) => {
+      const dateKey = String(record.dataDoEventoKey || record.dataDoEvento || "").trim();
+      let group = dateGroups.find((item) => item.key === dateKey);
+      if (!group) {
+        group = { key: dateKey, index: dateGroups.length, rowCount: 0 };
+        dateGroups.push(group);
+      }
+      const rowInGroup = group.rowCount;
+      group.rowCount += 1;
+      return { groupIndex: group.index, rowInGroup };
+    });
+    const dateColumnIndex = pdfColumns.findIndex(([label]) => label === "Data");
 
     pdf.autoTable({
       startY: 100,
@@ -2202,11 +2215,14 @@
       },
       didParseCell(data) {
         if (data.section === "body") {
-          const fills = [[248, 252, 250], [242, 247, 252], [255, 249, 240], [245, 246, 253]];
-          const record = records[data.row.index];
-          data.cell.styles.fillColor = fills[data.row.index % fills.length];
-          if (record?.history) {
-            data.cell.styles.fillColor = [255, 237, 213];
+          const group = dateGroupByRecord[data.row.index] || { groupIndex: 0, rowInGroup: 0 };
+          const dateFills = [[189, 224, 235], [208, 231, 216], [244, 218, 181], [218, 216, 241]];
+          const rowFills = [[248, 252, 250], [242, 247, 252]];
+          if (data.column.index === dateColumnIndex) {
+            data.cell.styles.fillColor = dateFills[group.groupIndex % dateFills.length];
+            data.cell.styles.fontStyle = "bold";
+          } else {
+            data.cell.styles.fillColor = rowFills[group.rowInGroup % rowFills.length];
           }
         }
       },
