@@ -96,7 +96,7 @@ Quando houver outro lancamento exatamente igual na mesma data, o app alerta ante
 12. Copie a URL final `/exec` e substitua em `app.js`, no campo `defaultScriptUrl`.
 
 ```text
-defaultScriptUrl: "https://script.google.com/macros/s/AKfycbxXxi5ODPoN8xdTl9D-18x6GdyIP-KGJGIuOnRFxluMEUEl1KJOKiYppQXQDIf7g73p_Q/exec"
+defaultScriptUrl: "https://script.google.com/macros/s/AKfycbwRE2wlSWX3p9AXV43Ylf6ciN-i0np-Bo-Hs4YPQwb-NeT90su-8KsExh1z1MV4fHQO7A/exec"
 ```
 
 Nao reutilize URLs antigas que retornem as listas `Caixa TOTAL`, `50%:Caixa/Plantao:50%` ou `Plantao TOTAL`.

@@ -7,11 +7,12 @@ const CONFIG = {
   trustedDeviceDays: 36500,
   guideWidthRatio: 0.94,
   guideAspectRatio: 4,
-  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbzdxPAGKmP4yEru3WrAc5ul2I5tLu07J35Zupzf4ZeCtC1Y090F3IyVFlIxhW1erHHP3A/exec",
+  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbwRE2wlSWX3p9AXV43Ylf6ciN-i0np-Bo-Hs4YPQwb-NeT90su-8KsExh1z1MV4fHQO7A/exec",
   maxSearchResults: 60,
 };
 
 const LEGACY_SCRIPT_URLS = new Set([
+  "https://script.google.com/macros/s/AKfycbzdxPAGKmP4yEru3WrAc5ul2I5tLu07J35Zupzf4ZeCtC1Y090F3IyVFlIxhW1erHHP3A/exec",
   "https://script.google.com/macros/s/AKfycbwheVeHuiaudaInH3nIbu7JIi_XniCsPeEFBig6yUfUZeRNt61QXKUIRav8flGU-S_MKQ/exec",
   "https://script.google.com/macros/s/AKfycbxXxi5ODPoN8xdTl9D-18x6GdyIP-KGJGIuOnRFxluMEUEl1KJOKiYppQXQDIf7g73p_Q/exec",
   "https://script.google.com/macros/s/AKfycbz2nGd76cbEFs6cTBfFF5Cf75DYIsLJ7LFMgymDZoZq-eMSL9TGWr6w9Aa-zAMMoC-Ktw/exec",
