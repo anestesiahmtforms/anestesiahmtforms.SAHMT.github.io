@@ -6,8 +6,8 @@ window.SAHMT_NOTICES = {
     {
       id: "aviso-principal",
       eyebrow: "Comunicado SAHMT",
-      title: "https://drive.google.com/file/d/1TWuarxdC3qDIZYRtZQ3xExCoKz4oTTuL/view?usp=drive_link",
-      message: .
+      title: "TRINAMENTO APP",
+      message: https://drive.google.com/file/d/1TWuarxdC3qDIZYRtZQ3xExCoKz4oTTuL/view?usp=drive_link.
 
 
 
