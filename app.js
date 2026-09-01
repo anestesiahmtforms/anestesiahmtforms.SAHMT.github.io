@@ -988,8 +988,11 @@
 
     elements.noticeEyebrow.textContent = activeNotice.eyebrow || "Comunicado SAHMT";
     elements.noticeTitle.textContent = activeNotice.title || "Aviso";
-    elements.noticeMessage.textContent = activeNotice.message || "";
-    renderNoticeMedia(activeNotice);
+    const embeddedMediaUrl = getSafeNoticeUrl(extractNoticeUrl(activeNotice.message));
+    elements.noticeMessage.textContent = String(activeNotice.message || "")
+      .replace(extractNoticeUrl(activeNotice.message), "")
+      .trim();
+    renderNoticeMedia(activeNotice, embeddedMediaUrl);
     elements.closeNoticeModal.disabled = true;
     elements.noticeModal.classList.remove("hidden");
     elements.noticeModal.setAttribute("aria-hidden", "false");
@@ -1012,7 +1015,7 @@
     }, 1000);
   }
 
-  function renderNoticeMedia(notice) {
+  function renderNoticeMedia(notice, embeddedMediaUrl = "") {
     if (!elements.noticeMedia) {
       return;
     }
@@ -1020,7 +1023,7 @@
     elements.noticeMedia.replaceChildren();
     const media = notice?.media || {};
     const imageUrl = getSafeNoticeUrl(notice?.imageUrl || notice?.bannerUrl || (media.type === "image" ? media.url : ""));
-    const videoUrl = getSafeNoticeUrl(notice?.videoUrl || (media.type === "video" ? media.url : ""));
+    const videoUrl = getSafeNoticeUrl(notice?.videoUrl || (media.type === "video" ? media.url : "") || embeddedMediaUrl);
 
     if (imageUrl) {
       const imageLink = document.createElement("a");
@@ -1047,6 +1050,11 @@
     }
 
     elements.noticeMedia.hidden = !elements.noticeMedia.childElementCount;
+  }
+
+  function extractNoticeUrl(value) {
+    const match = String(value || "").match(/https:\/\/[^\s`<>]+/i);
+    return match ? match[0].replace(/[.,;)]+$/, "") : "";
   }
 
   function closeNoticeModal() {
