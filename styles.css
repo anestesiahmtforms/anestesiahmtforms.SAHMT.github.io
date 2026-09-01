@@ -1456,8 +1456,11 @@ button:hover,
 .siglas-grid .sigla-item--offline {
   grid-column: -2;
   justify-self: end;
+  box-sizing: border-box;
+  max-width: calc(100% - 12px);
   width: calc(100% - 12px);
   margin-left: 12px;
+  margin-right: 0;
 }
 
 /* Keep the calendar date field fully outlined on narrow iPhone viewports. */
