@@ -2947,7 +2947,6 @@ function buildMonthlyPdf(rows, month) {
     throw new Error("Biblioteca de PDF nao carregada.");
   }
 
-  const alertCount = rows.filter((row) => isAlertType(row.tipo)).length;
   const toneA = [36, 78, 112];
   const toneB = [93, 104, 128];
   const alertTone = [133, 77, 14];
@@ -2972,6 +2971,19 @@ function buildMonthlyPdf(rows, month) {
     ...optionalPdfColumns,
   ];
   const body = rows.map((row, index) => pdfColumns.map(([, getValue]) => getValue(row, index) || ""));
+  const dateGroups = [];
+  const dateGroupByRow = rows.map((row) => {
+    const dateKey = normalizeDateKey(row.data) || String(row.data || "").trim();
+    let group = dateGroups.find((item) => item.key === dateKey);
+    if (!group) {
+      group = { key: dateKey, index: dateGroups.length, rowCount: 0 };
+      dateGroups.push(group);
+    }
+    const rowInGroup = group.rowCount;
+    group.rowCount += 1;
+    return { groupIndex: group.index, rowInGroup };
+  });
+  const dateColumnIndex = pdfColumns.findIndex(([label]) => label === "Data");
 
   doc.setFillColor(11, 63, 58);
   doc.rect(0, 0, 297, 24, "F");
@@ -2981,7 +2993,7 @@ function buildMonthlyPdf(rows, month) {
   doc.text("ETIQUETAS SAHMT", 14, 11);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(`Relatorio mensal de ${formatMonth(month)} | ${rows.length} registro(s) | ${alertCount} alerta(s)`, 14, 18);
+  doc.text(`Relatorio mensal de ${formatMonth(month)}`, 14, 18);
 
   doc.autoTable({
     startY: 30,
@@ -2995,14 +3007,18 @@ function buildMonthlyPdf(rows, month) {
     didParseCell(data) {
       if (data.section === "body") {
         const row = rows[data.row.index];
-        const rowTone = [toneA, toneB, [112, 84, 48], [72, 80, 128]][data.row.index % 4];
-        data.cell.styles.textColor = rowTone;
-        data.cell.styles.fillColor = [
-          [248, 252, 250],
-          [242, 247, 252],
-          [255, 249, 240],
-          [245, 246, 253],
-        ][data.row.index % 4];
+        const group = dateGroupByRow[data.row.index] || { groupIndex: 0, rowInGroup: 0 };
+        const dateFills = [[189, 224, 235], [208, 231, 216], [244, 218, 181], [218, 216, 241]];
+        const rowFills = [[248, 252, 250], [242, 247, 252]];
+        data.cell.styles.textColor = data.column.index === dateColumnIndex
+          ? [36, 78, 112]
+          : (group.rowInGroup % 2 === 0 ? toneA : toneB);
+        data.cell.styles.fillColor = data.column.index === dateColumnIndex
+          ? dateFills[group.groupIndex % dateFills.length]
+          : rowFills[group.rowInGroup % rowFills.length];
+        if (data.column.index === dateColumnIndex) {
+          data.cell.styles.fontStyle = "bold";
+        }
         if (isAlertType(row?.tipo)) {
           data.cell.styles.textColor = alertTone;
           data.cell.styles.fontStyle = "bold";
@@ -3017,7 +3033,7 @@ function buildMonthlyPdf(rows, month) {
   return {
     blob: doc.output("blob"),
     fileName: `etiquetas-sahmt-${month}.pdf`,
-    summaryText: `ETIQUETAS SAHMT - ${formatMonth(month)}\n${rows.length} registro(s)\n${alertCount} alerta(s)`,
+    summaryText: `ETIQUETAS SAHMT - ${formatMonth(month)}`,
   };
 }
 
