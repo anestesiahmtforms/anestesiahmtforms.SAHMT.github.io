@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-gestao-shell-v28";
+const CACHE_NAME = "sahmt-gestao-shell-v29";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -37,19 +37,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    const network = fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (response.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
       }
-
-      return fetch(event.request)
-        .then((networkResponse) => {
-          const copy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return networkResponse;
-        })
-        .catch(() => caches.match("./index.html"));
-    })
-  );
+      return response;
+    });
+    if (cached) {
+      event.waitUntil(network.catch(() => {}));
+      return cached;
+    }
+    return network.catch(() => caches.match("./index.html"));
+  })());
 });

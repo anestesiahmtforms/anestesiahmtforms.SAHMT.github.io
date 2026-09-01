@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v104";
+const CACHE_NAME = "sahmt-pwa-v105";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -99,40 +99,32 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // The live schedule and published interface must never be held back by an
-  // old service-worker response. External data is already fetched no-store.
+  // Serve the cached shell immediately, while refreshing it in the background.
+  // External spreadsheet data is still fetched by the app with no-store.
   if (new URL(event.request.url).origin !== self.location.origin) {
     return;
   }
 
-  event.respondWith(
-    fetch(event.request, { cache: "no-store" })
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(async () => {
-        const cached = await caches.match(event.request);
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    const network = fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (response.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+      }
+      return response;
+    });
 
-        if (cached) {
-          return cached;
-        }
+    if (cached) {
+      event.waitUntil(network.catch(() => {}));
+      return cached;
+    }
 
-        const requestUrl = new URL(event.request.url);
-        if (requestUrl.pathname.includes("/apps/eventos/")) {
-          return caches.match("./apps/eventos/index.html");
-        }
-        if (requestUrl.pathname.includes("/apps/etiquetas/")) {
-          return caches.match("./apps/etiquetas/index.html");
-        }
-        if (requestUrl.pathname.includes("/apps/gestao/")) {
-          return caches.match("./apps/gestao/index.html");
-        }
-
-        return caches.match("./index.html");
-      })
-  );
+    return network.catch(async () => {
+      const requestUrl = new URL(event.request.url);
+      if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
+      if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
+      if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
+      return caches.match("./index.html");
+    });
+  })());
 });

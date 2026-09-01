@@ -49,6 +49,7 @@
   const sharedStateEndpoint = normalizeEndpoint(syncConfig.endpoint);
   const syncPollIntervalMs = Number(syncConfig.pollIntervalMs) > 0 ? Number(syncConfig.pollIntervalMs) : 20000;
   const sharedPendingTtlMs = Number(syncConfig.pendingTtlMs) > 0 ? Number(syncConfig.pendingTtlMs) : 180000;
+  const scheduleCacheStorageKey = "sahmt-scale-schedule-cache-v1";
 
   const todayKey = formatKey(new Date());
   const siglaCheckState = loadSiglaCheckState();
@@ -100,8 +101,11 @@
     closeNoticeModal: document.getElementById("closeNoticeModal")
   };
 
-  await ensureSharedAccess();
+  // Start the public spreadsheet read while the shared authentication surface
+  // is restoring the trusted device. The UI still stays locked until access is ready.
+  const scheduleWarmupPromise = loadScheduleDataWithTimeout(12000).catch(() => null);
   preloadLabelsModule();
+  await ensureSharedAccess();
 
   if (elements.closeNoticeModal) {
     elements.closeNoticeModal.addEventListener("click", closeNoticeModal);
@@ -109,7 +113,7 @@
 
   showOpeningNotice();
 
-  data = fallbackData;
+  data = loadScheduleCache() || fallbackData;
 
   if (!data || !Array.isArray(data.days) || data.days.length === 0) {
     try {
@@ -228,14 +232,14 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260830-4", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260901-01", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
   }
 
   render(elements.dateInput.value);
-  refreshScheduleFromSheet();
+  refreshScheduleFromSheet(scheduleWarmupPromise);
 
   async function ensureSharedAccess() {
     if (!window.SAHMT_AUTH?.requireAccess) {
@@ -257,18 +261,36 @@
     elements.dateInput.max = orderedDates[orderedDates.length - 1];
   }
 
-  function refreshScheduleFromSheet() {
-    loadScheduleDataWithTimeout(12000)
+  function refreshScheduleFromSheet(warmupPromise = null) {
+    (warmupPromise || loadScheduleDataWithTimeout(12000))
       .then((liveData) => {
         if (!Array.isArray(liveData?.days) || !liveData.days.length) {
           return;
         }
 
         const selectedDate = elements.dateInput.value;
+        saveScheduleCache(liveData);
         applyScheduleData(liveData);
         render(clampKey(selectedDate));
       })
       .catch(() => {});
+  }
+
+  function loadScheduleCache() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(scheduleCacheStorageKey) || "null");
+      return Array.isArray(saved?.value?.days) && saved.value.days.length ? saved.value : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveScheduleCache(value) {
+    try {
+      window.localStorage.setItem(scheduleCacheStorageKey, JSON.stringify({ savedAt: Date.now(), value }));
+    } catch {
+      // Keep the network path available when storage is restricted.
+    }
   }
 
   function render(dateKey) {

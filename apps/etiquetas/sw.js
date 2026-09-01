@@ -1,4 +1,4 @@
-const CACHE_NAME = "etiqueta-sahmt-ia-v199";
+const CACHE_NAME = "etiqueta-sahmt-ia-v200";
 const ASSETS = [
   "./",
   "./index.html",
@@ -37,15 +37,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response && response.ok) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    const network = fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (response && response.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+      }
+      return response;
+    });
+    if (cached) {
+      event.waitUntil(network.catch(() => {}));
+      return cached;
+    }
+    return network.catch(() => caches.match("./index.html"));
+  })());
 });

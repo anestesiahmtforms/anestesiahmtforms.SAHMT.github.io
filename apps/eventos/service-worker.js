@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v128";
+const CACHE_NAME = "sahmt-pwa-v129";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -74,24 +74,23 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // The live schedule and published interface must never be held back by an
-  // old service-worker response. External data is already fetched no-store.
+  // Serve cached interface assets immediately, then refresh them silently.
   if (new URL(event.request.url).origin !== self.location.origin) {
     return;
   }
 
-  event.respondWith(
-    fetch(event.request, { cache: "no-store" })
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(async () => {
-        const cached = await caches.match(event.request);
-        return cached || caches.match("./index.html");
-      })
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    const network = fetch(event.request, { cache: "no-store" }).then((response) => {
+      if (response.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+      }
+      return response;
+    });
+    if (cached) {
+      event.waitUntil(network.catch(() => {}));
+      return cached;
+    }
+    return network.catch(() => caches.match("./index.html"));
+  })());
 });
