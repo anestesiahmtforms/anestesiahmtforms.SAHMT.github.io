@@ -1452,6 +1452,14 @@ button:hover,
   align-content: start;
 }
 
+/* Keep OFF LINE visually separated at the far right of the last row. */
+.siglas-grid .sigla-item--offline {
+  grid-column: -2;
+  justify-self: end;
+  width: calc(100% - 12px);
+  margin-left: 12px;
+}
+
 /* Keep the calendar date field fully outlined on narrow iPhone viewports. */
 .schedule-card > .search-banner .date-field {
   position: relative;

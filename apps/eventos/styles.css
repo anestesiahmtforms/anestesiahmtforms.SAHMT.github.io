@@ -1437,6 +1437,14 @@ button:hover,
   background: linear-gradient(180deg, #c8eeff 0%, #96d5f8 54%, #6ba9e7 100%);
 }
 
+/* Keep Suporte visually separated at the far right of the last row. */
+.siglas-grid .sigla-item--support {
+  grid-column: -2;
+  justify-self: end;
+  width: calc(100% - 12px);
+  margin-left: 12px;
+}
+
 .sigla-token--vacation {
   color: #17833c !important;
   background:

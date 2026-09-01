@@ -390,7 +390,7 @@
     });
 
     const offlineItem = document.createElement("div");
-    offlineItem.className = "sigla-item";
+    offlineItem.className = "sigla-item sigla-item--offline";
 
     const offlineLink = document.createElement("a");
     offlineLink.className = "sigla-token sigla-button offline-sigla";
