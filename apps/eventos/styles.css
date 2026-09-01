@@ -1446,6 +1446,12 @@ button:hover,
   margin: 0;
 }
 
+.siglas-grid .sigla-item--support .sigla-token--support {
+  min-height: 34px;
+  padding: 3px 4px;
+  font-size: 0.68rem;
+}
+
 .sigla-token--vacation {
   color: #17833c !important;
   background:

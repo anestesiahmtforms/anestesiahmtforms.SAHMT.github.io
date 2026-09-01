@@ -1461,6 +1461,12 @@ button:hover,
   margin: 0;
 }
 
+.siglas-grid .sigla-item--offline .offline-sigla {
+  min-height: 30px;
+  padding: 4px;
+  font-size: 0.68rem;
+}
+
 /* Keep the calendar date field fully outlined on narrow iPhone viewports. */
 .schedule-card > .search-banner .date-field {
   position: relative;
