@@ -1853,7 +1853,6 @@
       card.tabIndex = 0;
       card.setAttribute("role", "button");
       card.setAttribute("aria-label", `Editar registro de ${record.membro || record.tipo || "evento"}`);
-      card.addEventListener("dblclick", () => startEventRecordEdit(record));
 
       const number = document.createElement("div");
       number.className = "record-card__number";
@@ -1913,6 +1912,20 @@
         });
 
       card.appendChild(rows);
+
+      const actions = document.createElement("div");
+      actions.className = "record-card__actions";
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "record-card__edit-button";
+      editButton.textContent = "EDITAR REGISTRO";
+      editButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        startEventRecordEdit(record);
+      });
+      actions.appendChild(editButton);
+      card.appendChild(actions);
       elements.recordsList.appendChild(card);
     });
   }

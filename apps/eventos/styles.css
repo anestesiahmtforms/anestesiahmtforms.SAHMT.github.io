@@ -917,6 +917,32 @@ body.modal-open {
   outline-offset: 2px;
 }
 
+.record-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.record-card__edit-button {
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid rgba(13, 122, 108, 0.3);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e9fbf5, #c9eee2);
+  color: #0d695d;
+  box-shadow: 0 4px 10px rgba(13, 122, 108, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.record-card__edit-button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
 .record-card--tone-1 {
   background: rgba(236, 246, 252, 0.92);
 }
