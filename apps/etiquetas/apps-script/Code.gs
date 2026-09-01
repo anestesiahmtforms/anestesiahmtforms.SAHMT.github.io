@@ -228,14 +228,16 @@ function handleAiExtract_(payload) {
     "Regras:",
     "1. Para etiqueta hospitalar padrao, nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Nao inclua Pront nem o numero do prontuario.",
     "2. Para etiqueta hospitalar padrao, convenio: texto depois de 'Convenio:' ate o fim da linha. Nao inclua a palavra Convenio:.",
-    "3. Para etiqueta hospitalar padrao, cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Deve conter somente digitos.",
-    "4. Para etiqueta hospitalar padrao, atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Deve conter somente digitos.",
+    "3. Para etiqueta hospitalar padrao, cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Use tambem o recorte numerico ampliado correspondente. Deve conter somente digitos.",
+    "4. Para etiqueta hospitalar padrao, atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Use tambem o recorte numerico ampliado correspondente. Deve conter somente digitos.",
     "5. Para o modelo de consulta pre-anestesica em formato de card escuro, extraia apenas nomePaciente e atendimento.",
     "6. Quando detectar o modelo de consulta pre-anestesica, preencha tipo exatamente como 'Consulta Pré-anestésica' e credor exatamente como 'Caixa'. Nessa situacao, deixe convenio e cirurgia vazios.",
     "7. Quando detectar a etiqueta hospitalar padrao, deixe tipo e credor vazios para o frontend manter o fluxo atual.",
     "8. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
-    "9. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
-    "10. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
+    "9. Os recortes numericos aparecem depois da imagem principal: o primeiro mostra a faixa inferior completa, o segundo prioriza o lado esquerdo (N.Cirur) e o terceiro prioriza o lado direito (N.Atend). Compare a imagem principal com os recortes.",
+    "10. Para cirurgia e atendimento, responda somente a sequencia exata de digitos visiveis. Se qualquer digito estiver duvidoso, responda string vazia; nunca complete, corrija ou estime um numero.",
+    "11. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
+    "12. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
@@ -247,6 +249,7 @@ function handleAiExtract_(payload) {
         content: [
           { type: "input_text", text: prompt },
           { type: "input_image", image_url: imageDataUrl, detail: "high" },
+          ...getNumericImageInputs_(payload.numericImageDataUrls),
         ],
       },
     ],
@@ -355,11 +358,25 @@ function parseJsonObjectSafe_(text) {
 }
 
 function sanitizeLabelNumber_(value) {
-  const digits = cleanDigits_(value);
-  if (!digits || digits.length < 3) {
+  const raw = String(value == null ? "" : value).trim();
+  if (!raw || !/^\d+$/.test(raw)) {
     return "";
   }
-  return digits;
+  return raw.length >= 3 && raw.length <= 14 ? raw : "";
+}
+
+function getNumericImageInputs_(rawImages) {
+  if (!Array.isArray(rawImages)) {
+    return [];
+  }
+
+  return rawImages.slice(0, 3).reduce((inputs, imageDataUrl) => {
+    const value = String(imageDataUrl || "").trim();
+    if (/^data:image\/(png|jpe?g|webp);base64,/i.test(value)) {
+      inputs.push({ type: "input_image", image_url: value, detail: "high" });
+    }
+    return inputs;
+  }, []);
 }
 
 function normalizeConsultaType_(value) {

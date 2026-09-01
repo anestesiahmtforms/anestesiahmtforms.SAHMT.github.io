@@ -1025,6 +1025,10 @@ async function captureFromCamera() {
 
   const blob = await new Promise((resolve) => canvasEl.toBlob(resolve, "image/jpeg", 0.98));
   stopCamera();
+  if (!blob) {
+    setStatus("Nao foi possivel preparar a imagem capturada. Tente novamente.", "error");
+    return;
+  }
   setImageBlob(blob);
   setStatus("Etiqueta capturada. Toque em Ler Etiqueta.", "success");
 }
@@ -1146,7 +1150,7 @@ async function processCurrentImage() {
 }
 
 async function extractLabelWithAi(imageBlob) {
-  const imageDataUrl = await blobToDataUrl(imageBlob);
+  const imageSet = await prepareAiImageSet(imageBlob);
   const url = new URL(state.config.scriptUrl);
   url.searchParams.set("action", "aiExtract");
   addAuthToUrl(url);
@@ -1155,7 +1159,8 @@ async function extractLabelWithAi(imageBlob) {
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(withAuthPayload({
       action: "aiExtract",
-      imageDataUrl,
+      imageDataUrl: imageSet.imageDataUrl,
+      numericImageDataUrls: imageSet.numericImageDataUrls,
     })),
   });
 
@@ -1187,6 +1192,59 @@ async function extractLabelWithAi(imageBlob) {
     ),
     credor: String(result.credor || "").trim(),
   };
+}
+
+async function prepareAiImageSet(blob) {
+  const imageDataUrl = await blobToDataUrl(blob);
+  const image = await loadImageForAi(blob);
+  const width = image.naturalWidth || image.width;
+  const height = image.naturalHeight || image.height;
+
+  if (!width || !height) {
+    return { imageDataUrl, numericImageDataUrls: [] };
+  }
+
+  // The label numbers are normally printed below the barcodes. Enlarging those
+  // regions separately gives the vision model more pixels without changing the
+  // original image used for names and the label model.
+  const lowerTop = Math.round(height * 0.52);
+  const lowerHeight = Math.max(1, height - lowerTop);
+  const split = Math.round(width * 0.5);
+  const numericImageDataUrls = [
+    renderAiCrop(image, 0, lowerTop, width, lowerHeight, 2.4),
+    renderAiCrop(image, 0, lowerTop, split, lowerHeight, 3),
+    renderAiCrop(image, split, lowerTop, width - split, lowerHeight, 3),
+  ].filter(Boolean);
+
+  return { imageDataUrl, numericImageDataUrls };
+}
+
+function loadImageForAi(blob) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const url = URL.createObjectURL(blob);
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Falha ao preparar os recortes da etiqueta."));
+    };
+    image.src = url;
+  });
+}
+
+function renderAiCrop(image, sourceX, sourceY, sourceWidth, sourceHeight, scale) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.filter = "grayscale(1) contrast(1.18)";
+  context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.98);
 }
 
 function blobToDataUrl(blob) {
