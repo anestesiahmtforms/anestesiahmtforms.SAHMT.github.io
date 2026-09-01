@@ -2113,8 +2113,8 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
         const monthlyTone = ["a", "b", "c", "d"][index % 4];
         return `
         <article class="monthly-record-card summary-item daily-table-card daily-tone-${monthlyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
-          <div class="monthly-record-number">${index + 1}</div>
           <div class="monthly-record-fields">
+            <div class="monthly-record-number">${index + 1}</div>
             ${renderSummaryField("Data", formatDate(row.data || ""))}
             ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
             ${renderSummaryField("Convênio", row.convenio)}
@@ -2162,8 +2162,8 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
     const dailyTone = ["a", "b", "c", "d"][index % 4];
     return `
       <article class="monthly-record-card summary-item daily-table-card daily-tone-${dailyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
-        <div class="monthly-record-number">${index + 1}</div>
         <div class="monthly-record-fields">
+          <div class="monthly-record-number">${index + 1}</div>
           ${renderSummaryField("Data", formatDate(row.data || ""))}
           ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
           ${renderSummaryField("Convênio", row.convenio)}
@@ -2963,8 +2963,6 @@ function buildMonthlyPdf(rows, month) {
     ["Valor", (row) => row.valor ? formatStoredCurrency(row.valor) : ""],
     ["Credor", (row) => row.credor],
     ["Plantonista(s)", (row) => row.plantonistas],
-    ["Editado por", (row) => row.editadoPor],
-    ["Alterações", (row) => row.resumoEdicao],
     ["Observações", (row) => row.observacoes],
   ].filter(([, getValue]) => rows.some((row) => String(getValue(row) || "").trim()));
   const pdfColumns = [
