@@ -3699,3 +3699,14 @@ body::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* Keep the selected record fields visible inside the edit modal. */
+.edit-card #edit-summary {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.edit-card #edit-summary .confirm-edit-grid {
+  max-height: none;
+  overflow: visible;
+}
