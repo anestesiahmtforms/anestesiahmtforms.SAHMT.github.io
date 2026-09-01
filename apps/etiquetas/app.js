@@ -2177,37 +2177,26 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
         </div>
         ${editBlock}
         ${observationBlock}
+        <div class="summary-record-actions">
+          <button type="button" class="summary-edit-button" data-edit-record>EDITAR REGISTRO</button>
+        </div>
       </article>
     `;
   }).join("");
 
+  summaryListEl.querySelectorAll("[data-edit-record]").forEach((button, index) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openEditRecord(rows[index]);
+    });
+  });
+
   summaryListEl.querySelectorAll(".summary-item").forEach((item, index) => {
-    let tapCount = 0;
-    let tapTimer = 0;
     const row = rows[index];
     const open = () => openEditRecord(row);
     item.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
-        open();
-      }
-    });
-    item.addEventListener("touchend", (event) => {
-      event.preventDefault();
-      tapCount += 1;
-      window.clearTimeout(tapTimer);
-      if (tapCount === 3) {
-        tapCount = 0;
-        event.preventDefault();
-        open();
-        return;
-      }
-      tapTimer = window.setTimeout(() => {
-        tapCount = 0;
-      }, 650);
-    }, { passive: false });
-    item.addEventListener("click", (event) => {
-      if (event.detail === 3) {
-        event.preventDefault();
         open();
       }
     });
