@@ -1454,13 +1454,11 @@ button:hover,
 
 /* Keep OFF LINE visually separated at the far right of the last row. */
 .siglas-grid .sigla-item--offline {
-  grid-column: -2;
-  justify-self: end;
+  grid-column: -2 / -1;
+  justify-self: stretch;
   box-sizing: border-box;
-  max-width: calc(100% - 12px);
-  width: calc(100% - 12px);
-  margin-left: 12px;
-  margin-right: 0;
+  width: 100%;
+  margin: 0;
 }
 
 /* Keep the calendar date field fully outlined on narrow iPhone viewports. */

@@ -1439,10 +1439,11 @@ button:hover,
 
 /* Keep Suporte visually separated at the far right of the last row. */
 .siglas-grid .sigla-item--support {
-  grid-column: -2;
-  justify-self: end;
-  width: calc(100% - 12px);
-  margin-left: 12px;
+  grid-column: -2 / -1;
+  justify-self: stretch;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
 }
 
 .sigla-token--vacation {
