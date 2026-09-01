@@ -617,6 +617,9 @@
       button.disabled = !canWrite;
       button.setAttribute("aria-disabled", canWrite ? "false" : "true");
     });
+    if (elements.recordsList && elements.recordsDateInput) {
+      renderRecordsForDate(elements.recordsDateInput.value || todayKey);
+    }
   }
 
   function canWriteEventData() {
@@ -1913,19 +1916,21 @@
 
       card.appendChild(rows);
 
-      const actions = document.createElement("div");
-      actions.className = "record-card__actions";
-      const editButton = document.createElement("button");
-      editButton.type = "button";
-      editButton.className = "record-card__edit-button";
-      editButton.textContent = "EDITAR REGISTRO";
-      editButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        startEventRecordEdit(record);
-      });
-      actions.appendChild(editButton);
-      card.appendChild(actions);
+      if (canWriteEventData()) {
+        const actions = document.createElement("div");
+        actions.className = "record-card__actions";
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "record-card__edit-button";
+        editButton.textContent = "EDITAR REGISTRO";
+        editButton.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          startEventRecordEdit(record);
+        });
+        actions.appendChild(editButton);
+        card.appendChild(actions);
+      }
       elements.recordsList.appendChild(card);
     });
   }
