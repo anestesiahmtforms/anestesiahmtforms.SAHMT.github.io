@@ -2107,22 +2107,29 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
 
   monthlyListEl.innerHTML = `
     <div class="monthly-records">
-      ${rows.map((row, index) => `
-        <article class="monthly-record-card monthly-table-card monthly-tone-${index % 2 === 0 ? "a" : "b"}${isAlertType(row.tipo) ? " alert-row" : ""}">
+      ${rows.map((row, index) => {
+        const alertClass = isAlertType(row.tipo) ? " alert-row" : "";
+        const editedClass = row.editadoEm || row.editadoPor || row.resumoEdicao || row.observacaoAtualizadaEm || row.observacaoAtualizadaPor ? " edited-row" : "";
+        const monthlyTone = ["a", "b", "c", "d"][index % 4];
+        return `
+        <article class="monthly-record-card summary-item daily-table-card daily-tone-${monthlyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
           <div class="monthly-record-number">${index + 1}</div>
           <div class="monthly-record-fields">
-            <div><span>Data</span><strong>${escapeHtml(formatDate(row.data || ""))}</strong></div>
-            <div><span>Nome do Paciente</span><strong>${escapeHtml(row.nomePaciente || "-")}</strong></div>
-            <div><span>Convênio</span><strong>${escapeHtml(row.convenio || "-")}</strong></div>
-            <div><span>Cirurgia</span><strong>${escapeHtml(row.cirurgia || "-")}</strong></div>
-            <div><span>Atendimento</span><strong>${escapeHtml(row.atendimento || "-")}</strong></div>
-            <div><span>Tipo</span><strong>${escapeHtml(row.tipo || "-")}</strong></div>
-            <div><span>Valor</span><strong>${escapeHtml(formatStoredCurrency(row.valor) || "-")}</strong></div>
-            <div><span>Credor</span><strong>${escapeHtml(row.credor || "-")}</strong></div>
-            <div><span>Plantonista(s)</span><strong>${escapeHtml(row.plantonistas || "-")}</strong></div>
+            ${renderSummaryField("Data", formatDate(row.data || ""))}
+            ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
+            ${renderSummaryField("Convênio", row.convenio)}
+            ${renderSummaryField("Cirurgia", row.cirurgia)}
+            ${renderSummaryField("Atendimento", row.atendimento)}
+            ${renderSummaryField("Tipo", row.tipo)}
+            ${renderSummaryField("Valor", row.valor ? formatStoredCurrency(row.valor) : "")}
+            ${renderSummaryField("Credor", row.credor)}
+            ${renderSummaryField("Plantonista(s)", row.plantonistas)}
           </div>
+          ${renderSummaryEditBlock(row)}
+          ${renderSummaryObservationBlock(row)}
         </article>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
   `;
 }
@@ -2948,19 +2955,25 @@ function buildMonthlyPdf(rows, month) {
   if (typeof doc.autoTable !== "function") {
     throw new Error("Plugin de tabela PDF nao carregado.");
   }
-  const body = rows.map((row, index) => [
-    String(index + 1),
-    formatDate(row.data || ""),
-    row.nomePaciente || "-",
-    row.convenio || "-",
-    row.cirurgia || "-",
-    row.atendimento || "-",
-    row.tipo || "-",
-    formatStoredCurrency(row.valor) || "-",
-    row.credor || "-",
-    row.plantonistas || "-",
-    row.criadoPor || "-",
-  ]);
+  const optionalPdfColumns = [
+    ["Convênio", (row) => row.convenio],
+    ["Cirurgia", (row) => row.cirurgia],
+    ["Atendimento", (row) => row.atendimento],
+    ["Tipo", (row) => row.tipo],
+    ["Valor", (row) => row.valor ? formatStoredCurrency(row.valor) : ""],
+    ["Credor", (row) => row.credor],
+    ["Plantonista(s)", (row) => row.plantonistas],
+    ["Editado por", (row) => row.editadoPor],
+    ["Alterações", (row) => row.resumoEdicao],
+    ["Observações", (row) => row.observacoes],
+  ].filter(([, getValue]) => rows.some((row) => String(getValue(row) || "").trim()));
+  const pdfColumns = [
+    ["#", (row, index) => String(index + 1)],
+    ["Data", (row) => formatDate(row.data || "")],
+    ["Nome do Paciente", (row) => row.nomePaciente],
+    ...optionalPdfColumns,
+  ];
+  const body = rows.map((row, index) => pdfColumns.map(([, getValue]) => getValue(row, index) || ""));
 
   doc.setFillColor(11, 63, 58);
   doc.rect(0, 0, 297, 24, "F");
@@ -2974,27 +2987,30 @@ function buildMonthlyPdf(rows, month) {
 
   doc.autoTable({
     startY: 30,
-    head: [["#", "Data", "Nome do Paciente", "Convenio", "Cirurgia", "Atendimento", "Tipo", "Valor", "Credor", "Plantonista(s)", "Lancado por"]],
+    head: [pdfColumns.map(([label]) => label)],
     body,
     theme: "grid",
     styles: { font: "helvetica", fontSize: 7.5, cellPadding: 2, overflow: "linebreak", textColor: [31, 41, 55] },
     headStyles: { fillColor: [11, 63, 58], textColor: [255, 255, 255], fontStyle: "bold", halign: "center" },
     alternateRowStyles: { fillColor: [244, 248, 252] },
-    columnStyles: {
-      0: { cellWidth: 8, halign: "center" }, 1: { cellWidth: 20 }, 2: { cellWidth: 45 },
-      3: { cellWidth: 30 }, 4: { cellWidth: 18 }, 5: { cellWidth: 20 }, 6: { cellWidth: 25 },
-      7: { cellWidth: 20 }, 8: { cellWidth: 25 }, 9: { cellWidth: 30 }, 10: { cellWidth: 35 },
-    },
+    columnStyles: { 0: { cellWidth: 8, halign: "center" }, 1: { cellWidth: 20 }, 2: { cellWidth: 45 } },
     didParseCell(data) {
       if (data.section === "body") {
         const row = rows[data.row.index];
-        data.cell.styles.textColor = data.row.index % 2 === 0 ? toneA : toneB;
+        const rowTone = [toneA, toneB, [112, 84, 48], [72, 80, 128]][data.row.index % 4];
+        data.cell.styles.textColor = rowTone;
+        data.cell.styles.fillColor = [
+          [248, 252, 250],
+          [242, 247, 252],
+          [255, 249, 240],
+          [245, 246, 253],
+        ][data.row.index % 4];
         if (isAlertType(row?.tipo)) {
           data.cell.styles.textColor = alertTone;
           data.cell.styles.fontStyle = "bold";
           data.cell.styles.fillColor = [255, 248, 235];
         } else if (row?.resumoEdicao) {
-          data.cell.styles.fillColor = [241, 249, 244];
+          data.cell.styles.fillColor = [255, 237, 213];
         }
       }
     },
