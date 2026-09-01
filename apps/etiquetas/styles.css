@@ -3552,6 +3552,16 @@ body::before {
   }
 }
 
+/* Match the central capture guide to the proportion of the registered label. */
+.scanner-panel .guide-frame {
+  box-sizing: border-box;
+  width: calc(100% - 32px) !important;
+  max-width: calc(100% - 32px) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 3.3 / 1 !important;
+}
+
 /* Show which authenticated email is active in the app and its reports. */
 [data-auth-user]:not([hidden]) {
   padding-left: 20px;
