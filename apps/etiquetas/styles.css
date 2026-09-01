@@ -3710,3 +3710,28 @@ body::before {
   max-height: none;
   overflow: visible;
 }
+
+/* Safari can collapse the minmax grid track used by the edit sheet. */
+.edit-overlay .edit-card {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.edit-overlay .edit-card #edit-summary {
+  display: block !important;
+  flex: 0 0 auto;
+  height: auto !important;
+  visibility: visible !important;
+}
+
+.edit-overlay .edit-card #edit-summary .confirm-edit-grid {
+  display: grid !important;
+  height: auto !important;
+  visibility: visible !important;
+}
+
+.edit-overlay .edit-card #edit-summary .confirm-edit-grid > label {
+  display: grid !important;
+  visibility: visible !important;
+}
