@@ -2,7 +2,7 @@ const SPREADSHEET_NAME = "Etiquetas";
 const SPREADSHEET_ID = "1JBndSbftojjB-UGkBs4USUmCe5ZWdSx57bbZoSia2ME";
 const REGISTROS_SHEET = "ETIQUETA";
 const LISTAS_SHEET = "Listas";
-const OPENAI_MODEL = "gpt-5.2";
+const OPENAI_MODEL = "gpt-5-mini";
 const OPENAI_API_KEY_PROPERTY = "OPENAI_API_KEY";
 const REGISTROS_HEADERS = [
   "Data",
@@ -191,7 +191,8 @@ function handleAiHealth_() {
     payload: JSON.stringify({
       model: OPENAI_MODEL,
       input: "Responda apenas OK.",
-      max_output_tokens: 16,
+      max_output_tokens: 8,
+      reasoning: { effort: "low" },
     }),
     muteHttpExceptions: true,
   });
@@ -236,13 +237,16 @@ function handleAiExtract_(payload) {
     "8. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
     "9. Os recortes numericos aparecem depois da imagem principal: o primeiro mostra a faixa inferior completa, o segundo prioriza o lado esquerdo (N.Cirur) e o terceiro prioriza o lado direito (N.Atend). Compare a imagem principal com os recortes.",
     "10. Para cirurgia e atendimento, responda somente a sequencia exata de digitos visiveis. Se qualquer digito estiver duvidoso, responda string vazia; nunca complete, corrija ou estime um numero.",
-    "11. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
-    "12. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
+    "11. Um zero (0) parcialmente cortado ou com a borda apagada nunca deve ser interpretado como oito (8). Se nao for possivel distinguir 0 de 8 com certeza, deixe o campo vazio.",
+    "12. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
+    "13. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
   const requestBody = {
     model: OPENAI_MODEL,
+    reasoning: { effort: "low" },
+    max_output_tokens: 320,
     input: [
       {
         role: "user",

@@ -61,6 +61,9 @@ const state = {
   authorizedWarmupPromise: null,
 };
 
+const AI_HEALTH_CACHE_KEY = "etiqueta-hmt-ai-health-v1";
+const AI_HEALTH_CACHE_TTL_MS = 10 * 60 * 1000;
+
 const cameraEl = document.querySelector("#camera");
 const canvasEl = document.querySelector("#snapshot");
 const previewEl = document.querySelector("#preview");
@@ -521,20 +524,22 @@ function initializeAuthorizedApp() {
     reportMonthEl.value = today.slice(0, 7);
   }
 
-  // Warm the AI, sheet metadata, and report reads together after auth. None
-  // of these requests should delay the first interactive screen.
-  state.authorizedWarmupPromise = Promise.allSettled([
-    loadMetadata(),
-    loadAiHealthWithRetry(),
-    loadSummary({ silent: true, date: today }),
-    loadMonthlySummary({ silent: true }),
-  ]).then(() => undefined);
+  // Confirm the AI first. The report reads start afterwards so they cannot
+  // compete with the health check during Apps Script cold start.
+  state.authorizedWarmupPromise = (async () => {
+    await loadAiHealthWithRetry();
+    await Promise.allSettled([
+      loadMetadata(),
+      loadSummary({ silent: true, date: today }),
+      loadMonthlySummary({ silent: true }),
+    ]);
+  })().then(() => undefined);
 
   return state.authorizedWarmupPromise;
 }
 
 async function loadAiHealthWithRetry() {
-  const delays = [0, 1200, 3000, 6000];
+  const delays = [0, 800, 2200];
   for (let attempt = 0; attempt < delays.length; attempt += 1) {
     if (delays[attempt]) {
       await new Promise((resolve) => window.setTimeout(resolve, delays[attempt]));
@@ -910,6 +915,15 @@ async function loadAiHealth() {
   }
 
   state.aiHealthRequestInFlight = true;
+  const cachedHealth = readAiHealthCache();
+  if (cachedHealth) {
+    state.aiHealth = cachedHealth;
+    state.aiReady = true;
+    document.querySelector("#process-image").disabled = !state.imageBlob;
+    renderAiStatus();
+    state.aiHealthRequestInFlight = false;
+    return;
+  }
   if (!state.config.scriptUrl) {
     state.aiHealth = null;
     state.aiReady = false;
@@ -941,6 +955,7 @@ async function loadAiHealth() {
       checkedAt: new Date().toISOString(),
     };
     state.aiReady = true;
+    saveAiHealthCache(state.aiHealth);
     document.querySelector("#process-image").disabled = !state.imageBlob || !state.aiReady;
   } catch (error) {
     console.warn("Falha ao verificar IA:", error);
@@ -958,13 +973,34 @@ async function loadAiHealth() {
   }
 }
 
+function readAiHealthCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(AI_HEALTH_CACHE_KEY) || "null");
+    if (!cached?.ok || !cached.checkedAt) {
+      return null;
+    }
+    const age = Date.now() - new Date(cached.checkedAt).getTime();
+    return Number.isFinite(age) && age >= 0 && age < AI_HEALTH_CACHE_TTL_MS ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveAiHealthCache(health) {
+  try {
+    localStorage.setItem(AI_HEALTH_CACHE_KEY, JSON.stringify(health));
+  } catch {
+    // Cache is an optimization only; the live health check remains authoritative.
+  }
+}
+
 async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) {
     return;
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260830-2", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-4", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1219,25 +1255,25 @@ async function extractLabelWithAi(imageBlob) {
 }
 
 async function prepareAiImageSet(blob) {
-  const imageDataUrl = await blobToDataUrl(blob);
   const image = await loadImageForAi(blob);
   const width = image.naturalWidth || image.width;
   const height = image.naturalHeight || image.height;
 
   if (!width || !height) {
-    return { imageDataUrl, numericImageDataUrls: [] };
+    return { imageDataUrl: await blobToDataUrl(blob), numericImageDataUrls: [] };
   }
+
+  const imageDataUrl = renderAiImage(image, width, height, 1600, 0.86);
 
   // The label numbers are normally printed below the barcodes. Enlarging those
   // regions separately gives the vision model more pixels without changing the
   // original image used for names and the label model.
-  const lowerTop = Math.round(height * 0.52);
+  const lowerTop = Math.round(height * 0.56);
   const lowerHeight = Math.max(1, height - lowerTop);
   const split = Math.round(width * 0.5);
   const numericImageDataUrls = [
-    renderAiCrop(image, 0, lowerTop, width, lowerHeight, 2.4),
-    renderAiCrop(image, 0, lowerTop, split, lowerHeight, 3),
-    renderAiCrop(image, split, lowerTop, width - split, lowerHeight, 3),
+    renderAiCrop(image, 0, lowerTop, split, lowerHeight, 2.6),
+    renderAiCrop(image, split, lowerTop, width - split, lowerHeight, 2.6),
   ].filter(Boolean);
 
   return { imageDataUrl, numericImageDataUrls };
@@ -1268,7 +1304,19 @@ function renderAiCrop(image, sourceX, sourceY, sourceWidth, sourceHeight, scale)
   context.imageSmoothingQuality = "high";
   context.filter = "grayscale(1) contrast(1.18)";
   context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/jpeg", 0.98);
+  return canvas.toDataURL("image/jpeg", 0.88);
+}
+
+function renderAiImage(image, sourceWidth, sourceHeight, maxWidth, quality) {
+  const scale = Math.min(1, maxWidth / sourceWidth);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, 0, 0, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", quality);
 }
 
 function blobToDataUrl(blob) {
