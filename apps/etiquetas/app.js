@@ -1006,7 +1006,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-7", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-8", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1269,7 +1269,13 @@ async function prepareAiImageSet(blob) {
     return { imageDataUrl: await blobToDataUrl(blob), numericImageDataUrls: [] };
   }
 
-  const imageDataUrl = renderAiImage(image, width, height, 1600, 0.86);
+  let imageDataUrl;
+  try {
+    imageDataUrl = renderAiImage(image, width, height, 1600, 0.86);
+  } catch (error) {
+    console.warn("Falha ao otimizar imagem; usando a foto original:", error);
+    imageDataUrl = await blobToDataUrl(blob);
+  }
 
   // The label numbers are normally printed below the barcodes. Enlarging those
   // regions separately gives the vision model more pixels without changing the
@@ -1308,7 +1314,11 @@ function renderAiCrop(image, sourceX, sourceY, sourceWidth, sourceHeight, scale)
   const context = canvas.getContext("2d", { willReadFrequently: true });
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
-  context.filter = "grayscale(1) contrast(1.18)";
+  try {
+    context.filter = "grayscale(1) contrast(1.18)";
+  } catch {
+    context.filter = "none";
+  }
   context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL("image/jpeg", 0.88);
 }
