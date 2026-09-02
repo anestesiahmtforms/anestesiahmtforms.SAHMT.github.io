@@ -138,6 +138,7 @@
     monthlyRecordsSummary: document.getElementById("monthlyRecordsSummary"),
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
+    pendingEventIndicator: document.getElementById("pending-event-indicator"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid")
   };
@@ -167,6 +168,10 @@
   hydrateMemberDirectory().catch(() => {});
   hydrateEventRecords().catch(() => {});
   hydrateSharedSiglaState().then(() => render(elements.dateInput.value)).catch(() => {});
+  updatePendingEventUi();
+  flushPendingEventSubmissions();
+  window.addEventListener("online", () => flushPendingEventSubmissions({ notify: true }));
+  window.setInterval(() => flushPendingEventSubmissions(), 30000);
 
   elements.dateInput.addEventListener("input", () => {
     setActiveDailyDate(elements.dateInput.value);
@@ -229,6 +234,18 @@
   elements.monthlyRecordsBackdrop?.addEventListener("click", closeMonthlyRecordsModal);
   elements.shareMonthlyPdfButton?.addEventListener("click", shareMonthlyRecordsPdf);
   elements.toggleRecordsPanel?.addEventListener("click", toggleDailyRecordsPanel);
+  elements.pendingEventIndicator?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    flushPendingEventSubmissions({ notify: true });
+  });
+  elements.pendingEventIndicator?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+      flushPendingEventSubmissions({ notify: true });
+    }
+  });
   elements.closeRecordsPanel?.addEventListener("click", closeDailyRecordsPanel);
   elements.recordsPanelBackdrop?.addEventListener("click", closeDailyRecordsPanel);
 
@@ -300,7 +317,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260902-02", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260902-03", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -1268,10 +1285,14 @@
       closeEventEntryModal();
     } catch (error) {
       const detail = String(error?.message || "").trim();
+      queueEventSubmission(payload);
       setEventEntryStatus(
-        `Nao foi possivel sincronizar agora.${detail ? ` ${detail}` : " Confira o endpoint e tente novamente."}`,
+        `ENVIAR REGISTRO PENDENTE${detail ? `. ${detail}` : ""}`,
         "error"
       );
+      activeEventLaunch = null;
+      render(elements.dateInput?.value || todayKey);
+      updatePendingEventUi();
     } finally {
       setEventEntrySubmitting(false);
     }
@@ -1391,6 +1412,103 @@
     }
 
     throw lastError || new Error("REQUEST_FAILED");
+  }
+
+  const pendingEventSubmissionsKey = "sahmt-eventos-pending-submissions-v1";
+
+  function stripEventAuthPayload(payload) {
+    const {
+      authToken,
+      deviceToken,
+      userEmail,
+      userName,
+      ...safePayload
+    } = payload || {};
+    return safePayload;
+  }
+
+  function readPendingEventSubmissions() {
+    try {
+      const value = JSON.parse(window.localStorage.getItem(pendingEventSubmissionsKey) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function queueEventSubmission(payload) {
+    const queue = readPendingEventSubmissions();
+    const cleanPayload = stripEventAuthPayload(payload);
+    const signature = JSON.stringify(cleanPayload);
+    if (!queue.some((entry) => JSON.stringify(stripEventAuthPayload(entry)) === signature)) {
+      queue.push({ ...cleanPayload, queuedAt: new Date().toISOString() });
+    }
+    window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(queue.slice(-50)));
+    updatePendingEventUi();
+  }
+
+  async function flushPendingEventSubmissions(options = {}) {
+    const queue = readPendingEventSubmissions();
+    if (!queue.length || !navigator.onLine || !getAuthenticatedEmail()) {
+      updatePendingEventUi();
+      return;
+    }
+
+    const remaining = [];
+    let sentCount = 0;
+    for (const queuedPayload of queue) {
+      try {
+        const payload = window.SAHMT_AUTH?.withPayload
+          ? window.SAHMT_AUTH.withPayload(stripEventAuthPayload(queuedPayload))
+          : queuedPayload;
+        await postEventEntryPayload(payload);
+        commitEventSiglaFromPayload(queuedPayload);
+        sentCount += 1;
+      } catch {
+        remaining.push(queuedPayload);
+      }
+    }
+
+    window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(remaining));
+    updatePendingEventUi();
+    if (sentCount) {
+      hydrateEventRecords().catch(() => {});
+      render(elements.dateInput.value);
+      if (options.notify) {
+        window.alert("Registro pendente enviado com sucesso!");
+      }
+    }
+  }
+
+  function commitEventSiglaFromPayload(payload) {
+    const rawSigla = String(payload?.siglaEvento || "").trim().toUpperCase();
+    const sigla = rawSigla.startsWith(eventSharedSiglaPrefix)
+      ? rawSigla.slice(eventSharedSiglaPrefix.length).trim()
+      : rawSigla;
+    const dateKey = normalizeRecordDate(payload?.dataDoEvento || payload?.data);
+    if (!sigla || !dateKey) {
+      return;
+    }
+    if (!Array.isArray(siglaEventState[dateKey])) {
+      siglaEventState[dateKey] = [];
+    }
+    if (!siglaEventState[dateKey].includes(sigla)) {
+      siglaEventState[dateKey].push(sigla);
+      saveSiglaEventState();
+    }
+  }
+
+  function updatePendingEventUi() {
+    const hasPending = readPendingEventSubmissions().length > 0;
+    if (elements.pendingEventIndicator) {
+      elements.pendingEventIndicator.hidden = !hasPending;
+      elements.pendingEventIndicator.title = hasPending
+        ? "ENVIAR REGISTRO PENDENTE"
+        : "";
+    }
+    if (elements.toggleRecordsPanel) {
+      elements.toggleRecordsPanel.classList.toggle("has-pending-event", hasPending);
+    }
   }
 
   function resetEventEntryForm(dateKey) {

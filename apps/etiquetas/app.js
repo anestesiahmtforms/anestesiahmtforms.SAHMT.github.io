@@ -66,6 +66,7 @@ const canvasEl = document.querySelector("#snapshot");
 const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
+const pendingSubmissionsIndicatorEl = document.querySelector("#pending-submissions-indicator");
 const sheetStatusEl = document.querySelector("#sheet-status");
 const aiStatusEl = document.querySelector("#ai-status");
 const authGateEl = document.querySelector("#auth-gate");
@@ -149,6 +150,18 @@ document.querySelector("#capture-image").addEventListener("click", handleCameraC
 document.querySelector("#open-manual-entry").addEventListener("click", openManualEntry);
 document.querySelector("#upload-image")?.addEventListener("change", handleFileUpload);
 document.querySelector("#process-image").addEventListener("click", processCurrentImage);
+pendingSubmissionsIndicatorEl?.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  flushPendingSubmissions({ notify: true });
+});
+pendingSubmissionsIndicatorEl?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    event.stopPropagation();
+    flushPendingSubmissions({ notify: true });
+  }
+});
 document.querySelector("#send-sheet").addEventListener("click", sendToSheet);
 document.querySelector("#clear-form").addEventListener("click", resetForm);
 document.querySelector("#save-settings").addEventListener("click", saveSettings);
@@ -244,8 +257,9 @@ async function bootstrap() {
   setupPlantonistasPicker();
   syncConditionalEntryFields();
   syncPlantonistasRequirement();
-  flushPendingSubmissions();
+  updatePendingSubmissionsUi();
   renderSheetStatus();
+  flushPendingSubmissions({ notify: true });
   initializeAuthorizedApp().catch((error) => console.warn("Falha no aquecimento inicial:", error));
   registerServiceWorker();
 }
@@ -1487,7 +1501,9 @@ async function sendToSheet() {
     setSendFeedback("Dados enviados com sucesso!", "success");
     setStatus("Dados enviados com sucesso!", "success");
   } catch (error) {
-    showSendError(`Falha ao enviar para a planilha: ${error.message}`);
+    queueSubmission(payload);
+    setSendFeedback("ENVIAR REGISTRO PENDENTE", "error");
+    setStatus("ENVIAR REGISTRO PENDENTE", "error");
   } finally {
     toggleBusy(false);
   }
@@ -1495,7 +1511,7 @@ async function sendToSheet() {
 
 const PENDING_SUBMISSIONS_KEY = "etiquetas-sahmt-pending-submissions";
 
-async function postWithTimeout(payload, timeoutMs) {
+async function postWithTimeout(payload, timeoutMs, options = {}) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -1511,7 +1527,7 @@ async function postWithTimeout(payload, timeoutMs) {
     }
     return result;
   } catch (error) {
-    if (error.name === "AbortError" || !navigator.onLine) {
+    if (options.queueOnFailure !== false && (error.name === "AbortError" || !navigator.onLine || error)) {
       queueSubmission(payload);
       return { queued: true };
     }
@@ -1523,8 +1539,17 @@ async function postWithTimeout(payload, timeoutMs) {
 
 function queueSubmission(payload) {
   const queue = readPendingSubmissions();
-  queue.push({ ...payload, queuedAt: new Date().toISOString() });
+  const isDuplicate = queue.some((entry) => JSON.stringify(stripQueueMetadata(entry)) === JSON.stringify(stripQueueMetadata(payload)));
+  if (!isDuplicate) {
+    queue.push({ ...payload, queuedAt: new Date().toISOString() });
+  }
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue.slice(-50)));
+  updatePendingSubmissionsUi();
+}
+
+function stripQueueMetadata(payload) {
+  const { queuedAt, ...cleanPayload } = payload || {};
+  return cleanPayload;
 }
 
 function readPendingSubmissions() {
@@ -1536,21 +1561,41 @@ function readPendingSubmissions() {
   }
 }
 
-async function flushPendingSubmissions() {
+async function flushPendingSubmissions(options = {}) {
   const queue = readPendingSubmissions();
-  if (!queue.length || !state.config.scriptUrl || !navigator.onLine) return;
+  if (!queue.length || !state.config.scriptUrl || !navigator.onLine) {
+    updatePendingSubmissionsUi();
+    return;
+  }
   const remaining = [];
+  let sentCount = 0;
   for (const payload of queue) {
     try {
-      await postWithTimeout(payload, 10000);
+      await postWithTimeout(payload, 10000, { queueOnFailure: false });
+      sentCount += 1;
     } catch {
       remaining.push(payload);
     }
   }
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
+  updatePendingSubmissionsUi();
+  if (sentCount && options.notify) {
+    setStatus("Registro pendente enviado com sucesso!", "success");
+  }
 }
 
-window.addEventListener("online", flushPendingSubmissions);
+window.addEventListener("online", () => flushPendingSubmissions({ notify: true }));
+window.setInterval(() => flushPendingSubmissions(), 30000);
+
+function updatePendingSubmissionsUi() {
+  const hasPending = readPendingSubmissions().length > 0;
+  if (pendingSubmissionsIndicatorEl) {
+    pendingSubmissionsIndicatorEl.hidden = !hasPending;
+    pendingSubmissionsIndicatorEl.title = hasPending
+      ? "ENVIAR REGISTRO PENDENTE"
+      : "";
+  }
+}
 
 function showSendError(message) {
   setSendFeedback(message, "error");
