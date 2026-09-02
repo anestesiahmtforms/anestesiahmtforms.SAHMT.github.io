@@ -3778,20 +3778,6 @@ body::before {
   visibility: visible !important;
 }
 
-.pending-queue-status {
-  margin: 2px 8px 0;
-  color: #b91c1c;
-  font-size: 0.76rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.pending-queue-status[hidden] {
-  display: none !important;
-}
-
 /* Mobile touch fit: give the scanner controls breathing room without enlarging
    the outer camera area or pushing the footer below the viewport. */
 @media (max-width: 680px) {
