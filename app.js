@@ -1054,6 +1054,20 @@
     elements.noticeMedia.hidden = !elements.noticeMedia.childElementCount;
   }
 
+  function getSafeNoticeUrl(value) {
+    const rawUrl = String(value || "").trim();
+    if (!rawUrl) {
+      return "";
+    }
+
+    try {
+      const url = new URL(rawUrl, window.location.href);
+      return url.protocol === "https:" ? url.href : "";
+    } catch {
+      return "";
+    }
+  }
+
   function extractNoticeUrl(value) {
     const match = String(value || "").match(/https:\/\/[^\s`<>]+/i);
     return match ? match[0].replace(/[.,;)]+$/, "") : "";
