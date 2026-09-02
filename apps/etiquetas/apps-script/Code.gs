@@ -2,7 +2,7 @@ const SPREADSHEET_NAME = "Etiquetas";
 const SPREADSHEET_ID = "1JBndSbftojjB-UGkBs4USUmCe5ZWdSx57bbZoSia2ME";
 const REGISTROS_SHEET = "ETIQUETA";
 const LISTAS_SHEET = "Listas";
-const OPENAI_MODEL = "gpt-5-mini";
+const OPENAI_MODEL = "gpt-5.2";
 const OPENAI_API_KEY_PROPERTY = "OPENAI_API_KEY";
 const REGISTROS_HEADERS = [
   "Data",
