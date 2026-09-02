@@ -138,6 +138,7 @@
     monthlyRecordsSummary: document.getElementById("monthlyRecordsSummary"),
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
+    pendingEventStatus: document.getElementById("pending-event-status"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid")
   };
@@ -168,8 +169,18 @@
   hydrateEventRecords().catch(() => {});
   hydrateSharedSiglaState().then(() => render(elements.dateInput.value)).catch(() => {});
   flushPendingEventSubmissions();
-  window.addEventListener("online", () => flushPendingEventSubmissions({ notify: true }));
+  updatePendingEventStatus();
+  window.addEventListener("online", () => {
+    updatePendingEventStatus();
+    flushPendingEventSubmissions({ notify: true });
+  });
   window.setInterval(() => flushPendingEventSubmissions(), 30000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      updatePendingEventStatus();
+      flushPendingEventSubmissions({ notify: true });
+    }
+  });
 
   elements.dateInput.addEventListener("input", () => {
     setActiveDailyDate(elements.dateInput.value);
@@ -1272,6 +1283,7 @@
     } catch (error) {
       const detail = String(error?.message || "").trim();
       queueEventSubmission(payload);
+      updatePendingEventStatus();
       setEventEntryStatus(
         `ENVIAR REGISTRO PENDENTE${detail ? `. ${detail}` : ""}`,
         "error"
@@ -1434,6 +1446,7 @@
   async function flushPendingEventSubmissions(options = {}) {
     const queue = readPendingEventSubmissions();
     if (!queue.length || !navigator.onLine || !getAuthenticatedEmail()) {
+      updatePendingEventStatus();
       return;
     }
 
@@ -1453,6 +1466,7 @@
     }
 
     window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(remaining));
+    updatePendingEventStatus();
     if (sentCount) {
       hydrateEventRecords().catch(() => {});
       render(elements.dateInput.value);
@@ -1477,6 +1491,12 @@
     if (!siglaEventState[dateKey].includes(sigla)) {
       siglaEventState[dateKey].push(sigla);
       saveSiglaEventState();
+    }
+  }
+
+  function updatePendingEventStatus() {
+    if (elements.pendingEventStatus) {
+      elements.pendingEventStatus.hidden = readPendingEventSubmissions().length === 0;
     }
   }
 

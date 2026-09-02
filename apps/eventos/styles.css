@@ -353,6 +353,20 @@ body.modal-open {
   padding: 5px;
 }
 
+.pending-queue-status {
+  margin: 0 8px 2px;
+  color: #b91c1c;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.pending-queue-status[hidden] {
+  display: none !important;
+}
+
 .records-card .records-panel-toggle {
   min-height: 46px;
   padding: 10px 14px;
