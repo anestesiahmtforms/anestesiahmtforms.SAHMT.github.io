@@ -1592,6 +1592,8 @@ function updatePendingSubmissionsUi() {
   const hasPending = readPendingSubmissions().length > 0;
   if (pendingSubmissionsIndicatorEl) {
     pendingSubmissionsIndicatorEl.hidden = !hasPending;
+    pendingSubmissionsIndicatorEl.classList.toggle("is-visible", hasPending);
+    pendingSubmissionsIndicatorEl.setAttribute("aria-hidden", hasPending ? "false" : "true");
     pendingSubmissionsIndicatorEl.title = hasPending
       ? "ENVIAR REGISTRO PENDENTE"
       : "";

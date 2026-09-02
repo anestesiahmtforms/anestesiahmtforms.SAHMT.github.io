@@ -372,6 +372,18 @@ body.modal-open {
   display: none !important;
 }
 
+.pending-event-indicator:not(.is-visible) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.pending-event-indicator.is-visible {
+  display: grid !important;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .records-card.has-pending-event .records-panel-toggle {
   width: calc(100% - 42px);
 }

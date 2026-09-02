@@ -1503,6 +1503,8 @@
     const hasPending = readPendingEventSubmissions().length > 0;
     if (elements.pendingEventIndicator) {
       elements.pendingEventIndicator.hidden = !hasPending;
+      elements.pendingEventIndicator.classList.toggle("is-visible", hasPending);
+      elements.pendingEventIndicator.setAttribute("aria-hidden", hasPending ? "false" : "true");
       elements.pendingEventIndicator.title = hasPending
         ? "ENVIAR REGISTRO PENDENTE"
         : "";

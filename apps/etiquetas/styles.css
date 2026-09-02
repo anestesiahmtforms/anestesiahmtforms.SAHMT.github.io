@@ -3814,6 +3814,21 @@ body::before {
 .pending-submissions-indicator[hidden],
 .pending-event-indicator[hidden] {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.pending-submissions-indicator:not(.is-visible),
+.pending-event-indicator:not(.is-visible) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.pending-submissions-indicator.is-visible {
+  display: grid !important;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .scanner-panel .scanner-secondary-actions {
