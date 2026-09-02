@@ -2173,7 +2173,7 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
           ${renderSummaryField("Valor", row.valor ? formatStoredCurrency(row.valor) : "")}
           ${renderSummaryField("Credor", row.credor)}
           ${renderSummaryField("Plantonista(s)", row.plantonistas)}
-          ${renderSummaryField("Responsável", row.criadoPor)}
+          ${renderSummaryField("Responsável pelo Registro", row.criadoPor)}
         </div>
         ${editBlock}
         ${observationBlock}
