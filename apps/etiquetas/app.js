@@ -67,6 +67,7 @@ const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
 const pendingSubmissionsIndicatorEl = document.querySelector("#pending-submissions-indicator");
+const scannerSecondaryActionsEl = document.querySelector(".scanner-secondary-actions");
 const sheetStatusEl = document.querySelector("#sheet-status");
 const aiStatusEl = document.querySelector("#ai-status");
 const authGateEl = document.querySelector("#auth-gate");
@@ -1595,6 +1596,7 @@ function updatePendingSubmissionsUi() {
       ? "ENVIAR REGISTRO PENDENTE"
       : "";
   }
+  scannerSecondaryActionsEl?.classList.toggle("has-pending-submissions", hasPending);
 }
 
 function showSendError(message) {

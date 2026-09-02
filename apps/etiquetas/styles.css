@@ -3811,6 +3811,28 @@ body::before {
   }
 }
 
+.pending-submissions-indicator[hidden],
+.pending-event-indicator[hidden] {
+  display: none !important;
+}
+
+.scanner-panel .scanner-secondary-actions {
+  position: relative;
+}
+
+.scanner-panel .scanner-secondary-actions.has-pending-submissions .scanner-action {
+  width: calc(100% - 42px);
+  margin-right: 42px;
+}
+
+.scanner-panel .scanner-secondary-actions .pending-submissions-indicator {
+  right: 0;
+}
+
+#process-image {
+  padding-right: 16px;
+}
+
 /* Mobile touch fit: give the scanner controls breathing room without enlarging
    the outer camera area or pushing the footer below the viewport. */
 @media (max-width: 680px) {

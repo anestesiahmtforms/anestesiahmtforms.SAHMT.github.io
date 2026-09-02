@@ -124,6 +124,7 @@
     recordsEmptyState: document.getElementById("recordsEmptyState"),
     recordsList: document.getElementById("recordsList"),
     toggleRecordsPanel: document.getElementById("toggleRecordsPanel"),
+    recordsCard: document.querySelector(".records-card"),
     recordsPanelModal: document.getElementById("recordsPanelModal"),
     recordsPanelBackdrop: document.getElementById("recordsPanelBackdrop"),
     closeRecordsPanel: document.getElementById("closeRecordsPanel"),
@@ -1508,6 +1509,9 @@
     }
     if (elements.toggleRecordsPanel) {
       elements.toggleRecordsPanel.classList.toggle("has-pending-event", hasPending);
+    }
+    if (elements.recordsCard) {
+      elements.recordsCard.classList.toggle("has-pending-event", hasPending);
     }
   }
 
