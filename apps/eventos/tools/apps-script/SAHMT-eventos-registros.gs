@@ -2,7 +2,7 @@
 // Planilha alvo: 1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg
 // Aba alvo: Registros
 // Endpoint implantado e confirmado em 23/08/2026:
-// https://script.google.com/macros/s/AKfycbwfL9_ZUjR35Pd_FbLmBKky0hx3a0EQG4JDZicfBVcgUvyQyxHmpz_3wJluFAFYRRra/exec
+// https://script.google.com/macros/s/AKfycbx0hcm7tm9gkEQtGmx-OKsjwyNhv6fyw_Hw7H5QVDrBtglJKkTUcGyxQgBz3HRe5YTz/exec
 const EVENTOS_SPREADSHEET_ID = '1ku56cds3LvaFuRHaNGysw-VI2jSq8l1Q6CFOsHmoCXg';
 const EVENTOS_REGISTROS_SHEET = 'Registros';
 const EVENTOS_HIGHLIGHTS_SPREADSHEET_ID = '11ayJbQFmFPzLegFZHL8kPKCvudpPo60O4NyR3i7aofA';

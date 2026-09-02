@@ -31,7 +31,7 @@
   // Mantemos fallback entre implantacoes validas para o app continuar gravando
   // mesmo quando um deploy antigo deixa de responder temporariamente.
   const eventEntryConfig = {
-    endpointUrl: "https://script.google.com/macros/s/AKfycbwfL9_ZUjR35Pd_FbLmBKky0hx3a0EQG4JDZicfBVcgUvyQyxHmpz_3wJluFAFYRRra/exec",
+    endpointUrl: "https://script.google.com/macros/s/AKfycbx0hcm7tm9gkEQtGmx-OKsjwyNhv6fyw_Hw7H5QVDrBtglJKkTUcGyxQgBz3HRe5YTz/exec",
     fallbackEndpointUrls: [],
     requestTimeoutMs: 15000
   };
