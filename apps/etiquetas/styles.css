@@ -2618,6 +2618,36 @@ textarea {
   line-height: 1.25 !important;
 }
 
+.summary-edit-entry {
+  display: grid;
+  gap: 3px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(217, 119, 6, 0.24);
+}
+
+.summary-edit-entry:first-of-type {
+  margin-top: 2px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.summary-edit-entry div {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.summary-edit-entry div span {
+  flex: 0 0 auto;
+  font-weight: 900;
+}
+
+.summary-edit-entry div strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .summary-new-value {
   color: #d99a24;
   font-weight: 1000;
@@ -3645,11 +3675,13 @@ body::before {
 
 .summary-item.daily-table-card .summary-edit-block strong,
 .summary-item.daily-table-card .summary-edit-block small,
-.summary-item.daily-table-card .summary-edit-note {
+.summary-item.daily-table-card .summary-edit-note,
+.summary-item.daily-table-card .summary-edit-entry div strong,
+.summary-item.daily-table-card .summary-edit-entry div span {
   color: #b45309 !important;
 }
 
-.summary-item.daily-table-card .summary-edit-note {
+.summary-item.daily-table-card .summary-edit-entry {
   border-top-color: rgba(217, 119, 6, 0.24);
   white-space: normal;
   overflow: visible;

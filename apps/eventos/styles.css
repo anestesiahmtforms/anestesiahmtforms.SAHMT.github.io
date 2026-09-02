@@ -1110,6 +1110,20 @@ body.modal-open {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
 }
 
+.record-card__history-entry {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.record-card__history-entry + .record-card__history-entry {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(217, 119, 6, 0.24);
+}
+
 .record-card__history-line {
   display: flex;
   align-items: flex-start;

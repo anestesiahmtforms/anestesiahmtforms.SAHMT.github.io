@@ -2287,14 +2287,11 @@
         const block = document.createElement("div");
         block.className = "record-card__history-entry";
 
-        const note = document.createElement("span");
-        note.className = "record-card__history-value record-card__value--history";
-        note.textContent = [
-          entry.data,
-          entry.responsavel ? `- ${entry.responsavel}:` : "",
-          entry.alteracao
-        ].filter(Boolean).join(" ");
-        block.appendChild(note);
+        appendHistoryLine(block, "Data", entry.data);
+        appendHistoryLine(block, "Responsável", entry.responsavel);
+        const states = splitHistoryStates(entry.alteracao);
+        appendHistoryLine(block, "Estado inicial", states.initial);
+        appendHistoryLine(block, "Estado editado", states.edited);
         container.appendChild(block);
       });
     }
@@ -2322,6 +2319,24 @@
     line.appendChild(labelElement);
     line.appendChild(valueElement);
     container.appendChild(line);
+  }
+
+  function splitHistoryStates(value) {
+    const initial = [];
+    const edited = [];
+    String(value || "").split(/;\s*/).filter(Boolean).forEach((change) => {
+      const match = change.match(/^([^:]+):\s*(.*?)\s*->\s*(.*)$/);
+      if (match) {
+        initial.push(`${match[1].trim()}: ${match[2].trim()}`);
+        edited.push(`${match[1].trim()}: ${match[3].trim()}`);
+      } else {
+        edited.push(change.trim());
+      }
+    });
+    return {
+      initial: initial.join("; ") || "Não informado",
+      edited: edited.join("; ") || "Não informado"
+    };
   }
 
   function parseRecordHistoryEntries(value) {

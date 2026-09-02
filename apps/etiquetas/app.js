@@ -2248,15 +2248,45 @@ function renderEditHistoryLines(row) {
     return history
       .split(/\n+/)
       .filter(Boolean)
-      .map((line) => `<span class="summary-edit-note">${formatEditHistoryLine(line)}</span>`)
+      .map((line) => renderEditHistoryEntry(line))
       .join("");
   }
 
-  return `<span class="summary-edit-note">${escapeHtml(composeHistoryLine(
+  return renderEditHistoryEntry(composeHistoryLine(
     row.editadoEm || "Sem data registrada",
     row.editadoPor || "Sem responsavel registrado",
     "Registro editado."
-  ))}</span>`;
+  ));
+}
+
+function renderEditHistoryEntry(line) {
+  const raw = String(line || "").trim();
+  const separatorIndex = raw.indexOf(" - ");
+  const changeSeparatorIndex = raw.indexOf(": ", separatorIndex + 3);
+  const date = separatorIndex >= 0 ? raw.slice(0, separatorIndex) : "Sem data registrada";
+  const responsible = separatorIndex >= 0 && changeSeparatorIndex >= 0
+    ? raw.slice(separatorIndex + 3, changeSeparatorIndex)
+    : "Sem responsavel registrado";
+  const changes = changeSeparatorIndex >= 0 ? raw.slice(changeSeparatorIndex + 2) : raw;
+  const initial = [];
+  const edited = [];
+
+  changes.split(/;\s*/).filter(Boolean).forEach((change) => {
+    const match = change.match(/^([^:]+):\s*(.*?)\s*->\s*(.*)$/);
+    if (match) {
+      initial.push(`${match[1].trim()}: ${match[2].trim()}`);
+      edited.push(`${match[1].trim()}: ${match[3].trim()}`);
+    } else {
+      edited.push(change.trim());
+    }
+  });
+
+  return `<div class="summary-edit-entry">
+    <div><span>Data:</span><strong>${escapeHtml(date)}</strong></div>
+    <div><span>Responsável:</span><strong>${escapeHtml(responsible)}</strong></div>
+    <div><span>Estado inicial:</span><strong>${escapeHtml(initial.join("; ") || "Não informado")}</strong></div>
+    <div><span>Estado editado:</span><strong>${escapeHtml(edited.join("; ") || "Não informado")}</strong></div>
+  </div>`;
 }
 
 function composeHistoryLine(dateTime, responsible, detail) {
