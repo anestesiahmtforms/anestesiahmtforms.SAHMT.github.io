@@ -1968,9 +1968,7 @@
         ["Turno", record.turno],
         ["Pagador", record.pagador],
         ["Credor", record.credor],
-        ["Valor", formatStoredCurrency(record.valor)],
-        ["Responsável pelo Registro", `${getRecordResponsible(record)}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
-        ["Edicao de Registro", String(record.history || "").trim()]
+        ["Valor", formatStoredCurrency(record.valor)]
       ]
         .filter(([, value]) => String(value || "").trim())
         .forEach(([label, value]) => {
