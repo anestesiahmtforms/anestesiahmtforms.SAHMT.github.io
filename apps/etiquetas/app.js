@@ -58,6 +58,7 @@ const state = {
   googleAuthInProgress: false,
   aiReady: false,
   aiHealthRequestInFlight: false,
+  authorizedWarmupPromise: null,
 };
 
 const cameraEl = document.querySelector("#camera");
@@ -245,7 +246,7 @@ async function bootstrap() {
   syncPlantonistasRequirement();
   flushPendingSubmissions();
   renderSheetStatus();
-  await initializeAuthorizedApp();
+  initializeAuthorizedApp().catch((error) => console.warn("Falha no aquecimento inicial:", error));
   registerServiceWorker();
 }
 
@@ -489,7 +490,7 @@ async function handleGoogleCredentialResponse(credential) {
     persistTrustedDeviceSession();
     hideAuthGate();
     renderAuthStatus();
-    await initializeAuthorizedApp();
+    initializeAuthorizedApp().catch((error) => console.warn("Falha ao aquecer após login:", error));
     registerServiceWorker();
   } catch (error) {
     console.warn("Falha na autorizacao Google:", error);
@@ -507,8 +508,29 @@ async function handleGoogleCredentialResponse(credential) {
   }
 }
 
-async function initializeAuthorizedApp() {
-  await Promise.all([loadMetadata(), loadAiHealthWithRetry()]);
+function initializeAuthorizedApp() {
+  if (state.authorizedWarmupPromise) {
+    return state.authorizedWarmupPromise;
+  }
+
+  const today = getTodayISO();
+  if (summaryDateEl && !summaryDateEl.value) {
+    summaryDateEl.value = today;
+  }
+  if (reportMonthEl && !reportMonthEl.value) {
+    reportMonthEl.value = today.slice(0, 7);
+  }
+
+  // Warm the AI, sheet metadata, and report reads together after auth. None
+  // of these requests should delay the first interactive screen.
+  state.authorizedWarmupPromise = Promise.allSettled([
+    loadMetadata(),
+    loadAiHealthWithRetry(),
+    loadSummary({ silent: true, date: today }),
+    loadMonthlySummary({ silent: true }),
+  ]).then(() => undefined);
+
+  return state.authorizedWarmupPromise;
 }
 
 async function loadAiHealthWithRetry() {
@@ -803,6 +825,7 @@ function loadConfig() {
 async function saveSettings() {
   state.config.scriptUrl = scriptUrlEl.value.trim();
   localStorage.setItem(CONFIG.storageKey, JSON.stringify(state.config));
+  state.authorizedWarmupPromise = null;
   renderSheetStatus();
   await initializeAuthorizedApp();
   setStatus("URL do Apps Script salva neste aparelho.", "success");
