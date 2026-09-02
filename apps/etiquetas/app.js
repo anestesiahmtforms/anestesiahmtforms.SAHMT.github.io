@@ -71,6 +71,8 @@ const canvasEl = document.querySelector("#snapshot");
 const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
+const pendingSendConfirmationEl = document.querySelector("#pending-send-confirmation");
+const pendingSendConfirmationOkEl = document.querySelector("#pending-send-confirmation-ok");
 const sheetStatusEl = document.querySelector("#sheet-status");
 const aiStatusEl = document.querySelector("#ai-status");
 const authGateEl = document.querySelector("#auth-gate");
@@ -102,6 +104,20 @@ const editContextEl = document.querySelector("#edit-context");
 const editSummaryEl = document.querySelector("#edit-summary");
 const editFeedbackEl = document.querySelector("#edit-feedback");
 const editSaveEl = document.querySelector("#edit-save");
+
+pendingSendConfirmationOkEl?.addEventListener("click", () => {
+  pendingSendConfirmationEl.hidden = true;
+});
+
+function showPendingSendConfirmation(sentCount) {
+  if (!pendingSendConfirmationEl) {
+    return;
+  }
+  const countLabel = sentCount === 1 ? "O registro pendente foi enviado com sucesso." : `${sentCount} registros pendentes foram enviados com sucesso.`;
+  pendingSendConfirmationEl.querySelector("span").textContent = countLabel;
+  pendingSendConfirmationEl.hidden = false;
+  pendingSendConfirmationOkEl?.focus({ preventScroll: true });
+}
 
 const fields = {
   data: document.querySelector("#data"),
@@ -1003,7 +1019,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-10", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-11", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1625,7 +1641,7 @@ async function flushPendingSubmissions(options = {}) {
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
   if (sentCount && options.notify) {
     setStatus("Registro pendente enviado com sucesso!", "success");
-    window.alert("Registro pendente enviado com sucesso!");
+    showPendingSendConfirmation(sentCount);
   }
 }
 

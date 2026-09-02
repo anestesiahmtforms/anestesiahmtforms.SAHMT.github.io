@@ -367,6 +367,49 @@ body.modal-open {
   display: none !important;
 }
 
+.pending-send-confirmation {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  margin: 10px 8px 2px;
+  padding: 12px 14px;
+  border: 1px solid rgba(22, 101, 52, 0.35);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+  color: #166534;
+  box-shadow: 0 10px 22px rgba(22, 101, 52, 0.14);
+}
+
+.pending-send-confirmation[hidden] {
+  display: none !important;
+}
+
+.pending-send-confirmation strong,
+.pending-send-confirmation span {
+  grid-column: 1;
+}
+
+.pending-send-confirmation strong {
+  font-size: 0.9rem;
+}
+
+.pending-send-confirmation span {
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.pending-send-confirmation button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 56px;
+  min-height: 42px;
+  border-radius: 12px;
+  background: #166534;
+  color: #fff;
+  font-weight: 900;
+}
+
 .records-card .records-panel-toggle {
   min-height: 46px;
   padding: 10px 14px;

@@ -139,10 +139,26 @@
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
     pendingEventStatus: document.getElementById("pending-event-status"),
+    pendingSendConfirmation: document.getElementById("pending-send-confirmation"),
+    pendingSendConfirmationOk: document.getElementById("pending-send-confirmation-ok"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid")
   };
   let currentAccessLabel = "";
+
+  elements.pendingSendConfirmationOk?.addEventListener("click", () => {
+    elements.pendingSendConfirmation.hidden = true;
+  });
+
+  function showPendingSendConfirmation(sentCount) {
+    if (!elements.pendingSendConfirmation) {
+      return;
+    }
+    const countLabel = sentCount === 1 ? "O registro pendente foi enviado com sucesso." : `${sentCount} registros pendentes foram enviados com sucesso.`;
+    elements.pendingSendConfirmation.querySelector("span").textContent = countLabel;
+    elements.pendingSendConfirmation.hidden = false;
+    elements.pendingSendConfirmationOk?.focus({ preventScroll: true });
+  }
 
   await ensureSharedAuthorizedAccess();
 
@@ -314,7 +330,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260902-03", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260902-04", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -1471,7 +1487,7 @@
       hydrateEventRecords().catch(() => {});
       render(elements.dateInput.value);
       if (options.notify) {
-        window.alert("Registro pendente enviado com sucesso!");
+        showPendingSendConfirmation(sentCount);
       }
     }
   }

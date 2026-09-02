@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://docs.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=159">
+  <link rel="stylesheet" href="./styles.css?v=160">
 </head>
 <body>
   <div class="app-shell">
@@ -66,6 +66,11 @@
           </button>
         </div>
         <p id="processing-status" class="hint"></p>
+        <div id="pending-send-confirmation" class="pending-send-confirmation" hidden role="alert" aria-live="assertive">
+          <strong>Envio concluído</strong>
+          <span>O registro pendente foi enviado com sucesso.</span>
+          <button id="pending-send-confirmation-ok" type="button">OK</button>
+        </div>
       </section>
 
       <div class="quick-actions">
@@ -332,6 +337,6 @@
     })();
   </script>
   <script src="../../auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=157" type="module"></script>
+  <script src="./app.js?v=158" type="module"></script>
 </body>
 </html>
