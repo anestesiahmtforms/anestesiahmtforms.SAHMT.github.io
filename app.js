@@ -103,10 +103,12 @@
   };
 
   // Start the public spreadsheet read while the shared authentication surface
-  // is restoring the trusted device. The UI still stays locked until access is ready.
+  // restores the trusted device.
   const scheduleWarmupPromise = loadScheduleDataWithTimeout(12000).catch(() => null);
   preloadLabelsModule();
-  await ensureSharedAccess();
+  // Render the local schedule immediately; authentication continues in the background.
+  // This prevents a slow session restore from leaving the main page blank.
+  ensureSharedAccess().catch((error) => console.warn("Falha na autenticacao inicial:", error));
 
   if (elements.closeNoticeModal) {
     elements.closeNoticeModal.addEventListener("click", closeNoticeModal);
