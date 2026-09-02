@@ -206,6 +206,15 @@ function doPost(e) {
       lock.releaseLock();
     }
 
+    if (payload.siglaEvento) {
+      const highlightsSheet = getHighlightsSheet_();
+      setHighlight_(highlightsSheet, {
+        date: payload.dataDoEvento,
+        sigla: payload.siglaEvento,
+        marked: true
+      }, authenticatedUser.email);
+    }
+
     return jsonResponse_({
       ok: true,
       message: result.message,
@@ -256,6 +265,7 @@ function parsePayload_(payload) {
     credor: pickFirstValue_(payload, ['credor', 'resultadoCredor']),
     valor: normalizeCurrency_(pickFirstValue_(payload, ['valorAPagar', 'valorPagar'])),
     origem: pickFirstValue_(payload, ['origem']),
+    siglaEvento: pickFirstValue_(payload, ['siglaEvento']),
     criadoEm: pickFirstValue_(payload, ['criadoEmIso', 'criadoEm'])
   };
 

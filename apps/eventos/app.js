@@ -57,6 +57,7 @@
   const listsSyncStorageKey = "sahmt-eventos-lists-cache-v1";
   const recordsSyncStorageKey = "sahmt-eventos-records-cache-v1";
   const sharedStateEndpoint = normalizeEndpoint(syncConfig.endpoint);
+  const eventSharedSiglaPrefix = "EVENTO:";
   const syncPollIntervalMs = Number(syncConfig.pollIntervalMs) > 0 ? Number(syncConfig.pollIntervalMs) : 20000;
   const sharedPendingTtlMs = Number(syncConfig.pendingTtlMs) > 0 ? Number(syncConfig.pendingTtlMs) : 180000;
 
@@ -299,7 +300,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260901-01", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260902-02", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -747,7 +748,8 @@
     try {
       const remoteState = await fetchSharedSiglaState();
       if (remoteState) {
-        replaceSiglaCheckState(remoteState);
+        replaceSiglaCheckState(removeEventSharedState(remoteState));
+        replaceSiglaEventState(extractEventSharedState(remoteState));
       }
       startSharedStatePolling();
     } catch (error) {
@@ -763,11 +765,17 @@
     sharedStateTimer = window.setInterval(async () => {
       try {
         const remoteState = await fetchSharedSiglaState();
-        const mergedState = mergeSharedState(remoteState);
+        const mergedState = mergeSharedState(removeEventSharedState(remoteState));
         const nextHash = serializeSiglaState(mergedState);
 
         if (nextHash && nextHash !== sharedStateHash) {
           replaceSiglaCheckState(mergedState);
+          render(elements.dateInput.value);
+        }
+
+        const remoteEventState = extractEventSharedState(remoteState);
+        if (serializeSiglaState(remoteEventState) !== serializeSiglaState(siglaEventState)) {
+          replaceSiglaEventState(remoteEventState);
           render(elements.dateInput.value);
         }
       } catch (error) {
@@ -793,6 +801,41 @@
 
     const payload = await response.json();
     return normalizeSharedState(payload?.highlights);
+  }
+
+  function extractEventSharedState(rawState) {
+    const normalizedState = normalizeSharedState(rawState);
+    return Object.entries(normalizedState).reduce((state, [dateKey, siglas]) => {
+      const eventSiglas = siglas
+        .filter((value) => value.startsWith(eventSharedSiglaPrefix))
+        .map((value) => value.slice(eventSharedSiglaPrefix.length).trim().toUpperCase())
+        .filter(Boolean);
+
+      if (eventSiglas.length) {
+        state[dateKey] = Array.from(new Set(eventSiglas));
+      }
+      return state;
+    }, {});
+  }
+
+  function removeEventSharedState(rawState) {
+    const normalizedState = normalizeSharedState(rawState);
+    return Object.entries(normalizedState).reduce((state, [dateKey, siglas]) => {
+      const regularSiglas = siglas.filter((value) => !value.startsWith(eventSharedSiglaPrefix));
+      if (regularSiglas.length) {
+        state[dateKey] = regularSiglas;
+      }
+      return state;
+    }, {});
+  }
+
+  function replaceSiglaEventState(nextState) {
+    const normalizedState = normalizeSharedState(nextState);
+    Object.keys(siglaEventState).forEach((key) => delete siglaEventState[key]);
+    Object.entries(normalizedState).forEach(([dateKey, siglas]) => {
+      siglaEventState[dateKey] = siglas;
+    });
+    saveSiglaEventState();
   }
 
   async function pushSharedSiglaCheck(dateKey, sigla, marked) {
@@ -1273,6 +1316,9 @@
     const payload = {
       data: displayEventDate,
       dataDoEvento: displayEventDate,
+      siglaEvento: activeEventLaunch?.sigla
+        ? `${eventSharedSiglaPrefix}${activeEventLaunch.sigla}`
+        : "",
       ausente: memberStatus,
       membroAusenteAtrasado: memberStatus,
       evento: eventType,
