@@ -1006,7 +1006,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-8", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-9", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1550,6 +1550,7 @@ async function sendToSheet() {
     resetScannerView();
     setSendFeedback("Dados enviados com sucesso!", "success");
     setStatus("Dados enviados com sucesso!", "success");
+    updatePendingSubmissionsStatus();
   } catch (error) {
     queueSubmission(payload);
     setSendFeedback("ENVIAR REGISTRO PENDENTE", "error");
