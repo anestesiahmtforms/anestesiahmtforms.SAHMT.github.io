@@ -1877,13 +1877,13 @@
         ["Credor", record.credor],
         ["Valor a pagar", formatStoredCurrency(record.valor)],
         ["Responsável pelo Registro", `${getRecordResponsible(record)}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
-        ["Ultima edicao", String(record.history || "").trim()]
+        ["Edição de Registro", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
         .forEach(([label, value]) => {
           const row = document.createElement("div");
           row.className = "record-card__row";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             row.classList.add("record-card__row--history");
           }
           if (label === "Responsável pelo Registro") {
@@ -1892,7 +1892,7 @@
 
           const labelElement = document.createElement("span");
           labelElement.className = "record-card__label";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             labelElement.classList.add("record-card__label--history");
           }
           if (label === "Responsável pelo Registro") {
@@ -1902,7 +1902,7 @@
 
           const valueElement = document.createElement("span");
           valueElement.className = "record-card__value";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             row.appendChild(labelElement);
             appendHistoryDisplayBlock(row, value);
             rows.appendChild(row);
@@ -1970,13 +1970,13 @@
         ["Credor", record.credor],
         ["Valor", formatStoredCurrency(record.valor)],
         ["Responsável pelo Registro", `${getRecordResponsible(record)}${record.timestamp ? ` - ${record.timestamp}` : ""}`],
-        ["Ultima edicao", String(record.history || "").trim()]
+        ["Edição de Registro", String(record.history || "").trim()]
       ]
         .filter(([, value]) => String(value || "").trim())
         .forEach(([label, value]) => {
           const row = document.createElement("div");
           row.className = "record-card__row";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             row.classList.add("record-card__row--history");
           }
           if (label === "Responsável pelo Registro") {
@@ -1985,7 +1985,7 @@
 
           const labelElement = document.createElement("span");
           labelElement.className = "record-card__label";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             labelElement.classList.add("record-card__label--history");
           }
           if (label === "Responsável pelo Registro") {
@@ -1995,7 +1995,7 @@
 
           const valueElement = document.createElement("span");
           valueElement.className = "record-card__value";
-          if (label === "Ultima edicao") {
+          if (label === "Edição de Registro") {
             row.appendChild(labelElement);
             appendHistoryDisplayBlock(row, value);
             rows.appendChild(row);
