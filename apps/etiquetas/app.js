@@ -2125,7 +2125,6 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
             ${renderSummaryField("Credor", row.credor)}
             ${renderSummaryField("Plantonista(s)", row.plantonistas)}
           </div>
-          ${renderSummaryEditBlock(row)}
           ${renderSummaryObservationBlock(row)}
         </article>
       `;
