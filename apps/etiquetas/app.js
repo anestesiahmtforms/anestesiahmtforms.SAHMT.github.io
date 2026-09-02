@@ -66,8 +66,6 @@ const canvasEl = document.querySelector("#snapshot");
 const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
-const pendingSubmissionsIndicatorEl = document.querySelector("#pending-submissions-indicator");
-const scannerSecondaryActionsEl = document.querySelector(".scanner-secondary-actions");
 const sheetStatusEl = document.querySelector("#sheet-status");
 const aiStatusEl = document.querySelector("#ai-status");
 const authGateEl = document.querySelector("#auth-gate");
@@ -151,18 +149,6 @@ document.querySelector("#capture-image").addEventListener("click", handleCameraC
 document.querySelector("#open-manual-entry").addEventListener("click", openManualEntry);
 document.querySelector("#upload-image")?.addEventListener("change", handleFileUpload);
 document.querySelector("#process-image").addEventListener("click", processCurrentImage);
-pendingSubmissionsIndicatorEl?.addEventListener("click", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  flushPendingSubmissions({ notify: true });
-});
-pendingSubmissionsIndicatorEl?.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    event.stopPropagation();
-    flushPendingSubmissions({ notify: true });
-  }
-});
 document.querySelector("#send-sheet").addEventListener("click", sendToSheet);
 document.querySelector("#clear-form").addEventListener("click", resetForm);
 document.querySelector("#save-settings").addEventListener("click", saveSettings);
@@ -258,7 +244,6 @@ async function bootstrap() {
   setupPlantonistasPicker();
   syncConditionalEntryFields();
   syncPlantonistasRequirement();
-  updatePendingSubmissionsUi();
   renderSheetStatus();
   flushPendingSubmissions({ notify: true });
   initializeAuthorizedApp().catch((error) => console.warn("Falha no aquecimento inicial:", error));
@@ -1544,8 +1529,7 @@ function queueSubmission(payload) {
   if (!isDuplicate) {
     queue.push({ ...payload, queuedAt: new Date().toISOString() });
   }
-  localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue.slice(-50)));
-  updatePendingSubmissionsUi();
+  localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue));
 }
 
 function stripQueueMetadata(payload) {
@@ -1565,7 +1549,6 @@ function readPendingSubmissions() {
 async function flushPendingSubmissions(options = {}) {
   const queue = readPendingSubmissions();
   if (!queue.length || !state.config.scriptUrl || !navigator.onLine) {
-    updatePendingSubmissionsUi();
     return;
   }
   const remaining = [];
@@ -1579,7 +1562,6 @@ async function flushPendingSubmissions(options = {}) {
     }
   }
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
-  updatePendingSubmissionsUi();
   if (sentCount && options.notify) {
     setStatus("Registro pendente enviado com sucesso!", "success");
   }
@@ -1587,19 +1569,6 @@ async function flushPendingSubmissions(options = {}) {
 
 window.addEventListener("online", () => flushPendingSubmissions({ notify: true }));
 window.setInterval(() => flushPendingSubmissions(), 30000);
-
-function updatePendingSubmissionsUi() {
-  const hasPending = readPendingSubmissions().length > 0;
-  if (pendingSubmissionsIndicatorEl) {
-    pendingSubmissionsIndicatorEl.hidden = !hasPending;
-    pendingSubmissionsIndicatorEl.classList.toggle("is-visible", hasPending);
-    pendingSubmissionsIndicatorEl.setAttribute("aria-hidden", hasPending ? "false" : "true");
-    pendingSubmissionsIndicatorEl.title = hasPending
-      ? "ENVIAR REGISTRO PENDENTE"
-      : "";
-  }
-  scannerSecondaryActionsEl?.classList.toggle("has-pending-submissions", hasPending);
-}
 
 function showSendError(message) {
   setSendFeedback(message, "error");

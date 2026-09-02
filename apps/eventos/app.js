@@ -124,7 +124,6 @@
     recordsEmptyState: document.getElementById("recordsEmptyState"),
     recordsList: document.getElementById("recordsList"),
     toggleRecordsPanel: document.getElementById("toggleRecordsPanel"),
-    recordsCard: document.querySelector(".records-card"),
     recordsPanelModal: document.getElementById("recordsPanelModal"),
     recordsPanelBackdrop: document.getElementById("recordsPanelBackdrop"),
     closeRecordsPanel: document.getElementById("closeRecordsPanel"),
@@ -139,7 +138,6 @@
     monthlyRecordsSummary: document.getElementById("monthlyRecordsSummary"),
     monthlyRecordsEmptyState: document.getElementById("monthlyRecordsEmptyState"),
     monthlyRecordsList: document.getElementById("monthlyRecordsList"),
-    pendingEventIndicator: document.getElementById("pending-event-indicator"),
     emptyState: document.getElementById("emptyState"),
     siglasGrid: document.getElementById("siglasGrid")
   };
@@ -169,7 +167,6 @@
   hydrateMemberDirectory().catch(() => {});
   hydrateEventRecords().catch(() => {});
   hydrateSharedSiglaState().then(() => render(elements.dateInput.value)).catch(() => {});
-  updatePendingEventUi();
   flushPendingEventSubmissions();
   window.addEventListener("online", () => flushPendingEventSubmissions({ notify: true }));
   window.setInterval(() => flushPendingEventSubmissions(), 30000);
@@ -235,18 +232,6 @@
   elements.monthlyRecordsBackdrop?.addEventListener("click", closeMonthlyRecordsModal);
   elements.shareMonthlyPdfButton?.addEventListener("click", shareMonthlyRecordsPdf);
   elements.toggleRecordsPanel?.addEventListener("click", toggleDailyRecordsPanel);
-  elements.pendingEventIndicator?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    flushPendingEventSubmissions({ notify: true });
-  });
-  elements.pendingEventIndicator?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      event.stopPropagation();
-      flushPendingEventSubmissions({ notify: true });
-    }
-  });
   elements.closeRecordsPanel?.addEventListener("click", closeDailyRecordsPanel);
   elements.recordsPanelBackdrop?.addEventListener("click", closeDailyRecordsPanel);
 
@@ -1293,7 +1278,6 @@
       );
       activeEventLaunch = null;
       render(elements.dateInput?.value || todayKey);
-      updatePendingEventUi();
     } finally {
       setEventEntrySubmitting(false);
     }
@@ -1444,14 +1428,12 @@
     if (!queue.some((entry) => JSON.stringify(stripEventAuthPayload(entry)) === signature)) {
       queue.push({ ...cleanPayload, queuedAt: new Date().toISOString() });
     }
-    window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(queue.slice(-50)));
-    updatePendingEventUi();
+    window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(queue));
   }
 
   async function flushPendingEventSubmissions(options = {}) {
     const queue = readPendingEventSubmissions();
     if (!queue.length || !navigator.onLine || !getAuthenticatedEmail()) {
-      updatePendingEventUi();
       return;
     }
 
@@ -1471,7 +1453,6 @@
     }
 
     window.localStorage.setItem(pendingEventSubmissionsKey, JSON.stringify(remaining));
-    updatePendingEventUi();
     if (sentCount) {
       hydrateEventRecords().catch(() => {});
       render(elements.dateInput.value);
@@ -1496,24 +1477,6 @@
     if (!siglaEventState[dateKey].includes(sigla)) {
       siglaEventState[dateKey].push(sigla);
       saveSiglaEventState();
-    }
-  }
-
-  function updatePendingEventUi() {
-    const hasPending = readPendingEventSubmissions().length > 0;
-    if (elements.pendingEventIndicator) {
-      elements.pendingEventIndicator.hidden = !hasPending;
-      elements.pendingEventIndicator.classList.toggle("is-visible", hasPending);
-      elements.pendingEventIndicator.setAttribute("aria-hidden", hasPending ? "false" : "true");
-      elements.pendingEventIndicator.title = hasPending
-        ? "ENVIAR REGISTRO PENDENTE"
-        : "";
-    }
-    if (elements.toggleRecordsPanel) {
-      elements.toggleRecordsPanel.classList.toggle("has-pending-event", hasPending);
-    }
-    if (elements.recordsCard) {
-      elements.recordsCard.classList.toggle("has-pending-event", hasPending);
     }
   }
 

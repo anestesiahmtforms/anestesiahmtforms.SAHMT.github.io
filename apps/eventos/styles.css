@@ -349,49 +349,6 @@ body.modal-open {
   text-transform: uppercase;
 }
 
-.pending-event-indicator {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 50%;
-  background: #fee2e2;
-  color: #dc2626;
-  font-size: 1.25rem;
-  font-weight: 1000;
-  line-height: 1;
-  transform: translateY(-50%);
-  cursor: pointer;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), 0 6px 12px rgba(185, 28, 28, 0.2);
-}
-
-.pending-event-indicator[hidden] {
-  display: none !important;
-}
-
-.pending-event-indicator:not(.is-visible) {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.pending-event-indicator.is-visible {
-  display: grid !important;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.records-card.has-pending-event .records-panel-toggle {
-  width: calc(100% - 42px);
-}
-
-.records-card.has-pending-event .pending-event-indicator {
-  right: 5px;
-}
-
 .records-card {
   padding: 5px;
 }
@@ -1152,10 +1109,6 @@ body.modal-open {
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(155, 91, 0, 0.15);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
-}
-
-.records-panel-toggle.has-pending-event::after {
-  content: none;
 }
 
 .record-card__history-entry {
