@@ -711,8 +711,30 @@ label[hidden] {
 }
 
 .keyboard-open .form-panel .form-grid {
-  overflow: hidden;
-  padding-bottom: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 2px 18px 0;
+  scroll-padding-block: 8px 18px;
+}
+
+/* The iPhone keyboard reduces the visual viewport. Keep Entrada fixed, but
+   let its content scroll internally so the lower fields remain reachable. */
+.keyboard-open .form-panel.modal-panel {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.keyboard-open .form-panel .form-grid {
+  flex: 0 0 auto;
+}
+
+.keyboard-open .form-panel > .actions,
+.keyboard-open .form-panel > .send-feedback,
+.keyboard-open .form-panel > .panel-base-action {
+  flex: 0 0 auto;
 }
 
 .modal-panel .section-title,

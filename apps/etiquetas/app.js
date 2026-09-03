@@ -230,6 +230,11 @@ entryPanelEl?.addEventListener("focusin", (event) => {
   requestAnimationFrame(() => {
     target.scrollIntoView({ behavior: "auto", block: "nearest", inline: "nearest" });
   });
+  window.setTimeout(() => {
+    if (document.body.classList.contains("keyboard-open") && target.isConnected) {
+      target.scrollIntoView({ behavior: "auto", block: "nearest", inline: "nearest" });
+    }
+  }, 140);
 });
 window.addEventListener("focus", refreshDisplayedSummaries);
 window.addEventListener("pageshow", refreshDisplayedSummaries);
@@ -1019,7 +1024,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-11", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-12", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
