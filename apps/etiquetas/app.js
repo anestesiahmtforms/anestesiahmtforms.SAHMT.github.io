@@ -1026,7 +1026,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-13", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-14", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1557,7 +1557,7 @@ async function sendToSheet() {
   try {
     const result = await postWithTimeout(withAuthPayload(payload), 10000);
     if (result?.queued) {
-      setSendFeedback("Registro aguardando conexão para envio.", "error");
+      setSendFeedback("", "neutral");
       setStatus("Registro aguardando conexão para envio.", "error");
       return;
     }
@@ -1572,7 +1572,7 @@ async function sendToSheet() {
     setStatus("Dados enviados com sucesso!", "success");
   } catch (error) {
     queueSubmission(payload);
-    setSendFeedback("Registro aguardando conexão para envio.", "error");
+    setSendFeedback("", "neutral");
     setStatus("Registro aguardando conexão para envio.", "error");
   } finally {
     toggleBusy(false);
@@ -1647,10 +1647,11 @@ async function flushPendingSubmissions(options = {}) {
       remaining.push(payload);
     }
   }
-  localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
-  updatePendingSubmissionsStatus();
-  if (sentCount && options.notify) {
-    setStatus("Registro pendente enviado com sucesso!", "success");
+    localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
+    updatePendingSubmissionsStatus();
+    if (sentCount && options.notify) {
+      setSendFeedback("", "neutral");
+      setStatus("Registro pendente enviado com sucesso!", "success");
     showPendingSendConfirmation(sentCount);
   }
 }
