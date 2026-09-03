@@ -1667,7 +1667,7 @@ function updatePendingSubmissionsStatus() {
 }
 
 window.addEventListener("online", () => flushPendingSubmissions({ notify: true }));
-window.setInterval(() => flushPendingSubmissions(), 30000);
+window.setInterval(() => flushPendingSubmissions({ notify: true }), 30000);
 
 function showSendError(message) {
   setSendFeedback(message, "error");

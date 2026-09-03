@@ -190,7 +190,7 @@
     updatePendingEventStatus();
     flushPendingEventSubmissions({ notify: true });
   });
-  window.setInterval(() => flushPendingEventSubmissions(), 30000);
+  window.setInterval(() => flushPendingEventSubmissions({ notify: true }), 30000);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
       updatePendingEventStatus();
