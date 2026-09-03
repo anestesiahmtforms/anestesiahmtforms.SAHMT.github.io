@@ -71,6 +71,7 @@ const canvasEl = document.querySelector("#snapshot");
 const previewEl = document.querySelector("#preview");
 const cameraStatusEl = document.querySelector("#camera-status");
 const processingStatusEl = document.querySelector("#processing-status");
+const pendingSubmissionsStatusEl = document.querySelector("#pending-submissions-status");
 const pendingSendConfirmationEl = document.querySelector("#pending-send-confirmation");
 const pendingSendConfirmationOkEl = document.querySelector("#pending-send-confirmation-ok");
 const sheetStatusEl = document.querySelector("#sheet-status");
@@ -272,6 +273,7 @@ async function bootstrap() {
   syncConditionalEntryFields();
   syncPlantonistasRequirement();
   renderSheetStatus();
+  updatePendingSubmissionsStatus();
   flushPendingSubmissions({ notify: true });
   initializeAuthorizedApp().catch((error) => console.warn("Falha no aquecimento inicial:", error));
   registerServiceWorker();
@@ -1024,7 +1026,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-12", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260902-13", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1555,8 +1557,8 @@ async function sendToSheet() {
   try {
     const result = await postWithTimeout(withAuthPayload(payload), 10000);
     if (result?.queued) {
-      setSendFeedback("", "neutral");
-      setStatus("", "neutral");
+      setSendFeedback("Registro aguardando conexão para envio.", "error");
+      setStatus("Registro aguardando conexão para envio.", "error");
       return;
     }
 
@@ -1570,8 +1572,8 @@ async function sendToSheet() {
     setStatus("Dados enviados com sucesso!", "success");
   } catch (error) {
     queueSubmission(payload);
-    setSendFeedback("", "neutral");
-    setStatus("", "neutral");
+    setSendFeedback("Registro aguardando conexão para envio.", "error");
+    setStatus("Registro aguardando conexão para envio.", "error");
   } finally {
     toggleBusy(false);
   }
@@ -1612,6 +1614,7 @@ function queueSubmission(payload) {
     queue.push({ ...payload, queuedAt: new Date().toISOString() });
   }
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(queue));
+  updatePendingSubmissionsStatus();
 }
 
 function stripQueueMetadata(payload) {
@@ -1631,6 +1634,7 @@ function readPendingSubmissions() {
 async function flushPendingSubmissions(options = {}) {
   const queue = readPendingSubmissions();
   if (!queue.length || !state.config.scriptUrl || !navigator.onLine) {
+    updatePendingSubmissionsStatus();
     return;
   }
   const remaining = [];
@@ -1644,10 +1648,22 @@ async function flushPendingSubmissions(options = {}) {
     }
   }
   localStorage.setItem(PENDING_SUBMISSIONS_KEY, JSON.stringify(remaining));
+  updatePendingSubmissionsStatus();
   if (sentCount && options.notify) {
     setStatus("Registro pendente enviado com sucesso!", "success");
     showPendingSendConfirmation(sentCount);
   }
+}
+
+function updatePendingSubmissionsStatus() {
+  if (!pendingSubmissionsStatusEl) {
+    return;
+  }
+  const pendingCount = readPendingSubmissions().length;
+  pendingSubmissionsStatusEl.hidden = pendingCount === 0;
+  pendingSubmissionsStatusEl.textContent = pendingCount === 1
+    ? "Registro aguardando conexão para envio."
+    : `${pendingCount} registros aguardando conexão para envio.`;
 }
 
 window.addEventListener("online", () => flushPendingSubmissions({ notify: true }));

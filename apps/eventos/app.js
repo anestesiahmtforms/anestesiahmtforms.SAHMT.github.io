@@ -330,7 +330,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260902-04", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260902-05", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -1301,7 +1301,7 @@
       queueEventSubmission(payload);
       updatePendingEventStatus();
       setEventEntryStatus(
-        `ENVIAR REGISTRO PENDENTE${detail ? `. ${detail}` : ""}`,
+        `Registro aguardando conexão para envio.${detail ? ` ${detail}` : ""}`,
         "error"
       );
       activeEventLaunch = null;

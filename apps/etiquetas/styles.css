@@ -1689,6 +1689,19 @@ video {
   color: var(--danger);
 }
 
+.pending-submissions-status {
+  margin: 8px 4px 0;
+  color: #b91c1c;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.pending-submissions-status[hidden] {
+  display: none !important;
+}
+
 .pending-send-confirmation {
   display: grid;
   grid-template-columns: 1fr auto;
