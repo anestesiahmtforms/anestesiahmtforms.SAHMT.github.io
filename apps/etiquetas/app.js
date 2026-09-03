@@ -1641,7 +1641,7 @@ async function flushPendingSubmissions(options = {}) {
   let sentCount = 0;
   for (const payload of queue) {
     try {
-      await postWithTimeout(payload, 10000, { queueOnFailure: false });
+      await postWithTimeout(withAuthPayload(payload), 10000, { queueOnFailure: false });
       sentCount += 1;
     } catch {
       remaining.push(payload);
