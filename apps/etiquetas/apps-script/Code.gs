@@ -821,7 +821,37 @@ function getAllEntries_() {
   const values = dataRange.getDisplayValues();
   const notes = dataRange.getNotes();
   return values
-    .map((row, index) => rowToEntry_(row, index + 2, notes[index]));
+    .map((row, index) => rowToEntry_(row, index + 2, notes[index]))
+    .sort(compareEntriesDesc_);
+}
+
+function compareEntriesDesc_(left, right) {
+  const leftTime = parseEntryDateTime_(left.criadoEm || left.data);
+  const rightTime = parseEntryDateTime_(right.criadoEm || right.data);
+  if (leftTime !== rightTime) {
+    return rightTime - leftTime;
+  }
+  return Number(right.rowNumber || 0) - Number(left.rowNumber || 0);
+}
+
+function parseEntryDateTime_(value) {
+  const text = String(value || "").trim();
+  const isoTime = Date.parse(text);
+  if (Number.isFinite(isoTime)) {
+    return isoTime;
+  }
+  const match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!match) {
+    return 0;
+  }
+  return new Date(
+    Number(match[3]),
+    Number(match[2]) - 1,
+    Number(match[1]),
+    Number(match[4] || 0),
+    Number(match[5] || 0),
+    Number(match[6] || 0)
+  ).getTime();
 }
 
 function rowToEntry_(row, rowNumber, notes) {
