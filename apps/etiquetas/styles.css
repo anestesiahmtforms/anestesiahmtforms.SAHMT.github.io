@@ -126,8 +126,25 @@
 .summary-list .record-card,
 .monthly-list .record-card {
   display: grid !important;
-  grid-template-columns: 27px minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   align-items: start;
+}
+
+.summary-list .record-card__number,
+.monthly-list .record-card__number {
+  grid-column: 1;
+  width: fit-content;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 7px;
+  font-size: 0.58rem;
+  line-height: 1;
+}
+
+.summary-list .record-card__rows,
+.monthly-list .record-card__rows {
+  grid-column: 1;
 }
 
 .summary-list .record-card__rows,
