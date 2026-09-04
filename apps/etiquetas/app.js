@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260904-22", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260904-23", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2429,19 +2429,17 @@ function renderSummaryEditBlock(row) {
 
 function renderEditHistoryLines(row) {
   const history = String(row.resumoEdicao || "").trim();
-  if (history) {
-    return history
+  const entries = history
       .split(/\n+/)
       .filter(Boolean)
       .map((line) => renderEditHistoryEntry(line))
       .join("");
-  }
-
-  return renderEditHistoryEntry(composeHistoryLine(
+  const fallback = renderEditHistoryEntry(composeHistoryLine(
     row.editadoEm || "Sem data registrada",
     row.editadoPor || "Sem responsavel registrado",
     "Registro editado."
   ));
+  return `<div class="record-card__history">${entries || fallback}</div>`;
 }
 
 function renderEditHistoryEntry(line) {
@@ -2466,12 +2464,16 @@ function renderEditHistoryEntry(line) {
     }
   });
 
-  return `<div class="summary-edit-entry">
-    <div><span>Data:</span><strong>${escapeHtml(date)}</strong></div>
-    <div><span>Responsável:</span><strong>${escapeHtml(responsible)}</strong></div>
-    <div><span>Estado inicial:</span><strong>${escapeHtml(initial.join("; ") || "Não informado")}</strong></div>
-    <div><span>Estado editado:</span><strong>${escapeHtml(edited.join("; ") || "Não informado")}</strong></div>
+  return `<div class="record-card__history-entry">
+    ${renderHistoryLine("Data", date)}
+    ${renderHistoryLine("Responsável", responsible)}
+    ${renderHistoryLine("Estado inicial", initial.join("; ") || "Não informado")}
+    ${renderHistoryLine("Estado editado", edited.join("; ") || "Não informado")}
   </div>`;
+}
+
+function renderHistoryLine(label, value) {
+  return `<div class="record-card__history-line"><span class="record-card__history-label">${escapeHtml(label)}:</span><span class="record-card__history-value">${escapeHtml(value)}</span></div>`;
 }
 
 function composeHistoryLine(dateTime, responsible, detail) {
