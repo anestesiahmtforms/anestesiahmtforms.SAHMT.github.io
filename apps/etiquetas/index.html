@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://docs.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=168">
+  <link rel="stylesheet" href="./styles.css?v=169">
 </head>
 <body>
   <div class="app-shell">
@@ -212,16 +212,17 @@
       </section>
 
       <section class="panel summary-panel modal-panel" id="summary-panel" hidden>
-        <div class="section-title">
+        <div class="section-title records-hero">
           <div class="section-title-copy">
-            <h2>RELATÓRIO DIÁRIO - ETIQUETAS</h2>
+            <h2 class="records-hero__title">RELATÓRIO DIÁRIO - ETIQUETAS</h2>
             <span data-auth-user hidden></span>
           </div>
         </div>
 
-        <div class="summary-bottom-tools">
-          <div class="summary-date-picker">
+        <div class="summary-bottom-tools records-banner">
+          <div class="summary-date-picker date-field">
             <label id="summary-date-field" class="summary-date-field">
+              <span>Data dos registros</span>
               <input id="summary-date" type="date" aria-label="Data do registro">
             </label>
           </div>
@@ -236,9 +237,9 @@
       </section>
 
       <section class="panel monthly-panel modal-panel" id="monthly-panel" hidden>
-        <div class="section-title monthly-heading">
+        <div class="section-title monthly-heading records-hero">
           <div class="section-title-copy">
-            <h2>RELATÓRIO MENSAL - ETIQUETAS</h2>
+            <h2 class="records-hero__title">RELATÓRIO MENSAL - ETIQUETAS</h2>
             <span data-auth-user hidden></span>
           </div>
         </div>
@@ -341,6 +342,6 @@
     })();
   </script>
   <script src="../../auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=167" type="module"></script>
+  <script src="./app.js?v=168" type="module"></script>
 </body>
 </html>
