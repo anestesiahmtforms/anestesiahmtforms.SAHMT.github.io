@@ -7,11 +7,12 @@ const CONFIG = {
   trustedDeviceDays: 36500,
   guideWidthRatio: 0.94,
   guideAspectRatio: 4,
-  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbyY-TaF-I63UTbjB3tEyRsG1GfbXtQBMmAAwLDNlPjrAQb0TTH4-9m-aU87XFecP2IfOA/exec",
+  defaultScriptUrl: "https://script.google.com/macros/s/AKfycbyvZSe-OrRDxnLJNllroXI-Zvfr_4NJdMsp7jhqsTHW6-QDOkUKz8r29iTvPhpOaBX35A/exec",
   maxSearchResults: 60,
 };
 
 const LEGACY_SCRIPT_URLS = new Set([
+  "https://script.google.com/macros/s/AKfycbyY-TaF-I63UTbjB3tEyRsG1GfbXtQBMmAAwLDNlPjrAQb0TTH4-9m-aU87XFecP2IfOA/exec",
   "https://script.google.com/macros/s/AKfycbyfTRM6ym1d3hrrEoTfawOmNh90or1Jwm0K-noEJGl9ST6p7BkzHaRCl-juQtV4IDTICA/exec",
   "https://script.google.com/macros/s/AKfycbvjEcdI9UV8SFAAAxZx94qqMcNx-eEVLeRAoCnht4XcNloYnBPlTm76VdLfuYTrvc1uA/exec",
   "https://script.google.com/macros/s/AKfycbwRE2wlSWX3p9AXV43Ylf6ciN-i0np-Bo-Hs4YPQwb-NeT90su-8KsExh1z1MV4fHQO7A/exec",
@@ -1028,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260904-17", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260904-18", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
