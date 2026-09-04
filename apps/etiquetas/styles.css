@@ -3508,6 +3508,32 @@ body::before {
   }
 }
 
+/* Give the Plantonista(s) sigla picker comfortable touch targets on phones. */
+@media (max-width: 680px) {
+  .form-panel .multi-select-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    max-height: min(42dvh, 320px);
+    padding: 12px;
+  }
+
+  .form-panel .multi-select-options label {
+    min-height: 44px;
+    padding: 8px 6px;
+    border-radius: 11px;
+    font-size: 0.9rem;
+  }
+
+  .form-panel .multi-select-options input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .keyboard-open .form-panel .multi-select-options {
+    max-height: min(34dvh, 240px);
+  }
+}
+
 /* Keep the Entrada sheet anchored while iOS opens and resizes the keyboard. */
 @media (max-width: 680px) {
   .form-panel.modal-panel {
