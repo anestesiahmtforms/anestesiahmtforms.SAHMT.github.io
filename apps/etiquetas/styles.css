@@ -67,10 +67,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
   gap: 8px;
   padding: 6px 8px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(47, 114, 106, 0.12);
 }
 
 .record-card__row--history {
@@ -118,6 +121,28 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 5px;
+}
+
+.summary-list .record-card,
+.monthly-list .record-card {
+  display: grid !important;
+  grid-template-columns: 27px minmax(0, 1fr) !important;
+  align-items: start;
+}
+
+.summary-list .record-card__rows,
+.monthly-list .record-card__rows {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100%;
+  min-width: 0;
+}
+
+.summary-list .record-card__row,
+.monthly-list .record-card__row {
+  display: flex !important;
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .record-card__edit-button {
