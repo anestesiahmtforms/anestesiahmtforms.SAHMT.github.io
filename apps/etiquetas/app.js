@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260904-18", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260904-19", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2293,20 +2293,12 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
         const editedClass = row.editadoEm || row.editadoPor || row.resumoEdicao || row.observacaoAtualizadaEm || row.observacaoAtualizadaPor ? " edited-row" : "";
         const monthlyTone = ["a", "b", "c", "d"][index % 4];
         return `
-        <article class="monthly-record-card summary-item daily-table-card daily-tone-${monthlyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
-          <div class="monthly-record-fields">
-            <div class="monthly-record-number">${index + 1}</div>
-            ${renderSummaryField("Data", formatDate(row.data || ""))}
-            ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
-            ${renderSummaryField("Convênio", row.convenio)}
-            ${renderSummaryField("Cirurgia", row.cirurgia)}
-            ${renderSummaryField("Atendimento", row.atendimento)}
-            ${renderSummaryField("Tipo", row.tipo)}
-            ${renderSummaryField("Valor", row.valor ? formatStoredCurrency(row.valor) : "")}
-            ${renderSummaryField("Credor", row.credor)}
-            ${renderSummaryField("Plantonista(s)", row.plantonistas)}
+        <article class="record-card record-card--tone-${(index % 4) + 1} summary-item${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
+          <div class="record-card__number">${index + 1}</div>
+          <div class="record-card__rows">
+            ${renderEtiquetaRecordFields(row, true)}
+            ${renderSummaryObservationBlock(row, true)}
           </div>
-          ${renderSummaryObservationBlock(row)}
         </article>
       `;
       }).join("")}
@@ -2341,24 +2333,15 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
     const observationBlock = renderSummaryObservationBlock(row);
     const dailyTone = ["a", "b", "c", "d"][index % 4];
     return `
-      <article class="monthly-record-card summary-item daily-table-card daily-tone-${dailyTone}${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
-        <div class="monthly-record-fields">
-          <div class="monthly-record-number">${index + 1}</div>
-          ${renderSummaryField("Data", formatDate(row.data || ""))}
-          ${renderSummaryField("Nome do Paciente", row.nomePaciente)}
-          ${renderSummaryField("Convênio", row.convenio)}
-          ${renderSummaryField("Cirurgia", row.cirurgia)}
-          ${renderSummaryField("Atendimento", row.atendimento)}
-          ${renderSummaryField("Tipo", row.tipo)}
-          ${renderSummaryField("Valor", row.valor ? formatStoredCurrency(row.valor) : "")}
-          ${renderSummaryField("Credor", row.credor)}
-          ${renderSummaryField("Plantonista(s)", row.plantonistas)}
-          ${renderSummaryField("Responsável pelo Registro", row.criadoPor)}
-        </div>
-        ${editBlock}
-        ${observationBlock}
-        <div class="summary-record-actions">
-          <button type="button" class="summary-edit-button" data-edit-record>EDITAR REGISTRO</button>
+      <article class="record-card record-card--tone-${(index % 4) + 1} summary-item${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
+        <div class="record-card__number">${index + 1}</div>
+        <div class="record-card__rows">
+          ${renderEtiquetaRecordFields(row, false)}
+          ${editBlock}
+          ${observationBlock}
+          <div class="record-card__actions">
+            <button type="button" class="record-card__edit-button" data-edit-record>EDITAR REGISTRO</button>
+          </div>
         </div>
       </article>
     `;
@@ -2383,6 +2366,27 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
   });
 }
 
+function renderEtiquetaRecordFields(row, monthly) {
+  const fields = [
+    ["Data", formatDate(row.data || "")],
+    ["Nome do Paciente", row.nomePaciente],
+    ["Convênio", row.convenio],
+    ["Cirurgia", row.cirurgia],
+    ["Atendimento", row.atendimento],
+    ["Tipo", row.tipo],
+    ["Valor", row.valor ? formatStoredCurrency(row.valor) : ""],
+    ["Credor", row.credor],
+    ["Plantonista(s)", row.plantonistas],
+  ];
+  if (!monthly) {
+    fields.push(["Responsável pelo Registro", row.criadoPor]);
+  }
+  return fields
+    .filter(([, value]) => String(value || "").trim() && String(value).trim() !== "-")
+    .map(([label, value]) => `<div class="record-card__row"><span class="record-card__label">${escapeHtml(label)}</span><span class="record-card__value">${escapeHtml(value)}</span></div>`)
+    .join("");
+}
+
 function renderSummaryField(label, value) {
   const text = String(value == null ? "" : value).trim();
   if (!text || text === "-") {
@@ -2398,8 +2402,8 @@ function renderSummaryObservationBlock(row) {
   }
 
   return `
-    <div class="summary-history-block summary-observation-block">
-      <strong>Observacao</strong>
+    <div class="record-card__row record-card__row--registration summary-observation-block">
+      <span class="record-card__label record-card__label--registration">Observacao</span>
       <span>${escapeHtml(composeHistoryLine(
         row.observacaoAtualizadaEm || "Sem data registrada",
         row.observacaoAtualizadaPor || "Sem responsavel registrado",
@@ -2416,8 +2420,8 @@ function renderSummaryEditBlock(row) {
   }
 
   return `
-    <div class="summary-history-block summary-edit-block">
-      <strong>Edicao de Registro</strong>
+    <div class="record-card__row record-card__row--history summary-edit-block">
+      <span class="record-card__label record-card__label--history">Edicao de Registro</span>
       ${renderEditHistoryLines(row)}
     </div>
   `;
