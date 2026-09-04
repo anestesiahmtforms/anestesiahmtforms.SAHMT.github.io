@@ -1028,7 +1028,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260904-16", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260904-17", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2199,7 +2199,7 @@ async function loadSummary(options = {}) {
       throw new Error(result.message || "Falha ao carregar resumo.");
     }
 
-    state.summaryRows = result.entries || [];
+    state.summaryRows = (result.entries || []).sort(compareEtiquetaRecordsDesc);
     renderSummary(
       state.summaryRows,
       "Nenhuma entrada encontrada nesta data."
@@ -2246,7 +2246,7 @@ async function loadMonthlySummary(options = {}) {
   }
 
   try {
-    state.monthlyRows = await loadMonthlyEntries(month);
+    state.monthlyRows = (await loadMonthlyEntries(month)).sort(compareEtiquetaRecordsAsc);
     state.monthlyMonth = month;
     const alertCount = state.monthlyRows.filter((row) => isAlertType(row.tipo)).length;
     const updatedAt = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -2725,7 +2725,40 @@ async function loadMonthlyEntries(month) {
     throw new Error(result.message || "Falha ao carregar entradas do mes.");
   }
 
-  return result.entries || [];
+  return (result.entries || []).sort(compareEtiquetaRecordsAsc);
+}
+
+function compareEtiquetaRecordsDesc(left, right) {
+  const leftTime = parseEtiquetaDateTime(left?.criadoEm || left?.data);
+  const rightTime = parseEtiquetaDateTime(right?.criadoEm || right?.data);
+  if (leftTime !== rightTime) {
+    return rightTime - leftTime;
+  }
+  return Number(right?.rowNumber || 0) - Number(left?.rowNumber || 0);
+}
+
+function compareEtiquetaRecordsAsc(left, right) {
+  return -compareEtiquetaRecordsDesc(left, right);
+}
+
+function parseEtiquetaDateTime(value) {
+  const text = String(value || "").trim();
+  const isoTime = Date.parse(text);
+  if (Number.isFinite(isoTime)) {
+    return isoTime;
+  }
+  const match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!match) {
+    return 0;
+  }
+  return new Date(
+    Number(match[3]),
+    Number(match[2]) - 1,
+    Number(match[1]),
+    Number(match[4] || 0),
+    Number(match[5] || 0),
+    Number(match[6] || 0)
+  ).getTime();
 }
 
 function generatePdfReport() {
