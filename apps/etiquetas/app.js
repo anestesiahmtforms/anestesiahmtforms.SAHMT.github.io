@@ -39,6 +39,7 @@ const ALERT_TYPES = new Set(["particular", "complementacao", "complementação"]
 const CREDOR_CAIXA = "Caixa";
 const FINANCIAL_TYPES = new Set(["particular", "complementacao"]);
 const CONSULTA_TYPE = "Consulta Pré-anestésica";
+const SADT_TYPE = "SADT";
 const TOP_LEVEL_LOGIN_PARAM = "topLogin";
 
 const state = {
@@ -1026,7 +1027,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260902-14", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260904-15", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1216,7 +1217,10 @@ async function processCurrentImage() {
     applyDataToForm(parsed);
     showEntryPanel();
 
-    const missing = ["nomePaciente", "convenio", "cirurgia", "atendimento"].filter((key) => !parsed[key]);
+    const missingKeys = normalizeTipoValue(parsed.tipo) === SADT_TYPE
+      ? ["nomePaciente", "convenio", "atendimento"]
+      : ["nomePaciente", "convenio", "cirurgia", "atendimento"];
+    const missing = missingKeys.filter((key) => !parsed[key]);
     const qualityNote = missing.length ? " Confira a foto e tente novamente com a etiqueta inteira mais nitida." : "";
     const missingNote = missing.length ? ` Confira manualmente: ${missing.join(", ")}.` : "";
     setStatus(`Leitura Concluída.${missingNote}${qualityNote}`, missing.length ? "info" : "success");
@@ -1523,7 +1527,7 @@ function collectFormData() {
     cirurgia: fields.cirurgia.value.trim(),
     atendimento: fields.atendimento.value.trim(),
     tipo,
-    valor: shouldRequireValor(tipo) ? formatStoredCurrency(fields.valor.value) : "",
+    valor: (shouldRequireValor(tipo) || isSadtType(tipo)) ? formatStoredCurrency(fields.valor.value) : "",
     convenio: fields.convenio.value.trim(),
     credor: fields.credor.value.trim(),
     plantonistas: isCaixa ? "" : getSelectedPlantonistasValue(),
@@ -1826,9 +1830,10 @@ function confirmSubmissionEditable(payload, duplicateRows = []) {
             ${renderOption("Complementação", "Complementação", currentPayload.tipo)}
             ${renderOption("Convênio", "Convênio", currentPayload.tipo)}
             ${renderOption(CONSULTA_TYPE, CONSULTA_TYPE, currentPayload.tipo)}
+            ${renderOption(SADT_TYPE, SADT_TYPE, currentPayload.tipo)}
           </select>
         </label>
-        <label id="confirm-valor-field" ${shouldRequireValor(currentPayload.tipo) ? "" : "hidden"}>
+        <label id="confirm-valor-field" ${(shouldRequireValor(currentPayload.tipo) || isSadtType(currentPayload.tipo)) ? "" : "hidden"}>
           <span>Valor em Real</span>
           <input id="confirm-valor" inputmode="decimal" value="${escapeHtml(currentPayload.valor || "")}" placeholder="R$ 0,00">
         </label>
@@ -1942,7 +1947,7 @@ function collectConfirmationPayload(basePayload) {
     cirurgia: cleanDigits(confirmSummaryEl.querySelector("#confirm-cirurgia")?.value || ""),
     atendimento: cleanDigits(confirmSummaryEl.querySelector("#confirm-atendimento")?.value || ""),
     tipo: normalizeTipoValue(confirmSummaryEl.querySelector("#confirm-tipo")?.value || ""),
-    valor: shouldRequireValor(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "")
+    valor: (shouldRequireValor(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "") || isSadtType(confirmSummaryEl.querySelector("#confirm-tipo")?.value || ""))
       ? formatStoredCurrency(confirmSummaryEl.querySelector("#confirm-valor")?.value || "")
       : "",
     convenio: shouldRequireConvenio(confirmSummaryEl.querySelector("#confirm-tipo")?.value || "")
@@ -1963,7 +1968,9 @@ function getMissingRequiredFields(payload, options = {}) {
     requireConvenio = true,
     requirePlantonistas = payload.credor !== CREDOR_CAIXA,
   } = options;
-  const required = ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
+  const required = isSadtMode() || normalizeTipoValue(payload.tipo) === SADT_TYPE
+    ? ["data", "nomePaciente", "atendimento", "tipo", "credor"]
+    : ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (requireValor) {
     required.push("valor");
   }
@@ -2005,7 +2012,9 @@ function updateEntryValidationStates(options = {}) {
   const payload = collectFormData();
   const requiredKeys = isConsultaMode()
     ? ["data", "nomePaciente", "atendimento", "credor"]
-    : ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
+    : isSadtMode()
+      ? ["data", "nomePaciente", "atendimento", "tipo", "credor"]
+      : ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (shouldRequireValor(payload.tipo)) {
     requiredKeys.push("valor");
   }
@@ -2046,13 +2055,14 @@ function updateEntryValidationStates(options = {}) {
 function syncConditionalEntryFields() {
   syncEntryModeFields();
   const tipo = fields.tipo.value;
-  const needsValor = shouldRequireValor(tipo);
+  const requiresValor = shouldRequireValor(tipo);
+  const needsValor = requiresValor || isSadtType(tipo);
 
   if (conditionalFields.valor) {
     conditionalFields.valor.hidden = !needsValor;
   }
   if (fields.valor) {
-    fields.valor.required = needsValor;
+    fields.valor.required = requiresValor;
     if (!needsValor) {
       fields.valor.value = "";
     }
@@ -2068,10 +2078,12 @@ function syncConditionalEntryFields() {
 function syncEntryModeFields() {
   const consultaKeys = new Set(["data", "nomePaciente", "atendimento", "credor"]);
   const consultaMode = isConsultaMode();
+  const sadtMode = isSadtType(fields.tipo?.value);
   Object.entries(fields).forEach(([key, field]) => {
     const label = field?.closest("label");
     if (!label) return;
-    label.hidden = consultaMode && !consultaKeys.has(key);
+    label.hidden = consultaMode ? !consultaKeys.has(key) : sadtMode && key === "cirurgia";
+    field.disabled = sadtMode && key === "cirurgia";
   });
 
   if (consultaMode) {
@@ -2081,20 +2093,46 @@ function syncEntryModeFields() {
     fields.convenio.value = "";
     clearPlantonistasSelection();
   }
+
+  if (sadtMode) {
+    fields.cirurgia.value = "";
+  }
 }
 
 function isConsultaMode() {
   return fields.tipo?.value === CONSULTA_TYPE;
 }
 
+function isSadtType(value) {
+  return normalizeCompare(value) === "sadt";
+}
+
+function isSadtMode() {
+  return isSadtType(fields.tipo?.value);
+}
+
 function syncInlineConditionalFields(root, prefix) {
   const typeEl = root?.querySelector(`#${prefix}-tipo`);
+  const surgeryFieldEl = root?.querySelector(`#${prefix}-cirurgia`)?.closest("label");
+  const surgeryEl = root?.querySelector(`#${prefix}-cirurgia`);
   const valueFieldEl = root?.querySelector(`#${prefix}-valor-field`);
   const valueEl = root?.querySelector(`#${prefix}-valor`);
   const convenioFieldEl = root?.querySelector(`#${prefix}-convenio-field`);
   const convenioEl = root?.querySelector(`#${prefix}-convenio`);
-  const needsValor = shouldRequireValor(typeEl?.value || "");
+  const needsValor = shouldRequireValor(typeEl?.value || "") || isSadtType(typeEl?.value || "");
   const needsConvenio = shouldRequireConvenio(typeEl?.value || "");
+  const sadtMode = isSadtType(typeEl?.value || "");
+
+  if (surgeryFieldEl) {
+    surgeryFieldEl.hidden = sadtMode;
+  }
+  if (surgeryEl) {
+    surgeryEl.disabled = sadtMode;
+    surgeryEl.required = !sadtMode;
+    if (sadtMode) {
+      surgeryEl.value = "";
+    }
+  }
 
   if (valueFieldEl) {
     valueFieldEl.hidden = !needsValor;
@@ -2529,9 +2567,10 @@ function renderEditRecordFields() {
           ${renderOption("Complementação", "Complementação", row.tipo)}
           ${renderOption("Convênio", "Convênio", row.tipo)}
           ${renderOption("Consulta Pré-anestésica", "Consulta Pré-anestésica", row.tipo)}
+          ${renderOption(SADT_TYPE, SADT_TYPE, row.tipo)}
         </select>
       </label>
-      <label id="edit-valor-field" ${shouldRequireValor(row.tipo) ? "" : "hidden"}>
+      <label id="edit-valor-field" ${(shouldRequireValor(row.tipo) || isSadtType(row.tipo)) ? "" : "hidden"}>
         <span>Valor em Real</span>
         <input id="edit-valor" inputmode="decimal" value="${escapeHtml(formatStoredCurrency(row.valor))}" placeholder="R$ 0,00">
       </label>
@@ -2570,10 +2609,10 @@ function collectEditPayload() {
     rowNumber: original.rowNumber || "",
     data: withEditingFallback(editSummaryEl.querySelector("#edit-data")?.value || "", original.data),
     nomePaciente: withEditingFallback(editSummaryEl.querySelector("#edit-nomePaciente")?.value.trim() || "", original.nomePaciente),
-    cirurgia: mergedTipo === CONSULTA_TYPE ? "" : withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-cirurgia")?.value || ""), cleanDigits(original.cirurgia || "")),
+    cirurgia: mergedTipo === CONSULTA_TYPE || isSadtType(mergedTipo) ? "" : withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-cirurgia")?.value || ""), cleanDigits(original.cirurgia || "")),
     atendimento: withEditingFallback(cleanDigits(editSummaryEl.querySelector("#edit-atendimento")?.value || ""), cleanDigits(original.atendimento || "")),
     tipo: mergedTipo,
-    valor: shouldRequireValor(mergedTipo)
+    valor: (shouldRequireValor(mergedTipo) || isSadtType(mergedTipo))
       ? withEditingFallback(formatStoredCurrency(editSummaryEl.querySelector("#edit-valor")?.value || ""), formatStoredCurrency(original.valor))
       : "",
     convenio: mergedTipo === CONSULTA_TYPE ? "" : withEditingFallback(editSummaryEl.querySelector("#edit-convenio")?.value.trim() || "", original.convenio),
@@ -3288,6 +3327,7 @@ function normalizeTipoValue(value) {
   if (normalized === "particular") return "Particular";
   if (normalized === "complementacao") return "Complementação";
   if (normalized === "convenio") return "Convênio";
+  if (normalized === "sadt") return SADT_TYPE;
   return text;
 }
 

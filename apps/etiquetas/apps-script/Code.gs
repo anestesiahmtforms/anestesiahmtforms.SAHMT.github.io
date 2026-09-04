@@ -24,7 +24,7 @@ const REGISTROS_HEADERS = [
   "Valor",
 ];
 
-const TIPO_OPTIONS = ["Particular", "Complementação", "Convênio", "Consulta Pré-anestésica"];
+const TIPO_OPTIONS = ["Particular", "Complementação", "Convênio", "Consulta Pré-anestésica", "SADT"];
 const CREDOR_OPTIONS = ["Caixa", "Plantão", "Plantão/Caixa"];
 const PLANTONISTA_OPTIONS = [
   "AD", "AA", "AL", "BA", "CH", "CR", "DE", "DN", "FL", "FR", "GU", "GB", "IG", "JA",
@@ -224,7 +224,7 @@ function handleAiExtract_(payload) {
   }
 
   const prompt = [
-    "Voce le etiquetas hospitalares HMT e tambem cards de consulta pre-anestesica.",
+    "Voce le etiquetas hospitalares HMT, etiquetas SADT e cards de consulta pre-anestesica.",
     "Extraia somente os campos abaixo e responda em JSON.",
     "Regras:",
     "1. Para etiqueta hospitalar padrao, nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Nao inclua Pront nem o numero do prontuario.",
@@ -233,13 +233,15 @@ function handleAiExtract_(payload) {
     "4. Para etiqueta hospitalar padrao, atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Use tambem o recorte numerico ampliado correspondente. Deve conter somente digitos.",
     "5. Para o modelo de consulta pre-anestesica em formato de card escuro, extraia apenas nomePaciente e atendimento.",
     "6. Quando detectar o modelo de consulta pre-anestesica, preencha tipo exatamente como 'Consulta Pré-anestésica' e credor exatamente como 'Caixa'. Nessa situacao, deixe convenio e cirurgia vazios.",
-    "7. Quando detectar a etiqueta hospitalar padrao, deixe tipo e credor vazios para o frontend manter o fluxo atual.",
-    "8. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
-    "9. Os recortes numericos aparecem depois da imagem principal: o primeiro mostra a faixa inferior completa, o segundo prioriza o lado esquerdo (N.Cirur) e o terceiro prioriza o lado direito (N.Atend). Compare a imagem principal com os recortes.",
-    "10. Para cirurgia e atendimento, responda somente a sequencia exata de digitos visiveis. Se qualquer digito estiver duvidoso, responda string vazia; nunca complete, corrija ou estime um numero.",
-    "11. Um zero (0) parcialmente cortado ou com a borda apagada nunca deve ser interpretado como oito (8). Se nao for possivel distinguir 0 de 8 com certeza, deixe o campo vazio.",
-    "12. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
-    "13. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
+    "7. Para o modelo SADT, reconheca a etiqueta pelo texto 'N. Guia', 'Senha' e 'Convenio'. Extraia nomePaciente depois de 'Nome:' e antes de 'Pront:'. Extraia convenio somente depois de 'Convenio:' na linha da senha, ate o fim da linha; nao inclua 'Convenio:'.",
+    "8. Para o modelo SADT, extraia atendimento somente como o numero impresso abaixo do codigo de barras. Preencha tipo exatamente como 'SADT', deixe cirurgia vazio e deixe credor vazio para o usuario preencher.",
+    "9. Quando detectar a etiqueta hospitalar padrao, deixe tipo e credor vazios para o frontend manter o fluxo atual.",
+    "10. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
+    "11. Os recortes numericos aparecem depois da imagem principal: o primeiro mostra a faixa inferior completa, o segundo prioriza o lado esquerdo (N.Cirur) e o terceiro prioriza o lado direito (N.Atend). Compare a imagem principal com os recortes.",
+    "12. Para cirurgia e atendimento, responda somente a sequencia exata de digitos visiveis. Se qualquer digito estiver duvidoso, responda string vazia; nunca complete, corrija ou estime um numero.",
+    "13. Um zero (0) parcialmente cortado ou com a borda apagada nunca deve ser interpretado como oito (8). Se nao for possivel distinguir 0 de 8 com certeza, deixe o campo vazio.",
+    "14. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
+    "15. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
@@ -306,10 +308,11 @@ function handleAiExtract_(payload) {
   const convenio = cleanConvenio_(extracted.convenio);
   const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);
   const atendimento = sanitizeLabelNumber_(extracted.atendimento);
-  const extractedTipo = normalizeConsultaType_(extracted.tipo);
+  const extractedTipo = normalizeTipoValue_(extracted.tipo);
   const isConsultaModel = extractedTipo === "Consulta Pré-anestésica" ||
     (!extractedTipo && !convenio && !cirurgia && nomePaciente && atendimento);
-  const tipo = isConsultaModel ? "Consulta Pré-anestésica" : "";
+  const isSadtModel = extractedTipo === "SADT";
+  const tipo = isConsultaModel ? "Consulta Pré-anestésica" : (isSadtModel ? "SADT" : "");
   const credor = isConsultaModel ? "Caixa" : "";
 
   return jsonResponse({
@@ -393,7 +396,7 @@ function normalizeConsultaType_(value) {
 
 function normalizeTipoValue_(value) {
   const text = String(value || "").trim();
-  return normalizeConsultaType_(text) || text;
+  return normalizeConsultaType_(text) || (normalizeCompare_(text) === "sadt" ? "SADT" : text);
 }
 
 function ensureWorkbook_() {
@@ -540,6 +543,17 @@ function validatePayload_(payload) {
     }
     return;
   }
+  if (normalizeTipoValue_(payload.tipo) === "SADT") {
+    const sadtRequired = ["data", "nomePaciente", "atendimento", "tipo", "convenio", "credor"];
+    const sadtMissing = sadtRequired.filter((key) => !String(payload[key] || "").trim());
+    if (sadtMissing.length) {
+      throw new Error("Campos obrigatorios ausentes: " + sadtMissing.join(", "));
+    }
+    if (String(payload.credor || "").trim() !== "Caixa" && !String(payload.plantonistas || "").trim()) {
+      throw new Error("Campos obrigatorios ausentes: plantonistas");
+    }
+    return;
+  }
   const required = ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (isFinancialType_(payload.tipo)) {
     required.push("valor");
@@ -568,6 +582,17 @@ function validateUpdatePayload_(payload) {
     return;
   }
 
+  if (normalizeTipoValue_(payload.tipo) === "SADT") {
+    const sadtRequired = ["data", "nomePaciente", "atendimento", "tipo", "convenio", "credor"];
+    const sadtMissing = sadtRequired.filter((key) => !String(payload[key] || "").trim());
+    if (sadtMissing.length) {
+      throw new Error("Campos obrigatorios ausentes: " + sadtMissing.join(", "));
+    }
+    if (String(payload.credor || "").trim() !== "Caixa" && !String(payload.plantonistas || "").trim()) {
+      throw new Error("Campos obrigatorios ausentes: plantonistas");
+    }
+    return;
+  }
   const required = ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (payload.credor !== "Caixa") {
     required.push("plantonistas");
