@@ -2711,6 +2711,37 @@ button:hover,
 
 }
 
+/* The event launch/edit sheet uses the entire phone display. Only the form
+   scrolls when the keyboard is open; the header and footer stay anchored. */
+@media (max-width: 640px) {
+  #eventEntryModal {
+    padding: 0;
+  }
+
+  #eventEntryModal .entry-sheet {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    padding: max(12px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #eventEntryModal .entry-form {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  #eventEntryModal .entry-sheet__footer {
+    flex: 0 0 auto;
+  }
+}
+
 /* Keep the home return and footer together while the schedule fills the shell. */
 .app-frame {
   gap: 5px;
