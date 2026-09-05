@@ -4485,27 +4485,52 @@ body::before {
   text-align: left !important;
 }
 
-/* Daily ETIQUETAS cards follow the EVENTOS card composition. */
+/* Daily ETIQUETAS cards follow the complete EVENTOS card composition. */
 .summary-list .record-card {
-  display: grid !important;
-  grid-template-columns: 27px minmax(0, 1fr) !important;
-  align-items: start;
+  display: block !important;
+  position: relative;
+  padding: 11px;
+  border: 1px solid rgba(13, 50, 87, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 14px 26px rgba(13, 50, 87, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
+.summary-list .record-card--tone-1 { background: linear-gradient(135deg, #f8fcfa 0%, #e8f4f0 100%); }
+.summary-list .record-card--tone-2 { background: linear-gradient(135deg, #f5f9ff 0%, #e6eff8 100%); }
+.summary-list .record-card--tone-3 { background: linear-gradient(135deg, #fffaf2 0%, #f8ecdc 100%); }
+.summary-list .record-card--tone-4 { background: linear-gradient(135deg, #f8f7ff 0%, #ececf8 100%); }
+
 .summary-list .record-card__number {
-  grid-column: 1;
-  grid-row: 1;
-  width: 25px;
-  height: 25px;
-  min-width: 25px;
-  padding: 0;
-  border-radius: 9px;
-  font-size: 0.72rem;
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  min-width: 19px;
+  height: 17px;
+  margin: 0 0 4px;
+  padding: 0 6px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #0d7a6c, #155e75);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: 0 4px 9px rgba(13, 122, 108, 0.18);
 }
 
 .summary-list .record-card__rows {
-  grid-column: 2;
-  grid-row: 1;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   width: 100%;
   min-width: 0;
+}
+
+.summary-list .record-card__row {
+  grid-column: 1;
+  border: 1px solid rgba(13, 122, 108, 0.1);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.summary-list .record-card__row--history {
+  border-color: rgba(217, 119, 6, 0.44);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 237, 213, 0.94));
 }
