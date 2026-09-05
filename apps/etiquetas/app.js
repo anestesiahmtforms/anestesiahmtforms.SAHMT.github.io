@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260905-02", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260905-03", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }

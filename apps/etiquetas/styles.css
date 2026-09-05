@@ -4412,6 +4412,8 @@ body::before {
 .record-card__label {
   width: auto;
   flex: initial;
+  justify-self: start;
+  text-align: left;
 }
 
 .record-card__value,
@@ -4436,4 +4438,16 @@ body::before {
 .summary-panel .summary-edit-block .record-card__history-value {
   width: auto;
   flex: initial;
+}
+
+.record-card__history-label,
+.summary-panel .summary-edit-block .record-card__history-label {
+  justify-self: start;
+  text-align: left !important;
+}
+
+.record-card__history-value,
+.summary-panel .summary-edit-block .record-card__history-value {
+  justify-self: stretch;
+  text-align: right !important;
 }

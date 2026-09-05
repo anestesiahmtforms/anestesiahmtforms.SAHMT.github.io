@@ -2979,6 +2979,8 @@ button:hover,
 .record-card__label {
   width: auto;
   flex: initial;
+  justify-self: start;
+  text-align: left;
 }
 
 .record-card__value {
@@ -2998,6 +3000,16 @@ button:hover,
 .record-card__history-value {
   width: auto;
   flex: initial;
+}
+
+.record-card__history-label {
+  justify-self: start;
+  text-align: left;
+}
+
+.record-card__history-value {
+  justify-self: stretch;
+  text-align: right;
 }
 
 .record-card__history-entry {
