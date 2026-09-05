@@ -4336,7 +4336,9 @@ body::before {
 /* Final override: ETIQUETAS edit history must match EVENTOS exactly. */
 .summary-panel .summary-edit-block.record-card__row--history {
   display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr) !important;
   grid-column: 1 / -1 !important;
+  width: 100% !important;
   gap: 6px !important;
   padding: 6px 8px !important;
   border: 1px solid rgba(155, 91, 0, 0.18) !important;

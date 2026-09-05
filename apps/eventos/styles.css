@@ -2971,6 +2971,13 @@ button:hover,
   background: rgba(255, 255, 255, 0.68);
 }
 
+.record-card__row--history {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* History fields: labels stay left and their values use the full right column. */
 .record-card__history-line {
   display: grid !important;
