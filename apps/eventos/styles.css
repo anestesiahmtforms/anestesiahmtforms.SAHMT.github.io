@@ -2973,15 +2973,20 @@ button:hover,
 
 .record-card__row--history {
   display: grid !important;
-  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   box-sizing: border-box;
+}
+
+.record-card__row--history > .record-card__label--history,
+.record-card__row--history > .record-card__history {
+  grid-column: 1;
 }
 
 /* History fields: labels stay left and their values use the full right column. */
 .record-card__history-line {
   display: grid !important;
-  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: start;
   width: 100%;
   gap: 8px;
@@ -2998,5 +3003,5 @@ button:hover,
   width: 100%;
   min-width: 0;
   justify-self: stretch;
-  text-align: right !important;
+  text-align: left !important;
 }

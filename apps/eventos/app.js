@@ -330,7 +330,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260905-05", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260905-06", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });

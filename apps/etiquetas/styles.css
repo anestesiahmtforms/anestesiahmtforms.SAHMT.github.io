@@ -4336,7 +4336,7 @@ body::before {
 /* Final override: ETIQUETAS edit history must match EVENTOS exactly. */
 .summary-panel .summary-edit-block.record-card__row--history {
   display: grid !important;
-  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   grid-column: 1 / -1 !important;
   width: 100% !important;
   gap: 6px !important;
@@ -4345,6 +4345,11 @@ body::before {
   border-radius: 12px !important;
   background: linear-gradient(180deg, rgba(255, 244, 207, 0.98), rgba(255, 231, 168, 0.9)) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.summary-panel .summary-edit-block.record-card__row--history > .record-card__label--history,
+.summary-panel .summary-edit-block.record-card__row--history > .record-card__history {
+  grid-column: 1;
 }
 
 .summary-panel .summary-edit-block .record-card__label--history {
@@ -4429,7 +4434,7 @@ body::before {
 .record-card__history-line,
 .summary-panel .summary-edit-block .record-card__history-line {
   display: grid !important;
-  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   width: 100%;
   justify-content: initial;
 }
@@ -4477,5 +4482,5 @@ body::before {
   width: 100%;
   min-width: 0;
   justify-self: stretch;
-  text-align: right !important;
+  text-align: left !important;
 }
