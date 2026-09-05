@@ -4398,3 +4398,42 @@ body::before {
   overflow-wrap: anywhere;
   text-align: right;
 }
+
+/* Keep every report row aligned across the full card width. */
+.record-card__row {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  align-items: start;
+  justify-content: initial;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.record-card__label {
+  width: auto;
+  flex: initial;
+}
+
+.record-card__value,
+.record-card__row--registration > span:last-child {
+  display: block;
+  width: 100%;
+  justify-self: stretch;
+  flex: initial;
+}
+
+.record-card__history-line,
+.summary-panel .summary-edit-block .record-card__history-line {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  width: 100%;
+  justify-content: initial;
+}
+
+.record-card__history-label,
+.record-card__history-value,
+.summary-panel .summary-edit-block .record-card__history-label,
+.summary-panel .summary-edit-block .record-card__history-value {
+  width: auto;
+  flex: initial;
+}
