@@ -4534,3 +4534,36 @@ body::before {
   border-color: rgba(217, 119, 6, 0.44);
   background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 237, 213, 0.94));
 }
+
+.summary-list .record-card__label {
+  flex: 0 0 118px !important;
+  width: auto !important;
+  min-width: 0;
+  color: rgba(20, 50, 84, 0.72) !important;
+  text-align: left;
+}
+
+.summary-list .record-card__value {
+  flex: 1 1 auto !important;
+  width: 100%;
+  min-width: 0;
+  color: var(--ink) !important;
+  text-align: right;
+}
+
+.summary-list .record-card__row--registration .record-card__value {
+  color: #397eae !important;
+  font-weight: 800;
+}
+
+.summary-list .record-card__label--history,
+.summary-list .record-card__history-label,
+.summary-list .record-card__history-value {
+  color: #b45309 !important;
+}
+
+@media (max-width: 680px) {
+  .summary-list .record-card__label {
+    flex-basis: 102px !important;
+  }
+}
