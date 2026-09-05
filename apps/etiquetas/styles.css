@@ -4606,3 +4606,80 @@ body::before {
   min-width: 0;
   text-align: right !important;
 }
+
+/* Monthly ETIQUETAS cards use the same visual model as the daily report. */
+.monthly-list .monthly-records {
+  display: grid;
+  gap: 8px;
+}
+
+.monthly-list .record-card {
+  display: block !important;
+  position: relative;
+  padding: 11px;
+  border: 1px solid rgba(13, 50, 87, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 14px 26px rgba(13, 50, 87, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.monthly-list .record-card--tone-1 { background: linear-gradient(135deg, #f8fcfa 0%, #e8f4f0 100%); }
+.monthly-list .record-card--tone-2 { background: linear-gradient(135deg, #f5f9ff 0%, #e6eff8 100%); }
+.monthly-list .record-card--tone-3 { background: linear-gradient(135deg, #fffaf2 0%, #f8ecdc 100%); }
+.monthly-list .record-card--tone-4 { background: linear-gradient(135deg, #f8f7ff 0%, #ececf8 100%); }
+
+.monthly-list .record-card__number {
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  min-width: 19px;
+  height: 17px;
+  margin: 0 0 4px;
+  padding: 0 6px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #0d7a6c, #155e75);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow: 0 4px 9px rgba(13, 122, 108, 0.18);
+}
+
+.monthly-list .record-card__rows {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100%;
+  min-width: 0;
+}
+
+.monthly-list .record-card__row {
+  grid-column: 1;
+  border: 1px solid rgba(13, 122, 108, 0.1);
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.monthly-list .record-card__label {
+  flex: 0 0 118px !important;
+  width: auto !important;
+  min-width: 0;
+  color: rgba(20, 50, 84, 0.72) !important;
+  text-align: left;
+}
+
+.monthly-list .record-card__value {
+  flex: 1 1 auto !important;
+  width: 100%;
+  min-width: 0;
+  color: var(--ink) !important;
+  text-align: right;
+}
+
+.monthly-list .record-card__row--registration .record-card__value {
+  color: #397eae !important;
+  font-weight: 800;
+}
+
+@media (max-width: 680px) {
+  .monthly-list .record-card__label {
+    flex-basis: 102px !important;
+  }
+}
