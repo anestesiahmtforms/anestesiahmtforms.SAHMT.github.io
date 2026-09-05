@@ -4567,3 +4567,21 @@ body::before {
     flex-basis: 102px !important;
   }
 }
+
+/* Match the EVENTOS edit-history box exactly. */
+.summary-panel .summary-edit-block.record-card__row--history {
+  border-color: rgba(217, 119, 6, 0.44) !important;
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 237, 213, 0.94)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.summary-panel .summary-edit-block .record-card__history-entry {
+  border-color: rgba(217, 119, 6, 0.22) !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+}
+
+.summary-panel .summary-edit-block .record-card__label--history,
+.summary-panel .summary-edit-block .record-card__history-label,
+.summary-panel .summary-edit-block .record-card__history-value {
+  color: #b45309 !important;
+}
