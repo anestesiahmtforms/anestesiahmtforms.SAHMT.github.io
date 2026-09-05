@@ -330,7 +330,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260905-02", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260905-03", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -2015,9 +2015,7 @@
     }
 
     const activeDate = String(dateKey || todayKey).trim();
-    const records = eventRecords
-      .filter((record) => record.dataDoEventoKey === activeDate)
-      .sort(compareEventRecordsDesc);
+    const records = eventRecords.filter((record) => record.dataDoEventoKey === activeDate);
     elements.recordsList.innerHTML = "";
     toggle(elements.recordsEmptyState, records.length === 0);
 
