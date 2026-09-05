@@ -4585,3 +4585,24 @@ body::before {
 .summary-panel .summary-edit-block .record-card__history-value {
   color: #b45309 !important;
 }
+
+/* Use the exact two-column geometry used by EVENTOS edit history. */
+.summary-panel .summary-edit-block .record-card__history-line {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr) !important;
+  align-items: start;
+  width: 100%;
+  gap: 8px;
+}
+
+.summary-panel .summary-edit-block .record-card__history-label {
+  justify-self: start;
+  min-width: 0;
+  text-align: left !important;
+}
+
+.summary-panel .summary-edit-block .record-card__history-value {
+  justify-self: stretch;
+  min-width: 0;
+  text-align: right !important;
+}
