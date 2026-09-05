@@ -2970,3 +2970,26 @@ button:hover,
   border-color: rgba(217, 119, 6, 0.22);
   background: rgba(255, 255, 255, 0.68);
 }
+
+/* History fields: labels stay left and their values use the full right column. */
+.record-card__history-line {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  gap: 8px;
+}
+
+.record-card__history-label {
+  justify-self: start;
+  min-width: 0;
+  text-align: left !important;
+}
+
+.record-card__history-value {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  text-align: right !important;
+}
