@@ -3005,3 +3005,24 @@ button:hover,
   justify-self: stretch;
   text-align: left !important;
 }
+
+/* Keep EVENTOS edit history geometry identical to ETIQUETAS. */
+.record-card__row--history .record-card__history-line {
+  display: grid !important;
+  grid-template-columns: minmax(82px, 0.35fr) minmax(0, 1fr) !important;
+  align-items: start;
+  width: 100%;
+  gap: 8px;
+}
+
+.record-card__row--history .record-card__history-label {
+  justify-self: start;
+  min-width: 0;
+  text-align: left !important;
+}
+
+.record-card__row--history .record-card__history-value {
+  justify-self: stretch;
+  min-width: 0;
+  text-align: right !important;
+}
