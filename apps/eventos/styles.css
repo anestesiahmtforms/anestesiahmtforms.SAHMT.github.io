@@ -3056,3 +3056,27 @@ button:hover,
 #eventEntryModal.entry-modal--editing .entry-sheet__footer {
   flex: 0 0 auto;
 }
+
+/* Prevent iOS automatic input zoom from moving the fixed edit sheet sideways. */
+#eventEntryModal.entry-modal--editing .entry-sheet {
+  width: min(430px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
+#eventEntryModal.entry-modal--editing .entry-form {
+  touch-action: pan-y;
+}
+
+@media (max-width: 640px) {
+  #eventEntryModal.entry-modal--editing .entry-field input,
+  #eventEntryModal.entry-modal--editing .entry-field select,
+  #eventEntryModal.entry-modal--editing .entry-field textarea {
+    font-size: 16px !important;
+  }
+
+  #eventEntryModal.entry-modal--editing #amountToPayInput {
+    font-size: 16px !important;
+  }
+}
