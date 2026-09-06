@@ -4615,17 +4615,17 @@ body::before {
 
 #edit-overlay.edit-overlay .edit-card {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  width: min(430px, calc(100vw - 16px));
-  max-width: calc(100vw - 16px);
-  height: min(calc(100dvh - 8px), 920px);
-  max-height: calc(100dvh - 8px);
+  inset: max(4px, env(safe-area-inset-top, 0px)) max(4px, env(safe-area-inset-right, 0px)) max(4px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
   box-sizing: border-box;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transform: translate(-50%, -50%);
+  margin: 0;
+  transform: none;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -4642,6 +4642,23 @@ body::before {
 #edit-overlay.edit-overlay .confirm-actions,
 #edit-overlay.edit-overlay .panel-base-action {
   flex: 0 0 auto;
+}
+
+/* Keep the field list attached to the fixed sheet; only its contents scroll. */
+#edit-overlay.edit-overlay #edit-summary {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+}
+
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
