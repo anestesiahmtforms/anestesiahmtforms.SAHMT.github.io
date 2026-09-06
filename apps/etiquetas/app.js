@@ -236,8 +236,9 @@ window.addEventListener("focus", refreshDisplayedSummaries);
 window.addEventListener("pageshow", refreshDisplayedSummaries);
 if (window.visualViewport) {
   const syncKeyboardViewport = () => {
+    const entryIsOpen = entryPanelEl && !entryPanelEl.hidden;
     const keyboardOpen = window.visualViewport.height < window.innerHeight * 0.78;
-    document.body.classList.toggle("keyboard-open", keyboardOpen);
+    document.body.classList.toggle("keyboard-open", keyboardOpen && !entryIsOpen);
     document.documentElement.style.setProperty("--visual-height", `${Math.round(window.visualViewport.height)}px`);
   };
   window.visualViewport.addEventListener("resize", syncKeyboardViewport);
@@ -1028,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-14", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-15", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }

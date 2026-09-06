@@ -4896,12 +4896,18 @@ body::before {
 @media (max-width: 680px) {
   #entry-panel.form-panel.modal-panel,
   body.keyboard-open #entry-panel.form-panel.modal-panel {
+    position: fixed !important;
+    top: max(4px, env(safe-area-inset-top, 0px));
+    bottom: max(4px, env(safe-area-inset-bottom, 0px));
     left: max(4px, env(safe-area-inset-left, 0px));
     right: max(4px, env(safe-area-inset-right, 0px));
     width: auto;
+    height: calc(100lvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 8px);
     max-width: calc(100vw - 8px);
+    max-height: none;
     box-sizing: border-box;
     transform: none;
+    overflow: hidden;
   }
 
   #entry-panel #label-form input,
