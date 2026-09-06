@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-06", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-07", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2558,10 +2558,12 @@ function renderEditRecordFields() {
       return `<label><input type="checkbox" name="edit-plantonista" value="${escapeHtml(value)}"${checked}> <span>${escapeHtml(value)}</span></label>`;
     })
     .join("");
+  const selectedPlantonistasLabel = selectedPlantonistas.join(", ") || "Selecionar siglas";
   const plantonistasField = isConsulta ? "" : `
       <label class="full-width edit-plantonistas-field">
         <span>Plantonista(s)</span>
-        <div id="edit-plantonistas-grid" class="multi-select-options edit-plantonistas-grid">${editPlantonistaOptions}</div>
+        <button id="edit-plantonistas-toggle" type="button" class="multi-select-toggle" aria-expanded="false">${escapeHtml(selectedPlantonistasLabel)}</button>
+        <div id="edit-plantonistas-grid" class="multi-select-options edit-plantonistas-grid" hidden>${editPlantonistaOptions}</div>
       </label>`;
 
   editSummaryEl.innerHTML = `
@@ -2653,6 +2655,8 @@ function bindEditConditionalFields() {
   const typeEl = editSummaryEl?.querySelector("#edit-tipo");
   const valueEl = editSummaryEl?.querySelector("#edit-valor");
   const credorEl = editSummaryEl?.querySelector("#edit-credor");
+  const plantonistaToggle = editSummaryEl?.querySelector("#edit-plantonistas-toggle");
+  const plantonistaGrid = editSummaryEl?.querySelector("#edit-plantonistas-grid");
   if (typeEl) {
     typeEl.addEventListener("change", () => {
       typeEl.value = normalizeTipoValue(typeEl.value);
@@ -2674,6 +2678,14 @@ function bindEditConditionalFields() {
     credorEl.addEventListener("change", syncEditPlantonistaGrid);
     syncEditPlantonistaGrid();
   }
+  if (plantonistaToggle && plantonistaGrid) {
+    plantonistaToggle.addEventListener("click", () => {
+      const isOpen = !plantonistaGrid.hidden;
+      plantonistaGrid.hidden = isOpen;
+      plantonistaToggle.setAttribute("aria-expanded", String(!isOpen));
+    });
+    plantonistaGrid.addEventListener("change", updateEditPlantonistaToggle);
+  }
 }
 
 function syncEditPlantonistaGrid() {
@@ -2682,6 +2694,15 @@ function syncEditPlantonistaGrid() {
   editSummaryEl?.querySelectorAll("input[name='edit-plantonista']").forEach((checkbox) => {
     checkbox.disabled = disabled;
   });
+}
+
+function updateEditPlantonistaToggle() {
+  const toggle = editSummaryEl?.querySelector("#edit-plantonistas-toggle");
+  if (!toggle) return;
+  const selected = Array.from(editSummaryEl.querySelectorAll("input[name='edit-plantonista']:checked"))
+    .map((checkbox) => checkbox.value.trim())
+    .filter(Boolean);
+  toggle.textContent = selected.length ? selected.join(", ") : "Selecionar siglas";
 }
 
 async function saveEditedRecord() {
