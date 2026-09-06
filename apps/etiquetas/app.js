@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-18", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-19", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2514,6 +2514,7 @@ function openEditRecord(rowOrRowNumber) {
   renderEditRecordFields();
   setEditFeedback("", "neutral");
   editOverlayEl.hidden = false;
+  document.body.classList.add("edit-modal-open");
   editContextEl.textContent = `Lancado por: ${row.criadoPor || "Nao informado"} | Criado em: ${row.criadoEm || "Nao informado"}`;
 }
 
@@ -2761,6 +2762,7 @@ function closeEditRecord() {
   if (editOverlayEl) {
     editOverlayEl.hidden = true;
   }
+  document.body.classList.remove("edit-modal-open");
   setEditFeedback("", "neutral");
 }
 
