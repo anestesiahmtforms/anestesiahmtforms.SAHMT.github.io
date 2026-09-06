@@ -4845,7 +4845,8 @@ body::before {
 /* Manual entry remains fixed and fully visible while siglas are selected. */
 #entry-panel.manual-entry-expanded #label-form {
   overflow: hidden;
-  grid-auto-rows: minmax(40px, 1fr);
+  grid-template-rows: repeat(5, minmax(42px, 1fr)) minmax(0, min(30dvh, 220px));
+  grid-auto-rows: auto;
 }
 
 #entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) > span {
@@ -4856,6 +4857,23 @@ body::before {
 #entry-panel.manual-entry-expanded #plantonistas-options {
   max-height: none;
   overflow: hidden;
+}
+
+#entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) {
+  min-height: 0;
+  overflow: visible;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-picker,
+#entry-panel.manual-entry-expanded #plantonistas-options {
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 680px) {
+  #entry-panel.manual-entry-expanded #label-form {
+    grid-template-rows: repeat(5, minmax(38px, 1fr)) minmax(0, min(30dvh, 210px));
+  }
 }
 
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
