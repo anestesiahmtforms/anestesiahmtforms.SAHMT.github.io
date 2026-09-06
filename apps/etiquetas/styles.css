@@ -4789,10 +4789,10 @@ body::before {
 #entry-panel.manual-entry-expanded #plantonistas-options {
   position: static;
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   width: 100%;
-  height: min(31dvh, 300px);
-  max-height: min(31dvh, 300px);
+  height: min(30dvh, 300px);
+  max-height: min(30dvh, 300px);
   margin-top: 4px;
   box-sizing: border-box;
   overflow-y: auto;
@@ -4800,29 +4800,62 @@ body::before {
   -webkit-overflow-scrolling: touch;
 }
 
+#entry-panel.manual-entry-expanded #plantonistas-options label {
+  min-height: 26px;
+  padding: 3px 2px;
+  gap: 3px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-options input {
+  width: 14px;
+  height: 14px;
+}
+
 @media (max-width: 680px) {
   #entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) {
     grid-column: 1 / -1;
+    min-height: 0;
   }
 
   #entry-panel.manual-entry-expanded #plantonistas-options {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    height: min(31dvh, 280px);
-    max-height: min(31dvh, 280px);
-    gap: 6px;
-    padding: 8px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    height: min(30dvh, 220px);
+    max-height: min(30dvh, 220px);
+    gap: 4px;
+    padding: 6px;
+    overflow: hidden;
   }
 
   #entry-panel.manual-entry-expanded #plantonistas-options label {
-    min-height: 38px;
-    padding: 5px 3px;
-    font-size: 0.78rem;
+    min-height: 22px;
+    padding: 2px 1px;
+    gap: 2px;
+    border-radius: 7px;
+    font-size: 0.64rem;
   }
 
   #entry-panel.manual-entry-expanded #plantonistas-options input {
-    width: 16px;
-    height: 16px;
+    width: 13px;
+    height: 13px;
   }
+}
+
+/* Manual entry remains fixed and fully visible while siglas are selected. */
+#entry-panel.manual-entry-expanded #label-form {
+  overflow: hidden;
+  grid-auto-rows: minmax(40px, 1fr);
+}
+
+#entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) > span {
+  width: 100%;
+  text-align: center;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-options {
+  max-height: none;
+  overflow: hidden;
 }
 
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
