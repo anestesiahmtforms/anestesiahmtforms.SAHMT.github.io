@@ -4683,3 +4683,51 @@ body::before {
     flex-basis: 102px !important;
   }
 }
+
+/* Match EVENTOS report typography in both ETIQUETAS report modals. */
+.summary-panel .records-hero__title,
+.monthly-panel .records-hero__title {
+  font-size: 1rem !important;
+  line-height: 1.02;
+}
+
+.summary-panel .records-hero > [data-auth-user],
+.monthly-panel .records-hero > [data-auth-user] {
+  font-size: 0.67rem !important;
+  line-height: 1.15;
+}
+
+.summary-panel .date-field,
+.summary-panel .summary-date-field,
+.monthly-panel .date-field,
+.monthly-panel .summary-date-field {
+  font-size: 0.55rem !important;
+}
+
+.summary-list .record-card__label,
+.monthly-list .record-card__label {
+  font-size: 0.55rem !important;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.summary-list .record-card__value,
+.monthly-list .record-card__value {
+  font-size: 0.63rem !important;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.summary-list .record-card__history-label,
+.monthly-list .record-card__history-label {
+  font-size: 0.5rem !important;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.summary-list .record-card__history-value,
+.monthly-list .record-card__history-value {
+  font-size: 0.58rem !important;
+  line-height: 1.3;
+  font-weight: 800;
+}
