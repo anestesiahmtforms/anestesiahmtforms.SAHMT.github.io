@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-15", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-16", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2566,12 +2566,10 @@ function renderEditRecordFields() {
       return `<label><input type="checkbox" name="edit-plantonista" value="${escapeHtml(value)}"${checked}> <span>${escapeHtml(value)}</span></label>`;
     })
     .join("");
-  const selectedPlantonistasLabel = selectedPlantonistas.join(", ") || "Selecionar siglas";
   const plantonistasField = isConsulta ? "" : `
       <label class="full-width edit-plantonistas-field">
         <span>Plantonista(s)</span>
-        <button id="edit-plantonistas-toggle" type="button" class="multi-select-toggle" aria-expanded="false">${escapeHtml(selectedPlantonistasLabel)}</button>
-        <div id="edit-plantonistas-grid" class="multi-select-options edit-plantonistas-grid" hidden>${editPlantonistaOptions}</div>
+        <div id="edit-plantonistas-grid" class="multi-select-options edit-plantonistas-grid">${editPlantonistaOptions}</div>
       </label>`;
 
   editSummaryEl.innerHTML = `

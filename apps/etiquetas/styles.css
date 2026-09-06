@@ -4963,6 +4963,39 @@ body::before {
   }
 }
 
+/* Edit entry: match Manual Entry with a fixed inline sigla grid. */
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > #edit-valor-field {
+  order: 10;
+  grid-column: 1 / -1;
+}
+
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label {
+  min-height: 40px;
+  padding: 4px 6px;
+  gap: 2px;
+}
+
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > input,
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > select,
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > textarea {
+  min-height: 34px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-field {
+  overflow: visible;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid {
+  position: static;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: min(30dvh, 220px);
+  max-height: min(30dvh, 220px);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
