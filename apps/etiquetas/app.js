@@ -1028,7 +1028,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-12", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-13", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }

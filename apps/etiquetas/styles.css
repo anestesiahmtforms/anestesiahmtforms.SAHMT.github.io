@@ -4901,6 +4901,41 @@ body::before {
   }
 }
 
+/* Compact the data boxes and keep Valor em Real on its own final row. */
+#entry-panel #label-form > #valor-field {
+  order: 10;
+  grid-column: 1 / -1;
+}
+
+#entry-panel #label-form > label {
+  min-height: 40px;
+  padding: 4px 6px;
+  gap: 2px;
+}
+
+#entry-panel #label-form > label > input,
+#entry-panel #label-form > label > select,
+#entry-panel #label-form .multi-select-toggle {
+  min-height: 34px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+@media (max-width: 680px) {
+  #entry-panel #label-form > label {
+    min-height: 36px;
+    padding: 4px 5px;
+  }
+
+  #entry-panel #label-form > label > input,
+  #entry-panel #label-form > label > select,
+  #entry-panel #label-form .multi-select-toggle {
+    min-height: 32px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
