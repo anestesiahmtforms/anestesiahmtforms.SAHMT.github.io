@@ -4607,6 +4607,52 @@ body::before {
   text-align: right !important;
 }
 
+/* Keep ETIQUETAS edit sheet anchored while editing on mobile browsers. */
+#edit-overlay.edit-overlay {
+  overflow: hidden;
+  touch-action: none;
+}
+
+#edit-overlay.edit-overlay .edit-card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(430px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  height: min(calc(100dvh - 18px), 860px);
+  max-height: calc(100dvh - 18px);
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translate(-50%, -50%);
+  -webkit-text-size-adjust: 100%;
+}
+
+#edit-overlay.edit-overlay .edit-summary,
+#edit-overlay.edit-overlay #edit-summary {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+#edit-overlay.edit-overlay .confirm-actions,
+#edit-overlay.edit-overlay .panel-base-action {
+  flex: 0 0 auto;
+}
+
+/* iOS and Android must not zoom or move the fixed edit sheet on focus. */
+@media (max-width: 640px) {
+  #edit-overlay.edit-overlay .edit-card input,
+  #edit-overlay.edit-overlay .edit-card select,
+  #edit-overlay.edit-overlay .edit-card textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
