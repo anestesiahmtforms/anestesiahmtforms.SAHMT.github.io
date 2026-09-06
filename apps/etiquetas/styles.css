@@ -5099,6 +5099,84 @@ body::before {
   }
 }
 
+/* Keep Editar Registro fully contained on smartphone displays. */
+#edit-overlay.edit-overlay .edit-card {
+  position: fixed;
+  inset: max(4px, env(safe-area-inset-top, 0px)) max(4px, env(safe-area-inset-right, 0px)) max(4px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  width: auto;
+  max-width: none;
+  height: calc(100svh - 8px);
+  max-height: none;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: none;
+}
+
+#edit-overlay.edit-overlay #edit-summary {
+  min-height: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#edit-overlay.edit-overlay #edit-summary .confirm-edit-grid {
+  min-height: 0;
+  overflow: visible;
+}
+
+#edit-overlay.edit-overlay .confirm-actions,
+#edit-overlay.edit-overlay .panel-base-action {
+  flex: 0 0 auto;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid {
+  height: min(25dvh, 190px);
+  max-height: min(25dvh, 190px);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 6px;
+  overflow: hidden;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid label {
+  min-height: 21px;
+  padding: 2px 1px;
+  gap: 2px;
+  border-radius: 7px;
+  font-size: 0.64rem;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid input {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 680px) {
+  #edit-overlay.edit-overlay .edit-card {
+    height: calc(100svh - 8px);
+  }
+
+  #edit-overlay.edit-overlay #edit-summary .confirm-edit-grid {
+    gap: 5px;
+  }
+
+  #edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label {
+    min-height: 34px;
+    padding: 3px 5px;
+  }
+
+  #edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > input,
+  #edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > select,
+  #edit-overlay.edit-overlay #edit-summary .confirm-edit-grid > label > textarea {
+    min-height: 30px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
