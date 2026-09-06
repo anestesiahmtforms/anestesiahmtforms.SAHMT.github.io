@@ -4662,17 +4662,26 @@ body::before {
 }
 
 #edit-overlay.edit-overlay .edit-plantonistas-field {
+  position: relative;
   grid-column: 1 / -1;
 }
 
 #edit-overlay.edit-overlay .edit-plantonistas-grid {
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  left: 0;
+  z-index: 20;
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  max-height: none;
-  margin-top: 2px;
+  max-height: min(42dvh, 320px);
+  margin-top: 4px;
   padding: 10px;
-  overflow: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 18px 34px rgba(12, 35, 31, 0.22);
 }
 
 #edit-overlay.edit-overlay .edit-plantonistas-grid label {
@@ -4710,6 +4719,7 @@ body::before {
   #edit-overlay.edit-overlay .edit-plantonistas-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
+    max-height: min(42dvh, 300px);
     padding: 8px;
   }
 }
