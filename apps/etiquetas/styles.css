@@ -4876,6 +4876,22 @@ body::before {
   }
 }
 
+/* Keep Manual Entry on the layout viewport while the keyboard overlays it. */
+@media (max-width: 680px) {
+  body.keyboard-open #entry-panel.manual-entry-expanded {
+    inset: max(4px, env(safe-area-inset-top, 0px)) max(4px, env(safe-area-inset-right, 0px)) max(4px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+    width: auto;
+    height: calc(100lvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    max-height: none;
+    overflow: hidden;
+    transform: none;
+  }
+
+  body.keyboard-open #entry-panel.manual-entry-expanded #label-form {
+    overflow: hidden;
+  }
+}
+
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
 @media (max-width: 640px) {
   #edit-overlay.edit-overlay .edit-card input,
