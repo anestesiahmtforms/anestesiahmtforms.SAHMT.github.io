@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-08", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-09", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -1414,7 +1414,7 @@ function applyDataToForm(data) {
 function openManualEntry() {
   stopCamera();
   resetForm({ keepImage: false, hideEntry: false, keepDate: fields.data.value || getTodayISO() });
-  showEntryPanel();
+  showEntryPanel({ showPlantonistasGrid: true });
   setStatus("Preencha o registro manualmente.", "info");
 }
 
@@ -1426,6 +1426,12 @@ function showEntryPanel(options = {}) {
   movePanelToModalLayer(entryPanelEl);
   entryPanelEl.hidden = false;
   entryPanelEl.classList.add("is-open");
+  const showPlantonistasGrid = options.showPlantonistasGrid === true;
+  entryPanelEl.classList.toggle("manual-entry-expanded", showPlantonistasGrid);
+  if (plantonistasUi.panel) {
+    plantonistasUi.panel.hidden = !showPlantonistasGrid;
+    plantonistasUi.button?.setAttribute("aria-expanded", String(showPlantonistasGrid));
+  }
   syncConditionalEntryFields();
   syncPlantonistasRequirement();
   updateEntryValidationStates();
@@ -1442,7 +1448,9 @@ function hideEntryPanel() {
 
   entryPanelEl.hidden = true;
   entryPanelEl.classList.remove("is-open");
+  entryPanelEl.classList.remove("manual-entry-expanded");
   entryPanelEl.scrollTop = 0;
+  closePlantonistasPicker();
   syncModalLock();
 }
 

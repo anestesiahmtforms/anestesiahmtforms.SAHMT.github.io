@@ -4773,6 +4773,58 @@ body::before {
   }
 }
 
+/* Manual entry: keep the complete sigla grid in the lower third of the sheet. */
+#entry-panel.manual-entry-expanded #label-form {
+  align-content: start;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-picker {
+  width: 100%;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-toggle {
+  display: none;
+}
+
+#entry-panel.manual-entry-expanded #plantonistas-options {
+  position: static;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  height: min(31dvh, 300px);
+  max-height: min(31dvh, 300px);
+  margin-top: 4px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 680px) {
+  #entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) {
+    grid-column: 1 / -1;
+  }
+
+  #entry-panel.manual-entry-expanded #plantonistas-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: min(31dvh, 280px);
+    max-height: min(31dvh, 280px);
+    gap: 6px;
+    padding: 8px;
+  }
+
+  #entry-panel.manual-entry-expanded #plantonistas-options label {
+    min-height: 38px;
+    padding: 5px 3px;
+    font-size: 0.78rem;
+  }
+
+  #entry-panel.manual-entry-expanded #plantonistas-options input {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
 @media (max-width: 640px) {
   #edit-overlay.edit-overlay .edit-card input,
