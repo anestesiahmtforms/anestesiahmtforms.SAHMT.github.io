@@ -4661,6 +4661,55 @@ body::before {
   -webkit-overflow-scrolling: touch;
 }
 
+#edit-overlay.edit-overlay .edit-plantonistas-field {
+  grid-column: 1 / -1;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-height: none;
+  margin-top: 2px;
+  padding: 10px;
+  overflow: visible;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 6px 4px;
+  border: 1px solid rgba(13, 122, 108, 0.18);
+  border-radius: 10px;
+  background: rgba(248, 250, 247, 0.96);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid label:has(input:checked) {
+  border-color: rgba(13, 122, 108, 0.54);
+  background: #d9f2e8;
+  box-shadow: inset 0 0 0 1px rgba(13, 122, 108, 0.18);
+}
+
+#edit-overlay.edit-overlay .edit-plantonistas-grid input {
+  width: 17px;
+  min-height: 17px;
+  margin: 0 4px 0 0;
+  accent-color: var(--brand);
+}
+
+@media (max-width: 640px) {
+  #edit-overlay.edit-overlay .edit-plantonistas-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+  }
+}
+
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
 @media (max-width: 640px) {
   #edit-overlay.edit-overlay .edit-card input,

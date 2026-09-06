@@ -1029,7 +1029,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-04", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260906-05", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }
@@ -2546,10 +2546,22 @@ function renderEditRecordFields() {
         <span>Cirurgia</span>
         <input id="edit-cirurgia" inputmode="numeric" value="${escapeHtml(row.cirurgia || "")}" required>
       </label>`;
+  const selectedPlantonistas = String(row.plantonistas || "")
+    .split(/[,;]+/)
+    .map((item) => item.trim().toUpperCase())
+    .filter(Boolean);
+  const editPlantonistaOptions = Array.from(fields.plantonistas.options)
+    .filter((option) => option.value)
+    .map((option) => {
+      const value = option.value.trim();
+      const checked = selectedPlantonistas.includes(value.toUpperCase()) ? " checked" : "";
+      return `<label><input type="checkbox" name="edit-plantonista" value="${escapeHtml(value)}"${checked}> <span>${escapeHtml(value)}</span></label>`;
+    })
+    .join("");
   const plantonistasField = isConsulta ? "" : `
-      <label class="full-width">
+      <label class="full-width edit-plantonistas-field">
         <span>Plantonista(s)</span>
-        <input id="edit-plantonistas" type="text" value="${escapeHtml(row.plantonistas || "")}" placeholder="Nao necessario quando Credor for Caixa">
+        <div id="edit-plantonistas-grid" class="multi-select-options edit-plantonistas-grid">${editPlantonistaOptions}</div>
       </label>`;
 
   editSummaryEl.innerHTML = `
@@ -2613,6 +2625,10 @@ function collectEditPayload() {
   const mergedCredor = mergedTipo === CONSULTA_TYPE
     ? CREDOR_CAIXA
     : withEditingFallback(credor, original.credor);
+  const selectedPlantonistas = Array.from(editSummaryEl.querySelectorAll("input[name='edit-plantonista']:checked"))
+    .map((checkbox) => checkbox.value.trim())
+    .filter(Boolean)
+    .join(", ");
   return {
     rowNumber: original.rowNumber || "",
     data: withEditingFallback(editSummaryEl.querySelector("#edit-data")?.value || "", original.data),
@@ -2627,7 +2643,7 @@ function collectEditPayload() {
     credor: mergedCredor,
     plantonistas: mergedCredor === CREDOR_CAIXA
       ? ""
-      : withEditingFallback(editSummaryEl.querySelector("#edit-plantonistas")?.value.trim() || "", original.plantonistas),
+      : withEditingFallback(selectedPlantonistas, original.plantonistas),
     consulta: mergedTipo === CONSULTA_TYPE,
     observacoes: editSummaryEl.querySelector("#edit-observacoes")?.value.trim() || "",
   };
@@ -2636,6 +2652,7 @@ function collectEditPayload() {
 function bindEditConditionalFields() {
   const typeEl = editSummaryEl?.querySelector("#edit-tipo");
   const valueEl = editSummaryEl?.querySelector("#edit-valor");
+  const credorEl = editSummaryEl?.querySelector("#edit-credor");
   if (typeEl) {
     typeEl.addEventListener("change", () => {
       typeEl.value = normalizeTipoValue(typeEl.value);
@@ -2644,6 +2661,7 @@ function bindEditConditionalFields() {
         if (credorEl) credorEl.value = CREDOR_CAIXA;
       }
       syncInlineConditionalFields(editSummaryEl, "edit");
+      syncEditPlantonistaGrid();
     });
     syncInlineConditionalFields(editSummaryEl, "edit");
   }
@@ -2652,6 +2670,18 @@ function bindEditConditionalFields() {
       valueEl.value = formatStoredCurrency(valueEl.value);
     });
   }
+  if (credorEl) {
+    credorEl.addEventListener("change", syncEditPlantonistaGrid);
+    syncEditPlantonistaGrid();
+  }
+}
+
+function syncEditPlantonistaGrid() {
+  const credor = editSummaryEl?.querySelector("#edit-credor")?.value.trim() || "";
+  const disabled = credor === CREDOR_CAIXA;
+  editSummaryEl?.querySelectorAll("input[name='edit-plantonista']").forEach((checkbox) => {
+    checkbox.disabled = disabled;
+  });
 }
 
 async function saveEditedRecord() {
