@@ -4619,8 +4619,8 @@ body::before {
   left: 50%;
   width: min(430px, calc(100vw - 16px));
   max-width: calc(100vw - 16px);
-  height: min(calc(100dvh - 18px), 860px);
-  max-height: calc(100dvh - 18px);
+  height: min(calc(100dvh - 8px), 920px);
+  max-height: calc(100dvh - 8px);
   box-sizing: border-box;
   overflow: hidden;
   display: flex;
