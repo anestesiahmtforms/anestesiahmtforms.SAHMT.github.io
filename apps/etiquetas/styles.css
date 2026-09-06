@@ -4996,6 +4996,109 @@ body::before {
   overflow: hidden;
 }
 
+/* Main screen premium layout for mobile displays. */
+@media (max-width: 680px) {
+  .app-shell {
+    height: 100svh;
+    min-height: 100svh;
+    max-height: 100svh;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) {
+    height: 100%;
+    min-height: 0;
+    gap: 7px;
+    overflow: hidden;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 10px;
+    gap: 8px;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.72), transparent 32%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(239, 247, 243, 0.94));
+    box-shadow:
+      0 18px 38px rgba(8, 42, 59, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .camera-stage,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel video {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 170px;
+    height: auto;
+    max-height: none;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .capture-shutter,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel #process-image,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-action {
+    min-height: 50px;
+    border-radius: 18px;
+    font-size: 0.86rem;
+    font-weight: 900;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.46),
+      0 10px 20px rgba(13, 86, 78, 0.16);
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-actions,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-secondary-actions {
+    margin-top: 0;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .quick-actions {
+    flex: 0 0 auto;
+    gap: 7px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .quick-actions .quick-action-card {
+    padding: 3px;
+    border-radius: 18px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .quick-actions .home-action-button {
+    min-height: 46px;
+    border-radius: 16px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .module-link-strip {
+    flex: 0 0 auto;
+    min-height: 94px;
+    margin: 0;
+    padding: 6px;
+    gap: 6px;
+    border-radius: 20px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .module-link-strip .module-link-card {
+    min-height: 80px;
+    border-radius: 15px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .module-link-strip .module-link-card__image {
+    width: min(100%, 58px);
+    height: 54px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .footer-banner {
+    flex: 0 0 auto;
+    margin: 0;
+    min-height: 36px;
+    padding: 8px;
+    border-radius: 16px;
+    font-size: 0.56rem;
+  }
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
