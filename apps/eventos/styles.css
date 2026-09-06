@@ -3026,3 +3026,33 @@ button:hover,
   min-width: 0;
   text-align: right !important;
 }
+
+/* Keep the event edit sheet anchored while its form is edited or scrolled. */
+#eventEntryModal.entry-modal--editing {
+  overflow: hidden;
+}
+
+#eventEntryModal.entry-modal--editing .entry-sheet {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(100%, 430px);
+  height: min(calc(100dvh - 18px), 860px);
+  max-height: calc(100dvh - 18px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translate(-50%, -50%);
+}
+
+#eventEntryModal.entry-modal--editing .entry-form {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#eventEntryModal.entry-modal--editing .entry-sheet__footer {
+  flex: 0 0 auto;
+}
