@@ -4892,6 +4892,27 @@ body::before {
   }
 }
 
+/* Prevent iOS focus zoom and keep Entrada width stable between fields. */
+@media (max-width: 680px) {
+  #entry-panel.form-panel.modal-panel,
+  body.keyboard-open #entry-panel.form-panel.modal-panel {
+    left: max(4px, env(safe-area-inset-left, 0px));
+    right: max(4px, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-width: calc(100vw - 8px);
+    box-sizing: border-box;
+    transform: none;
+  }
+
+  #entry-panel #label-form input,
+  #entry-panel #label-form select,
+  #entry-panel #label-form textarea,
+  #entry-panel #label-form .multi-select-toggle {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
 /* iOS and Android must not zoom or move the fixed edit sheet on focus. */
 @media (max-width: 640px) {
   #edit-overlay.edit-overlay .edit-card input,
