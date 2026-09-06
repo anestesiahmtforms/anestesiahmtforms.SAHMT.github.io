@@ -5154,6 +5154,51 @@ body::before {
   height: 13px;
 }
 
+/* Main ETIQUETAS screen: keep the scanner compact so it never overlaps the reports. */
+@media (max-width: 680px) {
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    gap: 5px;
+    padding: 8px;
+    margin: 0;
+    overflow: visible;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .camera-stage,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .camera-stage.has-capture,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel video {
+    flex: 0 0 150px;
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .capture-shutter,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel #process-image,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-action {
+    min-height: 42px;
+    max-height: 42px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-actions,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .scanner-secondary-actions,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel #process-image,
+  .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .hint {
+    flex: 0 0 auto;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .layout:not(:has(.modal-panel.is-open)) > .quick-actions {
+    flex: 0 0 auto;
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 680px) {
   #edit-overlay.edit-overlay .edit-card {
     height: calc(100svh - 8px);
