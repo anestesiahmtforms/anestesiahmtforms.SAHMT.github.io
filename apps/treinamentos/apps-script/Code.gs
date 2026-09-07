@@ -164,7 +164,7 @@ function html_() {
 </head>
 <body>
 <main><section class="card"><header><h1><?= state.training ? state.training.title : "Treinamentos SAHMT" ?></h1><? if (state.email) { ?><p class="user">Acesso: <?= state.email ?></p><? } ?></header><div class="content">
-<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><p class="notice">Escolha um treinamento para iniciar.</p><div id="catalog" class="catalog"></div><? } else { ?><p class="notice">Assista ao video completo. Na metade, responda a pergunta para continuar. A confirmacao sera liberada ao atingir 95% de reproducao e o final do video.</p><div class="player-wrap"><div id="player" class="player"></div><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Está entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Não</button></div></div></div></div><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>Concluir treinamento</button><? } ?></div></section></main>
+<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><p class="notice">Escolha um treinamento para iniciar.</p><div id="catalog" class="catalog"></div><? } else { ?><p class="notice">Assista ao video completo. Na metade, responda a pergunta para continuar. A confirmacao sera liberada ao atingir 95% de reproducao e o final do video.</p><div class="player-wrap"><iframe id="youtubeFrame" class="player" src="https://www.youtube.com/embed/<?= state.training ? state.training.videoId : "" ?>?enablejsapi=1&playsinline=1&rel=0" title="<?= state.training ? state.training.title : "Treinamento SAHMT" ?>" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Está entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Não</button></div></div></div></div><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>Concluir treinamento</button><? } ?></div></section></main>
 <script>
 const state = <?!= state.trainingCatalogJson ?>;
 const endpoint = window.location.href.split("?")[0];
@@ -201,7 +201,7 @@ let questionAnswered = false;
 
 function onYouTubeIframeAPIReady() {
   if (!training || !training.videoId) return;
-  player = new YT.Player("player", {
+  player = new YT.Player("youtubeFrame", {
     videoId: training.videoId,
     playerVars: { playsinline: 1, rel: 0 },
     events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange, onError: onPlayerError }
