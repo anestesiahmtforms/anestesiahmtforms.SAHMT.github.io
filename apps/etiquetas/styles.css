@@ -5250,16 +5250,16 @@ body::before {
   }
 
   #entry-panel.form-panel.modal-panel #label-form > label {
-    min-height: 32px;
-    padding: 3px 5px;
+    min-height: 37px;
+    padding: 4px 5px;
     gap: 1px;
   }
 
   #entry-panel.form-panel.modal-panel #label-form > label > input,
   #entry-panel.form-panel.modal-panel #label-form > label > select,
   #entry-panel.form-panel.modal-panel #label-form .multi-select-toggle {
-    min-height: 28px;
-    padding: 3px 6px;
+    min-height: 33px;
+    padding: 4px 6px;
   }
 
   #entry-panel.form-panel.modal-panel > .actions {
@@ -5285,8 +5285,8 @@ body::before {
   }
 
   #entry-panel.manual-entry-expanded #label-form {
-    grid-template-rows: repeat(5, minmax(32px, auto)) minmax(0, 184px) minmax(0, auto);
-    grid-auto-rows: minmax(32px, auto);
+    grid-template-rows: repeat(5, minmax(37px, auto)) minmax(0, 190px) minmax(0, auto);
+    grid-auto-rows: minmax(37px, auto);
   }
 
   #entry-panel.manual-entry-expanded #valor-field {
@@ -5316,6 +5316,10 @@ body::before {
     min-height: 0;
     overflow: hidden;
     grid-auto-rows: minmax(0, 1fr);
+  }
+
+  #entry-panel.manual-entry-expanded #valor-field:not([hidden]) {
+    min-height: 37px;
   }
 }
 
