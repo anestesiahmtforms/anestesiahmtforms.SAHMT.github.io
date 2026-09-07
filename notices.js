@@ -7,7 +7,7 @@ window.SAHMT_NOTICES = {
       id: "aviso-principal",
       eyebrow: "Comunicado SAHMT",
       title: "APP - SAHMT (Visão geral)",
-      message: `https://drive.google.com/file/d/1TWuarxdC3qDIZYRtZQ3xExCoKz4oTTuL/view?usp=drive_link`,
+      message: `https://drive.google.com/file/d/18Pw333xWAnpvx5pu6JB1dw5PsZn8FP4F/view?usp=drive_link;httpsÇ;;drive.google.com;file;d;1zeYGSYThs8zE4uk2fnXxEi20VX-f9oN5;view:usp=drive_link;https://drive.google.com/file/d/1r-7krYGdL3xQiuSwWup0dEBf6iCVYA3G/view?usp=drive_link;https://drive.google.com/file/d/1IIj617BLJi-hCEKbOnasyj09Az-Zkiz-/view?usp=drive_link`,
       accent: "gold"
     },
     {
