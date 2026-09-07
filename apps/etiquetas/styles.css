@@ -5222,6 +5222,79 @@ body::before {
   }
 }
 
+/* Registro Manual: compact fields and reserve the bottom actions inside the fixed card. */
+@media (max-width: 680px) {
+  #entry-panel.form-panel.modal-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    height: calc(100svh - 8px);
+    max-height: none;
+    overflow: hidden;
+  }
+
+  #entry-panel.form-panel.modal-panel > .section-title,
+  #entry-panel.form-panel.modal-panel > .actions,
+  #entry-panel.form-panel.modal-panel > .send-feedback,
+  #entry-panel.form-panel.modal-panel > .panel-base-action {
+    flex: 0 0 auto;
+  }
+
+  #entry-panel.form-panel.modal-panel > .form-grid {
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+    align-content: start;
+    grid-auto-rows: minmax(32px, auto);
+    gap: 4px;
+    padding: 0 1px 4px 0;
+  }
+
+  #entry-panel.form-panel.modal-panel #label-form > label {
+    min-height: 32px;
+    padding: 3px 5px;
+    gap: 1px;
+  }
+
+  #entry-panel.form-panel.modal-panel #label-form > label > input,
+  #entry-panel.form-panel.modal-panel #label-form > label > select,
+  #entry-panel.form-panel.modal-panel #label-form .multi-select-toggle {
+    min-height: 28px;
+    padding: 3px 6px;
+  }
+
+  #entry-panel.form-panel.modal-panel > .actions {
+    min-height: 42px;
+    padding: 4px 0 2px;
+    gap: 4px;
+  }
+
+  #entry-panel.form-panel.modal-panel > .actions button {
+    min-height: 34px;
+    padding: 5px 10px;
+  }
+
+  #entry-panel.form-panel.modal-panel > .panel-base-action {
+    min-height: 48px;
+    margin-top: 3px;
+    padding-top: 4px;
+  }
+
+  #entry-panel.form-panel.modal-panel > .panel-base-action .panel-home-button {
+    min-height: 40px;
+    padding: 7px 12px;
+  }
+
+  #entry-panel.manual-entry-expanded #label-form {
+    grid-template-rows: repeat(6, minmax(32px, auto)) minmax(0, min(25dvh, 170px));
+    grid-auto-rows: minmax(32px, auto);
+  }
+
+  #entry-panel.manual-entry-expanded #plantonistas-options {
+    height: min(25dvh, 170px);
+    max-height: min(25dvh, 170px);
+  }
+}
+
 /* Monthly ETIQUETAS cards use the same visual model as the daily report. */
 .monthly-list .monthly-records {
   display: grid;
