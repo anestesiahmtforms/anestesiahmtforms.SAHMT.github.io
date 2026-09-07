@@ -15,8 +15,7 @@ const CONFIG = Object.freeze({
 function doGet(e) {
   const email = getAuthenticatedEmail_(e);
   const allowed = email && isParticipantAllowed_(email);
-  const accessId = allowed ? Utilities.getUuid() : "";
-  if (allowed) recordAccess_(accessId, email);
+  const accessId = allowed ? recordAccess_(email) : "";
 
   const template = HtmlService.createTemplate(html_());
   template.state = { allowed, email: email || "", accessId,
@@ -69,14 +68,25 @@ function isParticipantAllowed_(email) {
     .some((row) => normalizeEmail_(row[0]) === email);
 }
 
-function recordAccess_(accessId, email) {
+function recordAccess_(email) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
     const sheet = getSpreadsheet_().getSheetByName(CONFIG.participationSheet);
     if (!sheet) throw new Error("A aba Participações nao foi encontrada.");
+
+    const values = sheet.getDataRange().getValues();
+    for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
+      const row = values[rowIndex];
+      if (normalizeEmail_(row[1]) === email && String(row[2] || "") === CONFIG.trainingId) {
+        return String(row[0] || "");
+      }
+    }
+
+    const accessId = Utilities.getUuid();
     const now = new Date();
     sheet.appendRow([accessId, email, CONFIG.trainingId, now, "", "Acessado", getTrainingPoints_().access, now]);
+    return accessId;
   } finally {
     lock.releaseLock();
   }
