@@ -47,7 +47,10 @@ function completeTraining(accessId, email, trainingId) {
 
 function getAuthenticatedEmail_(e) {
   const sessionEmail = normalizeEmail_(Session.getActiveUser().getEmail());
-  return sessionEmail || normalizeEmail_(e && e.parameter ? e.parameter.email : "");
+  const parameterEmail = e && e.parameter
+    ? (e.parameter.userEmail || e.parameter.email)
+    : "";
+  return sessionEmail || normalizeEmail_(parameterEmail);
 }
 
 function isParticipantAllowed_(email) {

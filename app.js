@@ -235,7 +235,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260907-01", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260907-02", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -1003,6 +1003,16 @@
       if (embeddedMediaUrl) {
         titleLink.target = "_blank";
         titleLink.rel = "noopener noreferrer";
+        titleLink.addEventListener("click", (event) => {
+          const sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+          if (!sessionEmail) {
+            return;
+          }
+          event.preventDefault();
+          const trainingUrl = new URL(embeddedMediaUrl);
+          trainingUrl.searchParams.set("userEmail", sessionEmail);
+          window.open(trainingUrl.href, "_blank", "noopener,noreferrer");
+        });
       } else {
         titleLink.addEventListener("click", (event) => event.preventDefault());
       }
