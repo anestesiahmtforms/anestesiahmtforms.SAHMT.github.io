@@ -5249,7 +5249,7 @@ body::before {
     min-height: 0;
     height: auto;
     overflow: hidden;
-    align-content: start;
+    align-content: stretch;
     grid-auto-rows: minmax(32px, auto);
     gap: 4px;
     padding: 0 1px 4px 0;
@@ -5291,8 +5291,14 @@ body::before {
   }
 
   #entry-panel.manual-entry-expanded #label-form {
+    align-content: stretch;
     grid-template-rows: repeat(5, minmax(37px, auto)) minmax(0, 190px) minmax(0, auto);
     grid-auto-rows: minmax(37px, auto);
+  }
+
+  #entry-panel:not(.manual-entry-expanded) #label-form {
+    align-content: stretch;
+    grid-auto-rows: minmax(37px, 1fr);
   }
 
   #entry-panel.manual-entry-expanded #valor-field {
