@@ -1217,7 +1217,7 @@ async function processCurrentImage() {
   try {
     const parsed = await extractLabelWithAi(state.imageBlob);
     applyDataToForm(parsed);
-    showEntryPanel();
+    showEntryPanel({ showPlantonistasGrid: true });
 
     const missingKeys = normalizeTipoValue(parsed.tipo) === SADT_TYPE
       ? ["nomePaciente", "convenio", "atendimento"]
