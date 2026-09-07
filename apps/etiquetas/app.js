@@ -231,6 +231,18 @@ entryPanelEl?.addEventListener("focusin", (event) => {
     return;
   }
 
+  window.setTimeout(() => {
+    if (!entryPanelEl || entryPanelEl.hidden || !target.isConnected) {
+      return;
+    }
+    const formGrid = target.closest("#label-form");
+    if (!(formGrid instanceof HTMLElement)) {
+      return;
+    }
+    const targetCenter = target.offsetTop + target.offsetHeight / 2;
+    const scrollTop = Math.max(0, targetCenter - formGrid.clientHeight / 2);
+    formGrid.scrollTo({ top: scrollTop, behavior: "smooth" });
+  }, 80);
 });
 window.addEventListener("focus", refreshDisplayedSummaries);
 window.addEventListener("pageshow", refreshDisplayedSummaries);
@@ -239,6 +251,7 @@ if (window.visualViewport) {
     const entryIsOpen = entryPanelEl && !entryPanelEl.hidden;
     const keyboardOpen = window.visualViewport.height < window.innerHeight * 0.78;
     document.body.classList.toggle("keyboard-open", keyboardOpen && !entryIsOpen);
+    entryPanelEl?.classList.toggle("entry-keyboard-open", Boolean(keyboardOpen && entryIsOpen));
     document.documentElement.style.setProperty("--visual-height", `${Math.round(window.visualViewport.height)}px`);
   };
   window.visualViewport.addEventListener("resize", syncKeyboardViewport);
