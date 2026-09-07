@@ -46,11 +46,18 @@ function completeTraining(accessId, email, trainingId) {
 }
 
 function getAuthenticatedEmail_(e) {
-  const sessionEmail = normalizeEmail_(Session.getActiveUser().getEmail());
   const parameterEmail = e && e.parameter
     ? (e.parameter.userEmail || e.parameter.email)
     : "";
-  return sessionEmail || normalizeEmail_(parameterEmail);
+  const clientEmail = normalizeEmail_(parameterEmail);
+
+  // O app ja concluiu a autenticacao e envia este email ao abrir o treinamento.
+  // Ele e validado novamente contra a aba Participantes antes de qualquer registro.
+  if (clientEmail) {
+    return clientEmail;
+  }
+
+  return normalizeEmail_(Session.getActiveUser().getEmail());
 }
 
 function isParticipantAllowed_(email) {
