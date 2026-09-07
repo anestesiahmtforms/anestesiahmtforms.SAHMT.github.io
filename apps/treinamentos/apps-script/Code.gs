@@ -159,12 +159,12 @@ function html_() {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Treinamentos SAHMT</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;min-height:100vh;color:#0b2844;background:linear-gradient(145deg,#e8f2f2,#f7ead4)}main{width:min(94vw,760px);margin:auto;padding:20px 0 32px}.card{overflow:hidden;border:1px solid #fff;border-radius:26px;background:#ffffffc7;box-shadow:0 18px 50px #0b284428}header{padding:22px 20px;text-align:center;background:linear-gradient(135deg,#d8eee8,#f7e9cc)}h1{margin:0;font-size:clamp(1.4rem,5vw,2rem)}.user{margin:8px 0 0;color:#157760;font-weight:700;overflow-wrap:anywhere}.content{padding:20px}.notice{margin:0 0 16px;padding:13px 15px;border-radius:14px;background:#fff0d5;color:#70491f;font-weight:650}.catalog{display:grid;gap:12px}.training-link{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 18px;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-weight:800;text-align:center;text-decoration:none;box-shadow:0 8px 18px #0d554e38}.player-wrap{padding:0}.player{width:100%;aspect-ratio:16/9;border-radius:18px;background:#dbe8ec}.progress{height:10px;margin:16px 0 8px;border-radius:99px;background:#d8e5e5;overflow:hidden}.progress-bar{width:0;height:100%;background:#16805f;transition:width .2s}.status{min-height:24px;font-weight:700}.success{color:#116c48}.error{color:#a32828}button{width:100%;min-height:54px;border:0;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 8px 18px #0d554e38}button:disabled{opacity:.6;cursor:not-allowed}
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;min-height:100vh;color:#0b2844;background:linear-gradient(145deg,#e8f2f2,#f7ead4)}main{width:min(94vw,760px);margin:auto;padding:20px 0 32px}.card{overflow:hidden;border:1px solid #fff;border-radius:26px;background:#ffffffc7;box-shadow:0 18px 50px #0b284428}header{padding:22px 20px;text-align:center;background:linear-gradient(135deg,#d8eee8,#f7e9cc)}h1{margin:0;font-size:clamp(1.4rem,5vw,2rem)}.user{margin:8px 0 0;color:#157760;font-weight:700;overflow-wrap:anywhere}.content{padding:20px}.notice{margin:0 0 16px;padding:13px 15px;border-radius:14px;background:#fff0d5;color:#70491f;font-weight:650}.catalog{display:grid;gap:12px}.training-link{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 18px;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-weight:800;text-align:center;text-decoration:none;box-shadow:0 8px 18px #0d554e38}.player-wrap{position:relative;padding:0}.player{width:100%;aspect-ratio:16/9;border-radius:18px;background:#dbe8ec}.question-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:18px;border-radius:18px;background:#0b284499;z-index:2}.question-modal.visible{display:flex}.question-card{width:min(92%,420px);padding:22px 18px;border:2px solid #fff;border-radius:20px;background:#fffaf0;color:#0b2844;text-align:center;box-shadow:0 12px 32px #0b284455}.question-card h2{margin:0 0 16px;font-size:clamp(1.1rem,4vw,1.45rem)}.question-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.question-actions button{min-height:48px}.question-actions .no{background:linear-gradient(135deg,#b95050,#8d2929)}.progress{height:10px;margin:16px 0 8px;border-radius:99px;background:#d8e5e5;overflow:hidden}.progress-bar{width:0;height:100%;background:#16805f;transition:width .2s}.status{min-height:24px;font-weight:700}.success{color:#116c48}.error{color:#a32828}button{width:100%;min-height:54px;border:0;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 8px 18px #0d554e38}button:disabled{opacity:.6;cursor:not-allowed}
 </style>
 </head>
 <body>
 <main><section class="card"><header><h1><?= state.training ? state.training.title : "Treinamentos SAHMT" ?></h1><? if (state.email) { ?><p class="user">Acesso: <?= state.email ?></p><? } ?></header><div class="content">
-<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><p class="notice">Escolha um treinamento para iniciar.</p><div id="catalog" class="catalog"></div><? } else { ?><p class="notice">Assista ao video completo. A confirmacao sera liberada ao atingir 95% de reproducao e o final do video.</p><div class="player-wrap"><div id="player" class="player"></div></div><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>Concluir treinamento</button><? } ?></div></section></main>
+<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><p class="notice">Escolha um treinamento para iniciar.</p><div id="catalog" class="catalog"></div><? } else { ?><p class="notice">Assista ao video completo. Na metade, responda a pergunta para continuar. A confirmacao sera liberada ao atingir 95% de reproducao e o final do video.</p><div class="player-wrap"><div id="player" class="player"></div><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Esta entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Nao</button></div></div></div></div><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>Concluir treinamento</button><? } ?></div></section></main>
 <script>
 const state = <?!= state.trainingCatalogJson ?>;
 const endpoint = window.location.href.split("?")[0];
@@ -196,6 +196,8 @@ let watchedSeconds = 0;
 let lastTime = 0;
 let duration = 0;
 let finished = false;
+let midpointAsked = false;
+let questionAnswered = false;
 
 function onYouTubeIframeAPIReady() {
   if (!training || !training.videoId) return;
@@ -228,12 +230,34 @@ function onPlayerStateChange(event) {
 function trackPlayback() {
   if (!player || !duration) return;
   const currentTime = player.getCurrentTime();
+  if (!midpointAsked && currentTime >= duration / 2) {
+    midpointAsked = true;
+    player.pauseVideo();
+    showQuestion();
+  }
   const delta = currentTime - lastTime;
   if (delta > 0 && delta <= 2.5) watchedSeconds += delta;
   lastTime = currentTime;
   const progress = Math.min(100, Math.round((watchedSeconds / duration) * 100));
   document.getElementById("progressBar").style.width = progress + "%";
   updateCompletionState();
+}
+
+function showQuestion() {
+  const modal = document.getElementById("questionModal");
+  const status = document.getElementById("status");
+  if (modal) modal.classList.add("visible");
+  if (status) status.textContent = "Responda a pergunta para continuar o video.";
+}
+
+function answerQuestion() {
+  questionAnswered = true;
+  const modal = document.getElementById("questionModal");
+  const status = document.getElementById("status");
+  if (modal) modal.classList.remove("visible");
+  if (status) status.textContent = "Video em reproducao. Continue ate o final.";
+  lastTime = player.getCurrentTime();
+  player.playVideo();
 }
 
 function updateCompletionState() {
@@ -255,6 +279,10 @@ function onPlayerError() {
 function bindCompletion() {
   const button = document.getElementById("complete");
   if (!button) return;
+  const answerYes = document.getElementById("answerYes");
+  const answerNo = document.getElementById("answerNo");
+  if (answerYes) answerYes.addEventListener("click", answerQuestion);
+  if (answerNo) answerNo.addEventListener("click", answerQuestion);
   button.addEventListener("click", function () {
     button.disabled = true;
     const status = document.getElementById("status");
