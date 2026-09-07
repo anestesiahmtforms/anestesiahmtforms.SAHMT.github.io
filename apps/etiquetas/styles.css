@@ -5163,22 +5163,22 @@ body::before {
 /* Main ETIQUETAS screen: keep the scanner compact so it never overlaps the reports. */
 @media (max-width: 680px) {
   .layout:not(:has(.modal-panel.is-open)) > .scanner-panel {
-    flex: 0 0 auto;
+    flex: 1 1 0;
     height: auto;
     min-height: 0;
     gap: 5px;
     padding: 8px;
     margin: 0;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .camera-stage,
   .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .camera-stage.has-capture,
   .layout:not(:has(.modal-panel.is-open)) > .scanner-panel video {
-    flex: 0 0 150px;
-    height: 150px;
+    flex: 1 1 150px;
+    height: auto;
     min-height: 150px;
-    max-height: 150px;
+    max-height: none;
   }
 
   .layout:not(:has(.modal-panel.is-open)) > .scanner-panel .capture-shutter,
