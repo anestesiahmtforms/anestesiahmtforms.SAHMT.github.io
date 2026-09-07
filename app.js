@@ -980,33 +980,41 @@
     }
 
     const notices = Array.isArray(noticesPayload.notices) ? noticesPayload.notices : [];
-    const activeNotice = noticesPayload.activeId === null
-      ? null
-      : notices.find((notice) => notice.id === noticesPayload.activeId) || notices[0];
+    const showAllNotices = noticesPayload.activeId === "all";
+    const selectedNotices = showAllNotices
+      ? notices
+      : noticesPayload.activeId === null
+        ? []
+        : [notices.find((notice) => notice.id === noticesPayload.activeId) || notices[0]];
 
-    if (!activeNotice || !elements.noticeModal) {
+    if (!selectedNotices.length || !elements.noticeModal) {
       return;
     }
 
-    elements.noticeEyebrow.textContent = activeNotice.eyebrow || "Comunicado SAHMT";
-    const embeddedMediaUrl = getSafeNoticeUrl(activeNotice.videoUrl || extractNoticeUrl(activeNotice.message));
+    const activeNotice = selectedNotices[0];
+    elements.noticeEyebrow.textContent = showAllNotices ? "Tutoriais em vídeo" : (activeNotice.eyebrow || "Comunicado SAHMT");
     elements.noticeTitle.replaceChildren();
-    const title = activeNotice.title || "Aviso";
-    if (embeddedMediaUrl) {
+    selectedNotices.forEach((notice) => {
+      const embeddedMediaUrl = getSafeNoticeUrl(notice.videoUrl || extractNoticeUrl(notice.message));
+      const title = notice.title || "Aviso";
       const titleLink = document.createElement("a");
-      titleLink.href = embeddedMediaUrl;
-      titleLink.target = "_blank";
-      titleLink.rel = "noopener noreferrer";
+      titleLink.className = "notice-card__video-title";
+      titleLink.href = embeddedMediaUrl || "#";
+      if (embeddedMediaUrl) {
+        titleLink.target = "_blank";
+        titleLink.rel = "noopener noreferrer";
+      } else {
+        titleLink.addEventListener("click", (event) => event.preventDefault());
+      }
       titleLink.textContent = title;
       titleLink.setAttribute("aria-label", `Abrir video: ${title}`);
       elements.noticeTitle.appendChild(titleLink);
-    } else {
-      elements.noticeTitle.textContent = title;
-    }
-    elements.noticeMessage.textContent = String(activeNotice.message || "")
+    });
+    elements.noticeMessage.textContent = String(showAllNotices ? "" : activeNotice.message || "")
       .replace(extractNoticeUrl(activeNotice.message), "")
       .trim();
-    renderNoticeMedia(activeNotice, embeddedMediaUrl);
+    renderNoticeMedia(showAllNotices ? null : activeNotice,
+      showAllNotices ? "" : getSafeNoticeUrl(activeNotice.videoUrl || extractNoticeUrl(activeNotice.message)));
     elements.closeNoticeModal.disabled = true;
     elements.noticeModal.classList.remove("hidden");
     elements.noticeModal.setAttribute("aria-hidden", "false");

@@ -1264,6 +1264,11 @@ button:hover,
   color: #0d7a6c;
 }
 
+.notice-card__video-title {
+  display: block;
+  margin: 0.18rem 0;
+}
+
 .notice-card__message {
   margin: 13px 0 0;
   color: rgba(11, 40, 68, 0.88);
