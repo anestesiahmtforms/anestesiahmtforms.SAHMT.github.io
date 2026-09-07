@@ -5289,10 +5289,32 @@ body::before {
     grid-auto-rows: minmax(32px, auto);
   }
 
+  #entry-panel.manual-entry-expanded #valor-field {
+    grid-column: 1 / -1;
+    grid-row: 7;
+    align-self: start;
+  }
+
+  #entry-panel.manual-entry-expanded #label-form > label:has(#plantonistas-picker) {
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+
+  #entry-panel.manual-entry-expanded #plantonistas-picker {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+  }
+
   #entry-panel.manual-entry-expanded #plantonistas-options {
-    height: 184px;
-    max-height: 184px;
-    overflow: visible;
+    flex: 1 1 auto;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    overflow: hidden;
     grid-auto-rows: minmax(0, 1fr);
   }
 }
