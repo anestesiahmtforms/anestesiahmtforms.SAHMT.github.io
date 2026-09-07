@@ -5285,13 +5285,15 @@ body::before {
   }
 
   #entry-panel.manual-entry-expanded #label-form {
-    grid-template-rows: repeat(6, minmax(32px, auto)) minmax(0, min(25dvh, 170px));
+    grid-template-rows: repeat(5, minmax(32px, auto)) minmax(0, 184px) minmax(0, auto);
     grid-auto-rows: minmax(32px, auto);
   }
 
   #entry-panel.manual-entry-expanded #plantonistas-options {
-    height: min(25dvh, 170px);
-    max-height: min(25dvh, 170px);
+    height: 184px;
+    max-height: 184px;
+    overflow: visible;
+    grid-auto-rows: minmax(0, 1fr);
   }
 }
 
