@@ -235,7 +235,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260901-01", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260907-01", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -989,8 +989,20 @@
     }
 
     elements.noticeEyebrow.textContent = activeNotice.eyebrow || "Comunicado SAHMT";
-    elements.noticeTitle.textContent = activeNotice.title || "Aviso";
-    const embeddedMediaUrl = getSafeNoticeUrl(extractNoticeUrl(activeNotice.message));
+    const embeddedMediaUrl = getSafeNoticeUrl(activeNotice.videoUrl || extractNoticeUrl(activeNotice.message));
+    elements.noticeTitle.replaceChildren();
+    const title = activeNotice.title || "Aviso";
+    if (embeddedMediaUrl) {
+      const titleLink = document.createElement("a");
+      titleLink.href = embeddedMediaUrl;
+      titleLink.target = "_blank";
+      titleLink.rel = "noopener noreferrer";
+      titleLink.textContent = title;
+      titleLink.setAttribute("aria-label", `Abrir video: ${title}`);
+      elements.noticeTitle.appendChild(titleLink);
+    } else {
+      elements.noticeTitle.textContent = title;
+    }
     elements.noticeMessage.textContent = String(activeNotice.message || "")
       .replace(extractNoticeUrl(activeNotice.message), "")
       .trim();
@@ -1025,8 +1037,6 @@
     elements.noticeMedia.replaceChildren();
     const media = notice?.media || {};
     const imageUrl = getSafeNoticeUrl(notice?.imageUrl || notice?.bannerUrl || (media.type === "image" ? media.url : ""));
-    const videoUrl = getSafeNoticeUrl(notice?.videoUrl || (media.type === "video" ? media.url : "") || embeddedMediaUrl);
-
     if (imageUrl) {
       const imageLink = document.createElement("a");
       imageLink.className = "notice-card__image-link";
@@ -1039,16 +1049,6 @@
       image.alt = String(notice?.mediaAlt || notice?.title || "Imagem do comunicado");
       imageLink.appendChild(image);
       elements.noticeMedia.appendChild(imageLink);
-    }
-
-    if (videoUrl) {
-      const videoLink = document.createElement("a");
-      videoLink.className = "notice-card__video-link";
-      videoLink.href = videoUrl;
-      videoLink.target = "_blank";
-      videoLink.rel = "noopener noreferrer";
-      videoLink.textContent = "ASSISTIR AO VÍDEO";
-      elements.noticeMedia.appendChild(videoLink);
     }
 
     elements.noticeMedia.hidden = !elements.noticeMedia.childElementCount;
