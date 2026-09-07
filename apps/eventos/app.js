@@ -252,6 +252,21 @@
 
   if (elements.eventEntryForm) {
     elements.eventEntryForm.addEventListener("submit", onEventEntrySubmit);
+    elements.eventEntryForm.addEventListener("focusin", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (!target.isConnected || !elements.eventEntryForm) {
+          return;
+        }
+        const targetCenter = target.offsetTop + target.offsetHeight / 2;
+        const scrollTop = Math.max(0, targetCenter - elements.eventEntryForm.clientHeight / 2);
+        elements.eventEntryForm.scrollTo({ top: scrollTop, behavior: "smooth" });
+      }, 80);
+    });
   }
 
   elements.openMonthlyRecordsModal?.addEventListener("click", openMonthlyRecordsModal);
