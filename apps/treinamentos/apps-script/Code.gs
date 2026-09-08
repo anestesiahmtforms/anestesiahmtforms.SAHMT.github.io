@@ -6,7 +6,8 @@ const CONFIG = Object.freeze({
   spreadsheetId: "1NSICSqiTpmntdzEiuuc9CSBHgeZrSKw65X5yXfFq5x4",
   trainingSheet: "Treinamentos",
   participationSheet: "Participações",
-  participantSheet: "Participantes"
+  participantSheet: "Participantes",
+  webAppUrl: "https://script.google.com/macros/s/AKfycbw8tyhilyC8czRrho0iOugr7B6L5COFZjm2x5Di4HuzsgTsw3SSlbVDFLexzYmN0m1j0g/exec"
 });
 
 function doGet(e) {
@@ -29,6 +30,7 @@ function doGet(e) {
       videoUrl: training.videoUrl
     } : null,
     trainings,
+    endpoint: CONFIG.webAppUrl,
     trainingCatalogJson: JSON.stringify(trainings)
   };
 
@@ -168,7 +170,7 @@ function html_() {
 <? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><p class="notice">Escolha um treinamento para iniciar.</p><div id="catalog" class="catalog"></div><? } else { ?><div class="player-wrap"><div id="youtubeFrame" class="player" aria-label="<?= state.training ? state.training.title : "Treinamento SAHMT" ?>"></div><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Está entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Não</button></div></div></div></div><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>Concluir treinamento</button><? } ?></div></section></main>
 <script>
 const state = <?!= state.trainingCatalogJson ?>;
-const endpoint = window.location.href.split("?")[0];
+const endpoint = <?!= JSON.stringify(state.endpoint) ?>;
 const training = <?!= JSON.stringify(state.training) ?>;
 const email = <?!= JSON.stringify(state.email) ?>;
 const accessId = <?!= JSON.stringify(state.accessId) ?>;
@@ -180,6 +182,7 @@ function renderCatalog() {
     const link = document.createElement("a");
     link.className = "training-link";
     link.href = endpoint + "?trainingId=" + encodeURIComponent(item.id) + "&userEmail=" + encodeURIComponent(email);
+    link.target = "_top";
     link.textContent = item.title;
     catalog.appendChild(link);
   });
