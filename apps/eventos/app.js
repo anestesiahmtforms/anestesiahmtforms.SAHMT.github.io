@@ -783,6 +783,10 @@
       return true;
     }
 
+    if (!canViewAllEventRecords() && getAuthenticatedSigla() !== normalizedSigla) {
+      return false;
+    }
+
     return Array.isArray(siglaEventState[normalizedDate]) && siglaEventState[normalizedDate].includes(normalizedSigla);
   }
 
@@ -1845,23 +1849,27 @@
       return source;
     }
 
-    const authenticatedEmail = getAuthenticatedEmail();
-    if (!authenticatedEmail) {
+    const authenticatedSigla = getAuthenticatedSigla();
+    if (!authenticatedSigla) {
       return [];
     }
 
-    return source.filter((record) => {
-      const memberSigla = getEventMemberSigla(record?.membro);
-      const memberEmail = memberSigla
-        ? eventMemberEmailBySigla.get(memberSigla)
-        : "";
+    return source.filter((record) => getEventMemberSigla(record?.membro) === authenticatedSigla);
+  }
 
-      if (memberEmail) {
-        return memberEmail === authenticatedEmail;
+  function getAuthenticatedSigla() {
+    const authenticatedEmail = getAuthenticatedEmail();
+    if (!authenticatedEmail) {
+      return "";
+    }
+
+    for (const [sigla, memberEmail] of eventMemberEmailBySigla.entries()) {
+      if (memberEmail === authenticatedEmail) {
+        return sigla;
       }
+    }
 
-      return String(record?.registeredBy || "").trim().toLowerCase() === authenticatedEmail;
-    });
+    return "";
   }
 
   function getEventMemberSigla(value) {
