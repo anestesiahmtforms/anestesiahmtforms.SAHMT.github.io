@@ -1003,17 +1003,18 @@
       if (embeddedMediaUrl) {
         const applyTrainingHref = (emailValue = "") => {
           const sessionEmail = String(emailValue || "").trim();
-          const trainingUrl = new URL(embeddedMediaUrl);
-          if (sessionEmail && trainingUrl.hostname === "script.google.com") {
+          const trainingUrl = new URL(embeddedMediaUrl, window.location.href);
+          if (sessionEmail) {
             trainingUrl.searchParams.set("userEmail", sessionEmail);
           }
           titleLink.href = trainingUrl.href;
         };
 
-        // A real external anchor lets iOS hand the Google Apps Script page to
-        // Safari instead of trying to render it inside the standalone PWA.
-        titleLink.target = "_blank";
-        titleLink.rel = "noopener noreferrer external";
+        // The same-origin training shell keeps navigation inside the installed PWA.
+        const trainingPageUrl = new URL(embeddedMediaUrl, window.location.href);
+        const opensInsidePwa = trainingPageUrl.origin === window.location.origin;
+        titleLink.target = opensInsidePwa ? "_self" : "_blank";
+        titleLink.rel = opensInsidePwa ? "" : "noopener noreferrer external";
         applyTrainingHref(window.SAHMT_AUTH?.getUserLabel?.());
         window.SAHMT_AUTH?.onChange?.((session) => applyTrainingHref(session?.email));
       } else {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v128";
+const CACHE_NAME = "sahmt-pwa-v129";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -44,6 +44,7 @@ const APP_SHELL = [
   "./apps/eventos/gestao_operacional.png",
   "./apps/eventos/icons/icon-192.png",
   "./apps/eventos/icons/icon-512.png",
+  "./apps/treinamentos/index.html",
   "./apps/etiquetas/index.html",
   "./apps/etiquetas/styles.css",
   "./apps/etiquetas/app.js",
@@ -122,6 +123,7 @@ self.addEventListener("fetch", (event) => {
     return network.catch(async () => {
       const requestUrl = new URL(event.request.url);
       if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
+      if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
       if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
       if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
       return caches.match("./index.html");
