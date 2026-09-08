@@ -1001,21 +1001,27 @@
       titleLink.className = "notice-card__video-title";
       titleLink.href = embeddedMediaUrl || "#";
       if (embeddedMediaUrl) {
-        titleLink.target = "_blank";
-        titleLink.rel = "noopener noreferrer";
-        titleLink.addEventListener("click", () => {
-          const sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+        titleLink.addEventListener("click", async (event) => {
+          event.preventDefault();
+
+          let sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
           if (!sessionEmail) {
-            return;
+            try {
+              await ensureSharedAccess();
+              sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
+            } catch (error) {
+              console.warn("Falha ao preparar acesso ao treinamento:", error);
+            }
           }
 
           const trainingUrl = new URL(embeddedMediaUrl);
-          trainingUrl.searchParams.set("userEmail", sessionEmail);
-          // Keep the browser's native link activation. Calling window.open() here is
-          // blocked by iOS/Safari in standalone PWA mode, making the video appear
-          // unresponsive. Updating href synchronously preserves the user identifier
-          // while allowing the browser to open the destination normally.
-          titleLink.href = trainingUrl.href;
+          if (sessionEmail) {
+            trainingUrl.searchParams.set("userEmail", sessionEmail);
+          }
+
+          // Same-window navigation remains reliable in iOS standalone PWA mode,
+          // including when authentication completes asynchronously before opening.
+          window.location.assign(trainingUrl.href);
         });
       } else {
         titleLink.addEventListener("click", (event) => event.preventDefault());
