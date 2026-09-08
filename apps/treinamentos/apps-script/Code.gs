@@ -18,6 +18,10 @@ function doGet(e) {
   const allowed = Boolean(email && isParticipantAllowed_(email));
   const accessId = allowed && training ? recordAccess_(email, training.id) : "";
   const totalPoints = allowed ? getTotalPoints_(email) : 0;
+  const completedTrainingIds = allowed ? getCompletedTrainingIds_(email) : [];
+  const catalogTrainings = trainings.map((item) => Object.assign({}, item, {
+    completed: completedTrainingIds.indexOf(item.id) !== -1
+  }));
   const totalAvailablePoints = trainings.reduce((total, item) => {
     return total + item.accessPoints + item.completionPoints;
   }, 0);
@@ -36,12 +40,12 @@ function doGet(e) {
       videoId: training.videoId,
       videoUrl: training.videoUrl
     } : null,
-    trainings,
+    trainings: catalogTrainings,
     totalPoints,
     totalAvailablePoints,
     scorePercentage,
     endpoint: CONFIG.webAppUrl,
-    trainingCatalogJson: JSON.stringify(trainings)
+    trainingCatalogJson: JSON.stringify(catalogTrainings)
   };
 
   return template.evaluate()
@@ -147,6 +151,23 @@ function getTotalPoints_(email) {
     }, 0);
 }
 
+function getCompletedTrainingIds_(email) {
+  const normalizedEmail = normalizeEmail_(email);
+  if (!normalizedEmail) return [];
+  const sheet = getSpreadsheet_().getSheetByName(CONFIG.participationSheet);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  const completedIds = new Set();
+  sheet.getRange(2, 2, sheet.getLastRow() - 1, 5)
+    .getValues()
+    .forEach((row) => {
+      const status = String(row[4] || "").trim().toLowerCase();
+      if (normalizeEmail_(row[0]) === normalizedEmail && status === "concluido") {
+        completedIds.add(String(row[1] || "").trim());
+      }
+    });
+  return Array.from(completedIds);
+}
+
 function getTrainings_() {
   const sheet = getSpreadsheet_().getSheetByName(CONFIG.trainingSheet);
   if (!sheet || sheet.getLastRow() < 2) return [];
@@ -195,7 +216,7 @@ body.training-active{overflow:hidden}.training-active .training-mode{position:ab
 
 /* Catalogo no mesmo sistema visual da pagina Escala Semanal. */
 body:not(.training-active) main{
-  padding:max(10px,env(safe-area-inset-top)) 0 max(10px,env(safe-area-inset-bottom));
+  padding:max(22px,calc(env(safe-area-inset-top) + 12px)) 0 max(10px,env(safe-area-inset-bottom));
 }
 body:not(.training-active) .card{
   gap:8px;
@@ -214,7 +235,7 @@ body:not(.training-active) .footer-banner{
   box-shadow:var(--shadow);
 }
 body:not(.training-active) header{
-  min-height:174px;
+  min-height:158px;
   max-width:100%;
   overflow:hidden;
   padding:20px 24px;
@@ -241,7 +262,7 @@ body:not(.training-active) .content{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:8px;
-  min-height:92px;
+  min-height:84px;
   padding:7px;
   border:1px solid #ffffffdb;
   background:linear-gradient(145deg,#fffffff0,#dae8efcf);
@@ -254,7 +275,7 @@ body:not(.training-active) .content{
   grid-template-rows:1fr auto;
   justify-items:center;
   min-width:0;
-  min-height:76px;
+  min-height:68px;
   overflow:hidden;
   padding:4px 3px 6px;
   border:1px solid #fffffff2;
@@ -287,7 +308,7 @@ body:not(.training-active) .content{
 .module-link-card img{
   display:block;
   width:min(100%,66px);
-  height:55px;
+  height:48px;
   object-fit:contain;
   filter:drop-shadow(0 5px 6px #0c2b3e2e);
 }
@@ -315,9 +336,14 @@ body:not(.training-active) .content{
   text-align:center;
   box-shadow:0 12px 22px #083e5230,inset 0 1px 0 #ffffff4a;
 }
+.training-link--completed .training-points{
+  border-color:#bbf7d0;
+  background:linear-gradient(135deg,#24a866,#147a48);
+  box-shadow:0 5px 12px #0b5f3c55,inset 0 1px 0 #ffffff99;
+}
 @media(max-width:540px){
-  body:not(.training-active) main{width:96vw!important;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
-  body:not(.training-active) header{min-height:150px;padding:14px 15px;gap:12px}
+  body:not(.training-active) main{width:96vw!important;padding-top:max(20px,calc(env(safe-area-inset-top) + 12px));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  body:not(.training-active) header{min-height:142px;padding:12px 15px;gap:12px}
   body:not(.training-active) .brand-logo{width:92px;height:92px;border-radius:20px}
   body:not(.training-active) .header-copy{max-width:calc(100% - 104px)}
   body:not(.training-active) .header-copy h1{font-size:clamp(1.25rem,6vw,1.72rem)}
@@ -326,29 +352,30 @@ body:not(.training-active) .content{
   body:not(.training-active) .score{padding:5px 8px;font-size:.7rem}
   body:not(.training-active) .score-percentage{min-width:58px;padding:4px 7px;font-size:1.1rem}
   body:not(.training-active) .content{padding:9px}
-  .module-link-strip{gap:5px;min-height:78px;padding:5px;border-radius:20px!important}
-  .module-link-card{min-height:66px;padding:3px 2px 5px;border-radius:14px}
-  .module-link-card img{width:min(100%,53px);height:44px}
+  .module-link-strip{gap:5px;min-height:72px;padding:5px;border-radius:20px!important}
+  .module-link-card{min-height:60px;padding:3px 2px 5px;border-radius:14px}
+  .module-link-card img{width:min(100%,49px);height:38px}
   .module-link-card span{padding:2px 4px;font-size:.46rem;letter-spacing:.035em}
   .footer-banner{padding:7px 8px!important;font-size:.54rem}
 }
 @media(max-width:360px){
-  body:not(.training-active) header{min-height:140px;padding:12px}
+  body:not(.training-active) header{min-height:134px;padding:10px 12px}
   body:not(.training-active) .brand-logo{width:78px;height:78px}
   body:not(.training-active) .header-copy{max-width:calc(100% - 90px)}
   .module-link-card span{font-size:.42rem}
 }
 @media(max-height:700px){
-  :root{--training-row-height:50px;--catalog-gap:6px}
-  body:not(.training-active) header{min-height:130px;padding:11px 14px}
+  :root{--training-row-height:48px;--catalog-gap:6px}
+  body:not(.training-active) main{padding-top:max(16px,calc(env(safe-area-inset-top) + 10px))}
+  body:not(.training-active) header{min-height:122px;padding:9px 14px}
   body:not(.training-active) .brand-logo{width:78px;height:78px}
   body:not(.training-active) .header-copy{max-width:calc(100% - 92px)}
   body:not(.training-active) .eyebrow{font-size:.58rem}
   body:not(.training-active) .header-copy h1{font-size:1.18rem}
   body:not(.training-active) .user-summary{margin-top:5px}
-  .module-link-strip{min-height:68px}
-  .module-link-card{min-height:56px}
-  .module-link-card img{height:35px;width:44px}
+  .module-link-strip{min-height:62px}
+  .module-link-card{min-height:50px}
+  .module-link-card img{height:31px;width:40px}
   .footer-banner{padding:6px 8px}
 }
 </style>
@@ -370,6 +397,7 @@ function renderCatalog() {
   state.forEach(function (item) {
     const link = document.createElement("a");
     link.className = "training-link";
+    if (item.completed) link.classList.add("training-link--completed");
     link.href = pwaTrainingUrl + "?trainingId=" + encodeURIComponent(item.id) + "&userEmail=" + encodeURIComponent(email);
     link.target = "_top";
     const title = document.createElement("span");
@@ -378,12 +406,36 @@ function renderCatalog() {
     const points = document.createElement("span");
     const trainingPoints = item.accessPoints + item.completionPoints;
     points.className = "training-points";
-    points.textContent = trainingPoints + (trainingPoints === 1 ? " Ponto" : " Pontos");
+    points.textContent = (item.completed ? "✓ " : "") + trainingPoints + (trainingPoints === 1 ? " Ponto" : " Pontos");
+    if (item.completed) {
+      points.title = "Treinamento concluído";
+      points.setAttribute("aria-label", "Treinamento concluído: " + trainingPoints + (trainingPoints === 1 ? " ponto" : " pontos"));
+    }
     link.appendChild(title);
     link.appendChild(points);
     catalog.appendChild(link);
   });
-  requestAnimationFrame(fillUpcomingSlots);
+  requestAnimationFrame(function () {
+    fitTrainingButtons();
+    fillUpcomingSlots();
+  });
+}
+
+function fitTrainingButtons() {
+  const catalog = document.getElementById("catalog");
+  if (!catalog) return;
+  const links = Array.from(catalog.querySelectorAll(".training-link"));
+  if (!links.length) return;
+  const gap = parseFloat(getComputedStyle(catalog).gap) || 0;
+  const availableHeight = catalog.clientHeight - Math.max(0, links.length - 1) * gap;
+  const preferredHeight = window.innerHeight <= 700 ? 48 : 58;
+  const fittedHeight = Math.max(42, Math.min(preferredHeight, Math.floor(availableHeight / links.length)));
+  links.forEach(function (link) {
+    link.style.flexBasis = fittedHeight + "px";
+    link.style.height = fittedHeight + "px";
+    link.style.minHeight = fittedHeight + "px";
+    link.style.maxHeight = fittedHeight + "px";
+  });
 }
 
 function fillUpcomingSlots() {
@@ -608,6 +660,7 @@ document.addEventListener("wheel", function (event) {
 window.addEventListener("orientationchange", function () {
   setTimeout(function () {
     lockViewportHeight();
+    fitTrainingButtons();
     fillUpcomingSlots();
   }, 250);
 });
