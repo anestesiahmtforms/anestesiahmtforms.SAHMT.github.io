@@ -634,6 +634,7 @@
       window.SAHMT_AUTH.onChange((nextAuth) => {
         currentAccessLabel = String(nextAuth?.email || "").trim();
         applyWriteAccessUi();
+        hydrateEventRecords().catch(() => {});
       });
     }
 
@@ -1738,14 +1739,15 @@
     try {
       const cachedRecords = loadSyncCache(recordsSyncStorageKey);
       if (Array.isArray(cachedRecords)) {
-        eventRecords = cachedRecords;
+        eventRecords = filterEventRecordsForViewer(cachedRecords);
         renderRecordsForDate(elements.recordsDateInput?.value || todayKey);
         if (isMonthlyRecordsModalOpen()) {
           renderMonthlyRecordsForMonth(elements.monthlyRecordsInput?.value || todayKey.slice(0, 7));
         }
       }
-      eventRecords = await fetchEventRecordsRows();
-      saveSyncCache(recordsSyncStorageKey, eventRecords);
+      const freshRecords = await fetchEventRecordsRows();
+      saveSyncCache(recordsSyncStorageKey, freshRecords);
+      eventRecords = filterEventRecordsForViewer(freshRecords);
     } catch (error) {
       // Preserve cached records when the live spreadsheet is temporarily slow.
     } finally {
@@ -1802,6 +1804,41 @@
       window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value }));
     } catch (error) {
       // Storage can be unavailable in private browsing; network sync still works.
+    }
+  }
+
+  function canViewAllEventRecords() {
+    return eventWriteUsers.has(getAuthenticatedEmail());
+  }
+
+  function filterEventRecordsForViewer(records) {
+    const source = Array.isArray(records) ? records : [];
+    if (canViewAllEventRecords()) {
+      return source;
+    }
+
+    const authenticatedEmail = getAuthenticatedEmail();
+    if (!authenticatedEmail) {
+      return [];
+    }
+
+    return source.filter((record) =>
+      String(record?.registeredBy || "").trim().toLowerCase() === authenticatedEmail
+    );
+  }
+
+  function updateEventReportsEmptyMessages() {
+    const message = canViewAllEventRecords()
+      ? "Nenhum registro encontrado para esta data."
+      : "Não há eventos registrados para você.";
+
+    if (elements.recordsEmptyState) {
+      elements.recordsEmptyState.textContent = message;
+    }
+    if (elements.monthlyRecordsEmptyState) {
+      elements.monthlyRecordsEmptyState.textContent = canViewAllEventRecords()
+        ? "Nenhum registro encontrado para o mes escolhido."
+        : "Não há eventos registrados para você.";
     }
   }
 
@@ -2029,6 +2066,7 @@
       return;
     }
 
+    updateEventReportsEmptyMessages();
     const activeDate = String(dateKey || todayKey).trim();
     const records = eventRecords.filter((record) => record.dataDoEventoKey === activeDate);
     elements.recordsList.innerHTML = "";
@@ -2124,6 +2162,7 @@
       return;
     }
 
+    updateEventReportsEmptyMessages();
     const activeMonth = normalizeMonthKey(monthKey) || todayKey.slice(0, 7);
     const records = getMonthlyRecords(activeMonth);
     elements.monthlyRecordsList.innerHTML = "";
