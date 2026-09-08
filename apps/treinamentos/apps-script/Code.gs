@@ -192,17 +192,177 @@ body.training-active{overflow:hidden}.training-active .training-mode{position:ab
 .training-active header{display:none}.training-active .training-mode .content{padding-top:4px}.training-footer .status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.training-active #youtubeFrame,.training-active .player{min-height:0;background:#000}
 #playPause{min-height:58px;margin-bottom:7px;background:linear-gradient(135deg,#2563eb,#173f9b);font-size:clamp(1rem,3.5vw,1.15rem)}#playPause:disabled{background:linear-gradient(135deg,#a9b6b4,#758784);box-shadow:none}@media (max-height:560px){#playPause{min-height:44px;margin-bottom:4px}}
 :root{--app-height:100svh;--catalog-gap:10px;--training-row-height:64px}body{height:var(--app-height)!important;max-height:var(--app-height);overscroll-behavior:none;touch-action:none}body:not(.training-active) main{width:min(98vw,980px)!important;height:var(--app-height)!important;max-height:var(--app-height);align-items:stretch}body:not(.training-active) .card{height:100%;max-height:100%}body:not(.training-active) header{min-height:204px;padding:30px 28px}body:not(.training-active) .content{padding:16px 14px}body:not(.training-active) .catalog{display:flex;flex-direction:column;gap:var(--catalog-gap);height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;padding:2px 4px 4px}body:not(.training-active) .training-link{flex:0 0 var(--training-row-height);height:var(--training-row-height);min-height:var(--training-row-height);max-height:var(--training-row-height);padding:9px 18px 9px 22px;border-radius:16px;box-shadow:0 6px 0 #082b4a,0 10px 18px #08121f2e,inset 0 2px 0 #ffffff48}body:not(.training-active) .training-link:hover,body:not(.training-active) .training-link:focus-visible{transform:none;box-shadow:0 6px 0 #082b4a,0 10px 18px #08121f38,inset 0 2px 0 #ffffff5c}body:not(.training-active) .training-link:active{transform:translateY(3px);box-shadow:0 3px 0 #082b4a,0 6px 11px #08121f32,inset 0 2px 7px #0003}.catalog-fill{flex:1 1 auto;min-height:0;display:grid;gap:var(--catalog-gap);overflow:hidden}.upcoming-training{min-height:0;display:flex;align-items:center;justify-content:center;padding:7px 12px;border:1px dashed #8eacc2;border-radius:15px;background:linear-gradient(145deg,#f7fbfd,#e6eef2);color:#547088;font-size:.84rem;font-weight:800;letter-spacing:.01em;text-align:center;box-shadow:inset 0 1px 0 #fff}@media(max-width:540px){:root{--catalog-gap:8px;--training-row-height:60px}body:not(.training-active) main{width:98vw!important}body:not(.training-active) header{min-height:190px;padding:24px 18px}.brand-logo{width:100px;height:100px}body:not(.training-active) .content{padding:11px 9px}body:not(.training-active) .training-link{padding:8px 14px 8px 17px;border-radius:15px}.upcoming-training{padding:5px 9px;font-size:.78rem}}@media(max-height:620px){:root{--catalog-gap:7px;--training-row-height:54px}body:not(.training-active) header{min-height:164px;padding:17px}.brand-logo{width:82px;height:82px}.user-summary{margin-top:7px}body:not(.training-active) .content{padding:9px}.upcoming-training{font-size:.74rem}}
+
+/* Catalogo no mesmo sistema visual da pagina Escala Semanal. */
+body:not(.training-active) main{
+  padding:max(10px,env(safe-area-inset-top)) 0 max(10px,env(safe-area-inset-bottom));
+}
+body:not(.training-active) .card{
+  gap:8px;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+body:not(.training-active) header,
+body:not(.training-active) .content,
+body:not(.training-active) .module-link-strip,
+body:not(.training-active) .footer-banner{
+  flex:0 0 auto;
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+body:not(.training-active) header{
+  min-height:174px;
+  max-width:100%;
+  overflow:hidden;
+  padding:20px 24px;
+  border:2px solid #ff9f43b8;
+  background:linear-gradient(90deg,#ffd27866 0%,#e8d9bbf5 100%);
+}
+body:not(.training-active) .brand-logo{
+  width:112px;
+  height:112px;
+}
+body:not(.training-active) .header-copy{
+  max-width:calc(100% - 130px);
+}
+body:not(.training-active) .content{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  padding:13px 14px;
+  border:1px solid #ffffffdc;
+  background:#f9fbfcee;
+  box-shadow:0 18px 36px #08121f24,inset 0 1px 0 #fff;
+}
+.module-link-strip{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  min-height:92px;
+  padding:7px;
+  border:1px solid #ffffffdb;
+  background:linear-gradient(145deg,#fffffff0,#dae8efcf);
+  box-shadow:0 14px 28px #08121f24,inset 0 1px 0 #fff;
+}
+.module-link-card{
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-rows:1fr auto;
+  justify-items:center;
+  min-width:0;
+  min-height:76px;
+  overflow:hidden;
+  padding:4px 3px 6px;
+  border:1px solid #fffffff2;
+  border-radius:17px;
+  background:linear-gradient(160deg,#fff 0%,#ebf4f8f0 48%,#c7dae4e8 100%);
+  color:#1762a1;
+  text-decoration:none;
+  box-shadow:0 0 0 2px #ffffff94,0 8px 15px #1a496229,inset 0 1px 0 #fff,inset 0 -5px 10px #3360771a;
+  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+}
+.module-link-card:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:-44%;
+  left:-22%;
+  width:144%;
+  height:68%;
+  border-radius:50%;
+  background:linear-gradient(100deg,transparent 12%,#ffffffb8 48%,transparent 82%);
+  transform:rotate(-8deg);
+}
+.module-link-card:hover,.module-link-card:focus-visible{
+  outline:0;
+  filter:saturate(1.08);
+  transform:translateY(-2px);
+  box-shadow:0 0 0 2px #dbf1ffe6,0 12px 20px #1762a133,inset 0 1px 0 #fff;
+}
+.module-link-card:active{transform:translateY(1px) scale(.97)}
+.module-link-card img{
+  display:block;
+  width:min(100%,66px);
+  height:55px;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 6px #0c2b3e2e);
+}
+.module-link-card span{
+  max-width:100%;
+  overflow:hidden;
+  padding:3px 6px;
+  border:1px solid #1762a133;
+  border-radius:999px;
+  background:#ffffffa3;
+  color:#1762a1;
+  font-size:.54rem;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.06em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.footer-banner{
+  padding:9px 10px;
+  color:#fff;
+  background:linear-gradient(135deg,#18b7b7,#0a808a);
+  font-size:.62rem;
+  font-weight:800;
+  text-align:center;
+  box-shadow:0 12px 22px #083e5230,inset 0 1px 0 #ffffff4a;
+}
+@media(max-width:540px){
+  body:not(.training-active) main{width:96vw!important;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  body:not(.training-active) header{min-height:150px;padding:14px 15px;gap:12px}
+  body:not(.training-active) .brand-logo{width:92px;height:92px;border-radius:20px}
+  body:not(.training-active) .header-copy{max-width:calc(100% - 104px)}
+  body:not(.training-active) .header-copy h1{font-size:clamp(1.25rem,6vw,1.72rem)}
+  body:not(.training-active) .user-summary{gap:5px;margin-top:8px}
+  body:not(.training-active) .user{width:100%;font-size:.7rem}
+  body:not(.training-active) .score{padding:5px 8px;font-size:.7rem}
+  body:not(.training-active) .score-percentage{min-width:58px;padding:4px 7px;font-size:1.1rem}
+  body:not(.training-active) .content{padding:9px}
+  .module-link-strip{gap:5px;min-height:78px;padding:5px;border-radius:20px!important}
+  .module-link-card{min-height:66px;padding:3px 2px 5px;border-radius:14px}
+  .module-link-card img{width:min(100%,53px);height:44px}
+  .module-link-card span{padding:2px 4px;font-size:.46rem;letter-spacing:.035em}
+  .footer-banner{padding:7px 8px!important;font-size:.54rem}
+}
+@media(max-width:360px){
+  body:not(.training-active) header{min-height:140px;padding:12px}
+  body:not(.training-active) .brand-logo{width:78px;height:78px}
+  body:not(.training-active) .header-copy{max-width:calc(100% - 90px)}
+  .module-link-card span{font-size:.42rem}
+}
+@media(max-height:700px){
+  :root{--training-row-height:50px;--catalog-gap:6px}
+  body:not(.training-active) header{min-height:130px;padding:11px 14px}
+  body:not(.training-active) .brand-logo{width:78px;height:78px}
+  body:not(.training-active) .header-copy{max-width:calc(100% - 92px)}
+  body:not(.training-active) .eyebrow{font-size:.58rem}
+  body:not(.training-active) .header-copy h1{font-size:1.18rem}
+  body:not(.training-active) .user-summary{margin-top:5px}
+  .module-link-strip{min-height:68px}
+  .module-link-card{min-height:56px}
+  .module-link-card img{height:35px;width:44px}
+  .footer-banner{padding:6px 8px}
+}
 </style>
 </head>
 <body class="<?= state.training ? "training-active" : "" ?>">
 <main class="<?= state.training ? "training-mode" : "" ?>"><section class="card"><header><div class="brand-logo"><img src="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/sahmt_option1_clean.png" alt="Logo SAHMT"></div><div class="header-copy"><span class="eyebrow">EDUCAÇÃO CONTINUADA</span><h1><?= state.training ? state.training.title : "Treinamentos SAHMT" ?></h1><? if (state.email) { ?><div class="user-summary"><p class="user">Acesso: <?= state.email ?></p><p class="score">Sua pontuação: <?= state.totalPoints ?> / <?= state.totalAvailablePoints ?> pontos</p><span class="score-percentage"><?= state.scorePercentage ?>% <span class="score-caption">concluído</span></span></div><? } ?></div></header><div class="content">
-<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><div id="catalog" class="catalog"></div><? } else { ?><div class="player-wrap"><div id="youtubeFrame" class="player" aria-label="<?= state.training ? state.training.title : "Treinamento SAHMT" ?>"></div><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Está entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Não</button></div></div></div></div><footer class="training-footer"><button id="playPause" type="button" disabled>REPRODUZIR</button><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>CONCLUIR TREINAMENTO</button><a id="backToCatalog" class="back-link" hidden>Voltar aos treinamentos</a></footer><? } ?></div></section></main>
+<? if (!state.allowed) { ?><p class="error">Este treinamento esta disponivel somente para participantes autorizados.</p><? } else if (!state.training) { ?><div id="catalog" class="catalog"></div><? } else { ?><div class="player-wrap"><div id="youtubeFrame" class="player" aria-label="<?= state.training ? state.training.title : "Treinamento SAHMT" ?>"></div><div id="questionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle"><div class="question-card"><h2 id="questionTitle">Está entendendo?</h2><div class="question-actions"><button id="answerYes" type="button">Sim</button><button id="answerNo" class="no" type="button">Não</button></div></div></div></div><footer class="training-footer"><button id="playPause" type="button" disabled>REPRODUZIR</button><div class="progress" aria-label="Progresso do video"><div id="progressBar" class="progress-bar"></div></div><p id="status" class="status" aria-live="polite">Carregando video...</p><button id="complete" type="button" disabled>CONCLUIR TREINAMENTO</button><a id="backToCatalog" class="back-link" hidden>Voltar aos treinamentos</a></footer><? } ?></div><? if (!state.training) { ?><nav class="module-link-strip" aria-label="Navegação SAHMT"><a class="module-link-card" href="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/?from=treinamentos&skipNotice=1" target="_top" aria-label="Abrir Escala Semanal"><img src="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/sahmt_option1.png" alt="Escala"><span>ESCALA</span></a><a class="module-link-card" href="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/apps/eventos/" target="_top" aria-label="Abrir Gestão Operacional"><img src="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/gestao_operacional.png" alt="Operacional"><span>OPERACIONAL</span></a><a class="module-link-card" href="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/apps/etiquetas/" target="_top" aria-label="Abrir Etiquetas SAHMT"><img src="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/sahmt_option1.png" alt="Etiquetas"><span>ETIQUETAS</span></a><a class="module-link-card" href="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/apps/gestao/" target="_top" aria-label="Abrir Segmento de Gestão"><img src="https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/apps/gestao/assets/selo-qga-accredited-qmentum-diamond.png" alt="Gestão"><span>GESTÃO</span></a></nav><footer class="footer-banner">By Francisco Tadeu da Mota Albuquerque</footer><? } ?></section></main>
 <script>
 const state = <?!= state.trainingCatalogJson ?>;
 const endpoint = <?!= JSON.stringify(state.endpoint) ?>;
 const training = <?!= JSON.stringify(state.training) ?>;
 const email = <?!= JSON.stringify(state.email) ?>;
 const accessId = <?!= JSON.stringify(state.accessId) ?>;
+const pwaTrainingUrl = "https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/apps/treinamentos/";
 
 function renderCatalog() {
   const catalog = document.getElementById("catalog");
@@ -210,7 +370,7 @@ function renderCatalog() {
   state.forEach(function (item) {
     const link = document.createElement("a");
     link.className = "training-link";
-    link.href = endpoint + "?trainingId=" + encodeURIComponent(item.id) + "&userEmail=" + encodeURIComponent(email);
+    link.href = pwaTrainingUrl + "?trainingId=" + encodeURIComponent(item.id) + "&userEmail=" + encodeURIComponent(email);
     link.target = "_top";
     const title = document.createElement("span");
     title.className = "training-title";
@@ -409,7 +569,7 @@ function bindCompletion() {
   if (!button) return;
   const backToCatalog = document.getElementById("backToCatalog");
   if (backToCatalog) {
-    backToCatalog.href = endpoint + "?userEmail=" + encodeURIComponent(email);
+    backToCatalog.href = pwaTrainingUrl + "?userEmail=" + encodeURIComponent(email);
     backToCatalog.target = "_top";
   }
   const answerYes = document.getElementById("answerYes");
