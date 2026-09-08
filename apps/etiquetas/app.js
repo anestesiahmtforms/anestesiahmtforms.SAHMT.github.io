@@ -2399,13 +2399,26 @@ function renderEtiquetaRecordFields(row, monthly) {
     ["Credor", row.credor],
     ["Plantonista(s)", row.plantonistas],
   ];
-  if (!monthly) {
-    fields.push(["Responsável pelo Registro", row.criadoPor]);
-  }
+  fields.push(["Responsável pelo Registro", row.criadoPor]);
   return fields
     .filter(([, value]) => String(value || "").trim() && String(value).trim() !== "-")
-    .map(([label, value]) => `<div class="record-card__row"><span class="record-card__label">${escapeHtml(label)}</span><span class="record-card__value">${escapeHtml(value)}</span></div>`)
+    .map(([label, value]) => `<div class="record-card__row"><span class="record-card__label">${escapeHtml(label)}</span><span class="record-card__value">${highlightAuthenticatedEmail(value)}</span></div>`)
     .join("");
+}
+
+function highlightAuthenticatedEmail(value) {
+  const text = String(value == null ? "" : value);
+  const escapedText = escapeHtml(text);
+  const authenticatedEmail = String(state.auth?.email || "").trim();
+  if (!authenticatedEmail || !text.toLowerCase().includes(authenticatedEmail.toLowerCase())) {
+    return escapedText;
+  }
+
+  const escapedEmail = escapeHtml(authenticatedEmail).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return escapedText.replace(
+    new RegExp(escapedEmail, "gi"),
+    (match) => `<span class="report-authenticated-email">${match}</span>`
+  );
 }
 
 function renderSummaryField(label, value) {
@@ -2425,7 +2438,7 @@ function renderSummaryObservationBlock(row) {
   return `
     <div class="record-card__row record-card__row--registration summary-observation-block">
       <span class="record-card__label record-card__label--registration">Observacao</span>
-      <span>${escapeHtml(composeHistoryLine(
+      <span>${highlightAuthenticatedEmail(composeHistoryLine(
         row.observacaoAtualizadaEm || "Sem data registrada",
         row.observacaoAtualizadaPor || "Sem responsavel registrado",
         row.observacoes || "Sem texto de observacao."
@@ -2494,7 +2507,7 @@ function renderEditHistoryEntry(line) {
 }
 
 function renderHistoryLine(label, value) {
-  return `<div class="record-card__history-line"><span class="record-card__history-label">${escapeHtml(label)}:</span><span class="record-card__history-value">${escapeHtml(value)}</span></div>`;
+  return `<div class="record-card__history-line"><span class="record-card__history-label">${escapeHtml(label)}:</span><span class="record-card__history-value">${highlightAuthenticatedEmail(value)}</span></div>`;
 }
 
 function composeHistoryLine(dateTime, responsible, detail) {
