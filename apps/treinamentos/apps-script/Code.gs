@@ -191,6 +191,7 @@ html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{p
 body.training-active{overflow:hidden}.training-active .training-mode{position:absolute;inset:0;width:100vw;max-width:none;height:100%;min-height:0;margin:0;padding:4px;z-index:10}.training-footer{flex:0 0 auto;padding:8px 2px 2px;background:#ffffffee;border-top:1px solid #c9dada}.training-footer .progress{margin-top:0}#complete{min-height:68px;border:3px solid #fff7d6;border-radius:18px;background:linear-gradient(135deg,#f59e0b,#d85b08);color:#fff;font-size:clamp(1.08rem,4vw,1.3rem);letter-spacing:.025em;box-shadow:0 10px 24px #9a430866}#complete:disabled{background:linear-gradient(135deg,#a9b6b4,#758784);border-color:#e8eeee;color:#f8fbfb;box-shadow:none}.training-footer .back-link{min-height:58px;font-size:1.05rem}@media (max-height:560px){#complete{min-height:52px}.training-footer{padding-top:4px}}
 .training-active header{display:none}.training-active .training-mode .content{padding-top:4px}.training-footer .status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.training-active #youtubeFrame,.training-active .player{min-height:0;background:#000}
 #playPause{min-height:58px;margin-bottom:7px;background:linear-gradient(135deg,#2563eb,#173f9b);font-size:clamp(1rem,3.5vw,1.15rem)}#playPause:disabled{background:linear-gradient(135deg,#a9b6b4,#758784);box-shadow:none}@media (max-height:560px){#playPause{min-height:44px;margin-bottom:4px}}
+:root{--app-height:100svh;--catalog-gap:10px;--training-row-height:64px}body{height:var(--app-height)!important;max-height:var(--app-height);overscroll-behavior:none;touch-action:none}body:not(.training-active) main{height:var(--app-height)!important;max-height:var(--app-height);align-items:stretch}body:not(.training-active) .card{height:100%;max-height:100%}body:not(.training-active) header{min-height:176px;padding:24px 22px}body:not(.training-active) .content{padding:16px 14px}body:not(.training-active) .catalog{display:flex;flex-direction:column;gap:var(--catalog-gap);height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;padding:2px 4px 4px}body:not(.training-active) .training-link{flex:0 0 var(--training-row-height);height:var(--training-row-height);min-height:var(--training-row-height);max-height:var(--training-row-height);padding:9px 14px 9px 18px;border-radius:16px;box-shadow:0 6px 0 #082b4a,0 10px 18px #08121f2e,inset 0 2px 0 #ffffff48}body:not(.training-active) .training-link:hover,body:not(.training-active) .training-link:focus-visible{transform:none;box-shadow:0 6px 0 #082b4a,0 10px 18px #08121f38,inset 0 2px 0 #ffffff5c}body:not(.training-active) .training-link:active{transform:translateY(3px);box-shadow:0 3px 0 #082b4a,0 6px 11px #08121f32,inset 0 2px 7px #0003}.catalog-fill{flex:1 1 auto;min-height:0;display:grid;gap:var(--catalog-gap);overflow:hidden}.upcoming-training{min-height:0;display:flex;align-items:center;justify-content:center;padding:7px 12px;border:1px dashed #8eacc2;border-radius:15px;background:linear-gradient(145deg,#f7fbfd,#e6eef2);color:#547088;font-size:.84rem;font-weight:800;letter-spacing:.01em;text-align:center;box-shadow:inset 0 1px 0 #fff}@media(max-width:540px){:root{--catalog-gap:8px;--training-row-height:60px}body:not(.training-active) header{min-height:168px;padding:20px 15px}.brand-logo{width:94px;height:94px}body:not(.training-active) .content{padding:11px 10px}body:not(.training-active) .training-link{padding:8px 11px 8px 14px;border-radius:15px}.upcoming-training{padding:5px 9px;font-size:.78rem}}@media(max-height:620px){:root{--catalog-gap:7px;--training-row-height:54px}body:not(.training-active) header{min-height:146px;padding:14px}.brand-logo{width:78px;height:78px}.user-summary{margin-top:7px}body:not(.training-active) .content{padding:9px}.upcoming-training{font-size:.74rem}}
 </style>
 </head>
 <body class="<?= state.training ? "training-active" : "" ?>">
@@ -222,6 +223,48 @@ function renderCatalog() {
     link.appendChild(points);
     catalog.appendChild(link);
   });
+  requestAnimationFrame(fillUpcomingSlots);
+}
+
+function fillUpcomingSlots() {
+  const catalog = document.getElementById("catalog");
+  if (!catalog) return;
+  const currentFill = catalog.querySelector(".catalog-fill");
+  if (currentFill) currentFill.remove();
+
+  const links = Array.from(catalog.querySelectorAll(".training-link"));
+  const gap = parseFloat(getComputedStyle(catalog).gap) || 0;
+  const linksHeight = links.reduce(function (total, link) {
+    return total + link.getBoundingClientRect().height;
+  }, 0);
+  const gapsBetweenLinks = Math.max(0, links.length - 1) * gap;
+  const gapBeforeFill = links.length ? gap : 0;
+  const remainingHeight = catalog.clientHeight - linksHeight - gapsBetweenLinks - gapBeforeFill;
+  if (remainingHeight < 34) return;
+
+  const preferredHeight = 52;
+  const slotCount = Math.max(1, Math.round((remainingHeight + gap) / (preferredHeight + gap)));
+  const fill = document.createElement("div");
+  fill.className = "catalog-fill";
+  fill.style.gridTemplateRows = "repeat(" + slotCount + ",minmax(0,1fr))";
+  for (let index = 0; index < slotCount; index += 1) {
+    const slot = document.createElement("div");
+    slot.className = "upcoming-training";
+    slot.textContent = "Próximo Treinamento em breve aqui!";
+    fill.appendChild(slot);
+  }
+  catalog.appendChild(fill);
+}
+
+function lockViewportHeight() {
+  const visibleHeight = window.visualViewport
+    ? window.visualViewport.height
+    : window.innerHeight;
+  document.documentElement.style.setProperty(
+    "--app-height",
+    Math.max(320, Math.round(visibleHeight)) + "px"
+  );
+  window.scrollTo(0, 0);
 }
 
 function loadPlayerApi() {
@@ -394,7 +437,20 @@ function bindCompletion() {
   });
 }
 
+lockViewportHeight();
 renderCatalog();
+document.addEventListener("touchmove", function (event) {
+  event.preventDefault();
+}, { passive: false });
+document.addEventListener("wheel", function (event) {
+  event.preventDefault();
+}, { passive: false });
+window.addEventListener("orientationchange", function () {
+  setTimeout(function () {
+    lockViewportHeight();
+    fillUpcomingSlots();
+  }, 250);
+});
 if (training) { bindPlaybackControl(); bindCompletion(); loadPlayerApi(); }
 </script>
 </body>
