@@ -39,6 +39,34 @@
     "wx2064@gmail.com",
     "marcio.henrique82@gmail.com"
   ]);
+  const eventMemberEmailBySigla = new Map([
+    ["DE", "deilerjeunon19@gmail.com"],
+    ["DN", "deneradiniz@gmail.com"],
+    ["FL", "macielfonseca@gmail.com"],
+    ["FR", "wx2064@gmail.com"],
+    ["GU", "25.guilherme@gmail.com"],
+    ["GB", "gpbicalho@gmail.com"],
+    ["IG", "igorfagundesvieira@gmail.com"],
+    ["JA", "jaymebc@gmail.com"],
+    ["L2", "lalvesaraujo1@gmail.com"],
+    ["LE", "bovino3.lf@gmail.com"],
+    ["LD", "leodcp1@gmail.com"],
+    ["LC", "lucas.cardoso.andrade@gmail.com"],
+    ["LH", "luciah1509@gmail.com"],
+    ["LU", "luc3101@gmail.com"],
+    ["LA", "luizacs4182@gmail.com"],
+    ["LO", "luizotavio.andrade@gmail.com"],
+    ["MA", "giovannoni1806@gmail.com"],
+    ["MH", "marcio.henrique82@gmail.com"],
+    ["PR", "paulorenato12021@gmail.com"],
+    ["RA", "rafael.augusto.rezende@gmail.com"],
+    ["RL", "ericardolucas@gmail.com"],
+    ["RC", "rodrigocapuano12@gmail.com"],
+    ["RO", "digoanestesia@gmail.com"],
+    ["RU", "rubenscpinheiro0217@gmail.com"],
+    ["WE", "wendellvcp@gmail.com"],
+    ["TE", "wx2901@gmail.com"]
+  ]);
   const highlightedEventPeople = [
     "Fernando Astrogildo",
     "Bernardo Guimaraes",
@@ -1822,9 +1850,32 @@
       return [];
     }
 
-    return source.filter((record) =>
-      String(record?.registeredBy || "").trim().toLowerCase() === authenticatedEmail
-    );
+    return source.filter((record) => {
+      const memberSigla = getEventMemberSigla(record?.membro);
+      const memberEmail = memberSigla
+        ? eventMemberEmailBySigla.get(memberSigla)
+        : "";
+
+      if (memberEmail) {
+        return memberEmail === authenticatedEmail;
+      }
+
+      return String(record?.registeredBy || "").trim().toLowerCase() === authenticatedEmail;
+    });
+  }
+
+  function getEventMemberSigla(value) {
+    const normalized = String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/[ÁÀÃÂÄ]/g, "A");
+
+    if (!normalized) {
+      return "";
+    }
+
+    const match = normalized.match(/^(DE|DN|FL|FR|GU|GB|IG|JA|L2|LE|LD|LC|LH|LU|LA|LO|MA|MH|PR|RA|RL|RC|RO|RU|WE|TE)(?=\s|[-–—/:]|$)/);
+    return match ? match[1] : "";
   }
 
   function updateEventReportsEmptyMessages() {
