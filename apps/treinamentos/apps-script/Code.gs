@@ -190,6 +190,13 @@ function loadPlayerApi() {
   document.head.appendChild(tag);
 }
 
+function preparePlayerFrame() {
+  if (!training || !training.videoId) return;
+  const frame = document.getElementById("youtubeFrame");
+  if (!frame) return;
+  frame.src = "https://www.youtube.com/embed/" + training.videoId + "?enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin);
+}
+
 let player;
 let timer;
 let watchedSeconds = 0;
@@ -304,7 +311,7 @@ function bindCompletion() {
 }
 
 renderCatalog();
-if (training) { bindCompletion(); loadPlayerApi(); }
+if (training) { bindCompletion(); preparePlayerFrame(); loadPlayerApi(); }
 </script>
 </body>
 </html>`;
