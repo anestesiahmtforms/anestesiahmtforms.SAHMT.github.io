@@ -157,6 +157,7 @@ function html_() {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Treinamentos SAHMT</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;min-height:100vh;color:#0b2844;background:linear-gradient(145deg,#e8f2f2,#f7ead4)}main{width:min(94vw,760px);margin:auto;padding:20px 0 32px}.card{overflow:hidden;border:1px solid #fff;border-radius:26px;background:#ffffffc7;box-shadow:0 18px 50px #0b284428}header{padding:22px 20px;text-align:center;background:linear-gradient(135deg,#d8eee8,#f7e9cc)}h1{margin:0;font-size:clamp(1.4rem,5vw,2rem)}.user{margin:8px 0 0;color:#157760;font-weight:700;overflow-wrap:anywhere}.content{padding:20px}.notice{margin:0 0 16px;padding:13px 15px;border-radius:14px;background:#fff0d5;color:#70491f;font-weight:650}.catalog{display:grid;gap:12px}.training-link{display:flex;align-items:center;justify-content:center;min-height:64px;padding:0 18px;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-weight:800;text-align:center;text-decoration:none;box-shadow:0 8px 18px #0d554e38}.player-wrap{position:relative;padding:0}.player{width:100%;aspect-ratio:16/9;border-radius:18px;background:#dbe8ec}.question-modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:18px;border-radius:18px;background:#0b284499;z-index:2}.question-modal.visible{display:flex}.question-card{width:min(92%,420px);padding:22px 18px;border:2px solid #fff;border-radius:20px;background:#fffaf0;color:#0b2844;text-align:center;box-shadow:0 12px 32px #0b284455}.question-card h2{margin:0 0 16px;font-size:clamp(1.1rem,4vw,1.45rem)}.question-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.question-actions button{min-height:48px}.question-actions .no{background:linear-gradient(135deg,#b95050,#8d2929)}.progress{height:10px;margin:16px 0 8px;border-radius:99px;background:#d8e5e5;overflow:hidden}.progress-bar{width:0;height:100%;background:#16805f;transition:width .2s}.status{min-height:24px;font-weight:700}.success{color:#116c48}.error{color:#a32828}button{width:100%;min-height:54px;border:0;border-radius:18px;color:#fff;background:linear-gradient(135deg,#187e6a,#0d554e);font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 8px 18px #0d554e38}button:disabled{opacity:.6;cursor:not-allowed}
@@ -194,6 +195,7 @@ function preparePlayerFrame() {
   if (!training || !training.videoId) return;
   const frame = document.getElementById("youtubeFrame");
   if (!frame) return;
+  frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
   frame.src = "https://www.youtube.com/embed/" + training.videoId + "?enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin);
 }
 
