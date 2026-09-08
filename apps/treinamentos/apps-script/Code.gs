@@ -196,7 +196,7 @@ function preparePlayerFrame() {
   const frame = document.getElementById("youtubeFrame");
   if (!frame) return;
   frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-  frame.src = "https://www.youtube.com/embed/" + training.videoId + "?enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin);
+  frame.src = "https://www.youtube.com/embed/" + training.videoId + "?enablejsapi=1&playsinline=1&rel=0&origin=https%3A%2F%2Fscript.google.com&widget_referrer=https%3A%2F%2Fscript.google.com%2F";
 }
 
 let player;
