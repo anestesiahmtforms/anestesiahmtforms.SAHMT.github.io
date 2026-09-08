@@ -1,13 +1,37 @@
 window.SAHMT_NOTICES = {
-  activeId: "treinamento-app",
+  activeId: "all",
   notices: [
     {
-      id: "treinamento-app",
-      eyebrow: "Material de apoio",
-      title: "Treinamento App",
-      videoUrl: "https://script.google.com/macros/s/AKfycbw8tyhilyC8czRrho0iOugr7B6L5COFZjm2x5Di4HuzsgTsw3SSlbVDFLexzYmN0m1j0g/exec",
+      id: "video-escala",
+      eyebrow: "Tutorial 1",
+      title: "1 - App Escala",
+      videoUrl: "https://youtube.com/shorts/h9qC2TMbxHU?feature=share",
+      message: "",
+      accent: "gold"
+    },
+    {
+      id: "video-eventos",
+      eyebrow: "Tutorial 2",
+      title: "2 - App Eventos",
+      videoUrl: "https://youtu.be/9uWHZzCq9Fo",
       message: "",
       accent: "blue"
+    },
+    {
+      id: "video-etiquetas",
+      eyebrow: "Tutorial 3",
+      title: "3 - App Etiquetas",
+      videoUrl: "https://youtu.be/0cUtz8sH9W8",
+      message: "",
+      accent: "green"
+    },
+    {
+      id: "video-gestao",
+      eyebrow: "Tutorial 4",
+      title: "4 - App Gestão",
+      videoUrl: "https://youtube.com/shorts/IkCP0naesis?feature=share",
+      message: "",
+      accent: "green"
     }
   ]
 };

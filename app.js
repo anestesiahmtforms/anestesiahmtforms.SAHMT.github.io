@@ -1004,7 +1004,7 @@
         const applyTrainingHref = (emailValue = "") => {
           const sessionEmail = String(emailValue || "").trim();
           const trainingUrl = new URL(embeddedMediaUrl);
-          if (sessionEmail) {
+          if (sessionEmail && trainingUrl.hostname === "script.google.com") {
             trainingUrl.searchParams.set("userEmail", sessionEmail);
           }
           titleLink.href = trainingUrl.href;
