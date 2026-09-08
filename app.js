@@ -1001,28 +1001,21 @@
       titleLink.className = "notice-card__video-title";
       titleLink.href = embeddedMediaUrl || "#";
       if (embeddedMediaUrl) {
-        titleLink.addEventListener("click", async (event) => {
-          event.preventDefault();
-
-          let sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
-          if (!sessionEmail) {
-            try {
-              await ensureSharedAccess();
-              sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
-            } catch (error) {
-              console.warn("Falha ao preparar acesso ao treinamento:", error);
-            }
-          }
-
+        const applyTrainingHref = (emailValue = "") => {
+          const sessionEmail = String(emailValue || "").trim();
           const trainingUrl = new URL(embeddedMediaUrl);
           if (sessionEmail) {
             trainingUrl.searchParams.set("userEmail", sessionEmail);
           }
+          titleLink.href = trainingUrl.href;
+        };
 
-          // Same-window navigation remains reliable in iOS standalone PWA mode,
-          // including when authentication completes asynchronously before opening.
-          window.location.assign(trainingUrl.href);
-        });
+        // A real external anchor lets iOS hand the Google Apps Script page to
+        // Safari instead of trying to render it inside the standalone PWA.
+        titleLink.target = "_blank";
+        titleLink.rel = "noopener noreferrer external";
+        applyTrainingHref(window.SAHMT_AUTH?.getUserLabel?.());
+        window.SAHMT_AUTH?.onChange?.((session) => applyTrainingHref(session?.email));
       } else {
         titleLink.addEventListener("click", (event) => event.preventDefault());
       }
