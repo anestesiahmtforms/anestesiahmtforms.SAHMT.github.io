@@ -1003,15 +1003,19 @@
       if (embeddedMediaUrl) {
         titleLink.target = "_blank";
         titleLink.rel = "noopener noreferrer";
-        titleLink.addEventListener("click", (event) => {
+        titleLink.addEventListener("click", () => {
           const sessionEmail = String(window.SAHMT_AUTH?.getUserLabel?.() || "").trim();
           if (!sessionEmail) {
             return;
           }
-          event.preventDefault();
+
           const trainingUrl = new URL(embeddedMediaUrl);
           trainingUrl.searchParams.set("userEmail", sessionEmail);
-          window.open(trainingUrl.href, "_blank", "noopener,noreferrer");
+          // Keep the browser's native link activation. Calling window.open() here is
+          // blocked by iOS/Safari in standalone PWA mode, making the video appear
+          // unresponsive. Updating href synchronously preserves the user identifier
+          // while allowing the browser to open the destination normally.
+          titleLink.href = trainingUrl.href;
         });
       } else {
         titleLink.addEventListener("click", (event) => event.preventDefault());
