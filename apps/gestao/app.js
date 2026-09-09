@@ -58,6 +58,20 @@ const managementItems = [
     title: "GESTÃO FINANCEIRA",
     gestorUrl: "#",
     equipeUrl: "#"
+  },
+  {
+    title: "TREINAMENTOS",
+    directUrl: "../treinamentos/"
+  },
+  {
+    title: "CHECKLIST",
+    gestorUrl: "#",
+    equipeUrl: "#"
+  },
+  {
+    title: "NOTIFICAÇÕES",
+    gestorUrl: "#",
+    equipeUrl: "#"
   }
 ];
 
@@ -181,6 +195,14 @@ function closeFolderOverlay() {
   document.body.classList.remove("folder-open");
 }
 
+function openDirectItem(item) {
+  window.SAHMT_AUTH?.track("area_open", formatLabel(item.title));
+
+  const targetUrl = new URL(item.directUrl, window.location.href);
+  window.SAHMT_AUTH?.addAuthToUrl?.(targetUrl);
+  window.location.assign(targetUrl.href);
+}
+
 function renderCards() {
   const fragment = document.createDocumentFragment();
 
@@ -195,7 +217,14 @@ function renderCards() {
     tile.style.animationDelay = `${index * 46}ms`;
     tile.dataset.index = String(index + 1);
     tile.setAttribute("aria-label", formatLabel(item.title));
-    tile.addEventListener("click", () => openFolder(item, index));
+    tile.addEventListener("click", () => {
+      if (item.directUrl) {
+        openDirectItem(item);
+        return;
+      }
+
+      openFolder(item, index);
+    });
 
     fragment.appendChild(tile);
   });
@@ -206,7 +235,7 @@ function renderCards() {
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=20260901-01", { updateViaCache: "none" }).catch(() => {
+    navigator.serviceWorker.register("./sw.js?v=20260909-01", { updateViaCache: "none" }).catch(() => {
         // The app still works without the service worker.
       });
     });
