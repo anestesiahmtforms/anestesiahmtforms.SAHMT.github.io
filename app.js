@@ -234,8 +234,14 @@
   window.visualViewport?.addEventListener("resize", requestViewportFit);
 
   if ("serviceWorker" in navigator) {
+    let controllerReloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (controllerReloaded) return;
+      controllerReloaded = true;
+      window.location.reload();
+    });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-13", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-14", { updateViaCache: "none" })
         .then(async (registration) => {
           await registration.update();
           registration.waiting?.postMessage({ type: "SKIP_WAITING" });
