@@ -54,14 +54,19 @@
 
 /* Use the remaining schedule space to enlarge the sigla touch targets. */
 .schedule-card .siglas-grid {
-  gap: 9px 7px;
-  grid-auto-rows: minmax(42px, auto);
+  gap: 6px;
+  grid-auto-rows: minmax(34px, auto);
 }
 
 .schedule-card .sigla-token {
-  min-height: 42px;
-  padding-top: 7px;
-  padding-bottom: 7px;
+  min-height: 34px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.82),
+    0 10px 20px rgba(0, 0, 0, 0.08),
+    0 0 16px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
 
 /* Final title-logo treatment: a visible iPhone-style 3D button. */
@@ -505,9 +510,13 @@ button:hover,
 
 .siglas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 7px;
+  padding: 8px 6px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(13, 50, 87, 0.08);
 }
 
 .sigla-item {
@@ -519,13 +528,13 @@ button:hover,
 .sigla-token {
   position: relative;
   width: 100%;
-  min-height: 30px;
+  min-height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  padding: 4px 4px;
-  font-size: 0.79rem;
+  padding: 3px 4px;
+  font-size: 0.73rem;
   font-weight: 800;
   text-align: center;
   color: #111111;
@@ -1529,9 +1538,29 @@ button:hover,
 }
 
 .siglas-grid .sigla-item--offline .offline-sigla {
-  min-height: 30px;
-  padding: 4px;
+  min-height: 34px;
+  padding: 3px 4px;
   font-size: 0.68rem;
+}
+
+@media (max-width: 680px) {
+  .schedule-card .siglas-grid {
+    gap: 4px;
+    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+    margin-top: 4px;
+    padding: 6px 4px 8px;
+  }
+
+  .schedule-card .sigla-token {
+    min-height: 31px;
+    padding: 2px 3px;
+    font-size: 0.68rem;
+  }
+
+  .siglas-grid .sigla-item--offline .offline-sigla {
+    min-height: 31px;
+    padding: 2px 3px;
+  }
 }
 
 /* Keep the calendar date field fully outlined on narrow iPhone viewports. */

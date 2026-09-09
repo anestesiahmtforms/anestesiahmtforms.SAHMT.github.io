@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const CACHE_NAME = "sahmt-pwa-v135";
+=======
+const CACHE_NAME = "sahmt-pwa-v130";
+>>>>>>> 5c3e12e (style(escala): alinhar botoes de siglas a eventos)
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -77,7 +81,19 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Cache each asset independently so one temporary failure cannot disable offline mode.
+      await Promise.all(APP_SHELL.map(async (asset) => {
+        try {
+          const response = await fetch(asset, { cache: "no-store" });
+          if (response.ok) {
+            await cache.put(asset, response);
+          }
+        } catch (error) {
+          // The next online visit will retry this asset without blocking the shell.
+        }
+      }));
+    })
   );
   self.skipWaiting();
 });
@@ -107,7 +123,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith((async () => {
-    const cached = await caches.match(event.request);
+    const cached = await caches.match(event.request, { ignoreSearch: true });
     const network = fetch(event.request, { cache: "no-store" }).then((response) => {
       if (response.ok) {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
@@ -123,11 +139,11 @@ self.addEventListener("fetch", (event) => {
       return network.catch(async () => {
         if (cached) return cached;
         const requestUrl = new URL(event.request.url);
-        if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
-        if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
-        if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
-        if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
-        return caches.match("./index.html");
+        if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html", { ignoreSearch: true });
+        if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html", { ignoreSearch: true });
+        if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html", { ignoreSearch: true });
+        if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html", { ignoreSearch: true });
+        return caches.match("./index.html", { ignoreSearch: true });
       });
     }
 
@@ -138,11 +154,11 @@ self.addEventListener("fetch", (event) => {
 
     return network.catch(async () => {
       const requestUrl = new URL(event.request.url);
-      if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
-      if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
-      if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
-      if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
-      return caches.match("./index.html");
+      if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html", { ignoreSearch: true });
+      if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html", { ignoreSearch: true });
+      if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html", { ignoreSearch: true });
+      if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html", { ignoreSearch: true });
+      return caches.match("./index.html", { ignoreSearch: true });
     });
   })());
 });
