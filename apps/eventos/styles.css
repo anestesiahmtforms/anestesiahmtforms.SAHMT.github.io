@@ -3175,8 +3175,20 @@ button:hover,
 
 .schedule-card .sigla-token {
   height: 100%;
-  min-height: 42px;
-  padding: 5px 3px;
+  min-height: 48px;
+  padding: 5px 4px;
+  border-radius: 24px;
+  font-size: 1rem;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.82),
+    0 5px 0 rgba(175, 180, 183, 0.42),
+    0 10px 16px rgba(30, 42, 52, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.schedule-card .sigla-index {
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
 .schedule-card .empty-state:not(.hidden) {
@@ -3223,8 +3235,9 @@ button:hover,
   }
 
   .schedule-card .sigla-token {
-    min-height: 38px;
-    padding: 3px 2px;
+    min-height: 44px;
+    padding: 4px 3px;
+    font-size: 0.9rem;
   }
 
   .module-link-strip {
