@@ -3244,3 +3244,32 @@ button:hover,
     margin: 0;
   }
 }
+/* Modelo visual dos botoes de siglas do backup de 27/08. */
+.siglas-grid {
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)) !important;
+  gap: 5px !important;
+  margin-top: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.sigla-token {
+  min-height: 28px !important;
+  padding: 3px 4px !important;
+  font-size: 0.73rem !important;
+}
+
+@media (max-width: 640px) {
+  .siglas-grid {
+    gap: 4px !important;
+    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)) !important;
+  }
+
+  .sigla-token {
+    min-height: 26px !important;
+    padding: 2px 3px !important;
+    font-size: 0.68rem !important;
+  }
+}

@@ -1818,3 +1818,19 @@ button:hover,
     margin: 0;
   }
 }
+/* Modelo visual dos botoes de siglas do backup de 27/08. */
+.siglas-grid {
+  grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)) !important;
+  gap: 6px !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.sigla-token {
+  min-height: 30px !important;
+  padding: 4px 4px !important;
+  font-size: 0.79rem !important;
+}
