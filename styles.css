@@ -1775,30 +1775,12 @@ button:hover,
   }
 }
 
-/* Keep combined assignments inside the same fixed button dimensions. */
-.schedule-card .sigla-token {
-  box-sizing: border-box;
-  min-width: 0;
-  max-height: 100%;
-  overflow: hidden;
-  flex-wrap: nowrap;
-  line-height: 1;
-}
-
-.schedule-card .sigla-token--multi {
-  gap: 0;
-  padding-inline: 2px;
-  font-size: clamp(0.48rem, 1.75vw, 0.66rem);
-  letter-spacing: -0.035em;
-}
-
-.schedule-card .sigla-token--multi .sigla-token__part {
-  min-width: 0;
-  padding-inline: 1px;
-  padding-bottom: 0;
-}
-
-.schedule-card .sigla-token--multi .dc-vacation-sigla,
-.schedule-card .sigla-token--multi .sigla-token__vacation-part {
-  padding-inline: 2px;
+/* Preserve the original button design; only fit three-sigla content internally. */
+.schedule-card .sigla-token--multi .sigla-token__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transform: scale(0.72);
+  transform-origin: center;
 }
