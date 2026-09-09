@@ -345,7 +345,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-04", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-05", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -417,13 +417,14 @@
       bindSiglaInteractions(token, sigla, weekdayLabel, dateKey);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
+      const isMultiSigla = extractSiglas(sigla).length + dcVacationSiglas.length >= 3;
       appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions);
 
       if (dcVacationSiglas.length) {
-        token.appendChild(document.createTextNode(" - "));
+        token.appendChild(document.createTextNode(isMultiSigla ? "-" : " - "));
         dcVacationSiglas.forEach((vacationSigla, position) => {
           if (position > 0) {
-            token.appendChild(document.createTextNode(", "));
+            token.appendChild(document.createTextNode(isMultiSigla ? "/" : ", "));
           }
 
           token.appendChild(
@@ -434,6 +435,10 @@
             )
           );
         });
+      }
+
+      if (isMultiSigla) {
+        token.classList.add("sigla-token--multi");
       }
 
       if (isWholeSiglaOnVacation(sigla, vacationSiglas)) {
