@@ -4,6 +4,7 @@
   min-height: 0;
   align-content: space-evenly;
   grid-auto-rows: max-content;
+  touch-action: pan-y;
 }
 
 .schedule-card .sigla-item {

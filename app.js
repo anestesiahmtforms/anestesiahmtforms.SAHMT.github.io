@@ -145,6 +145,10 @@
     render(shiftDate(elements.dateInput.value, 1));
   });
 
+  enableDateSwipeNavigation(elements.siglasGrid, (delta) => {
+    render(shiftDate(elements.dateInput.value, delta));
+  });
+
   elements.todayButton.addEventListener("click", () => {
     render(clampKey(todayKey));
   });
@@ -234,18 +238,9 @@
   window.visualViewport?.addEventListener("resize", requestViewportFit);
 
   if ("serviceWorker" in navigator) {
-    let controllerReloaded = false;
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (controllerReloaded) return;
-      controllerReloaded = true;
-      window.location.reload();
-    });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-14", { updateViaCache: "none" })
-        .then(async (registration) => {
-          await registration.update();
-          registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-        })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-07", { updateViaCache: "none" })
+        .then((registration) => registration.update())
         .catch(() => {});
     });
   }
@@ -1277,6 +1272,86 @@
     const date = new Date(`${dateKey}T12:00:00`);
     date.setDate(date.getDate() + delta);
     return clampKey(formatKey(date));
+  }
+
+  function enableDateSwipeNavigation(surface, navigateByDays) {
+    if (!surface || !window.PointerEvent || typeof navigateByDays !== "function") {
+      return;
+    }
+
+    const minimumDistance = 48;
+    const maximumDurationMs = 900;
+    let gesture = null;
+    let suppressClickUntil = 0;
+
+    surface.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" || (event.button !== undefined && event.button !== 0)) {
+        gesture = null;
+        return;
+      }
+
+      gesture = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startedAt: performance.now(),
+        pressTarget: event.target instanceof Element ? event.target.closest(".sigla-button") : null,
+        rejected: false
+      };
+    }, true);
+
+    surface.addEventListener("pointermove", (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) {
+        return;
+      }
+
+      const deltaX = event.clientX - gesture.startX;
+      const deltaY = event.clientY - gesture.startY;
+      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 18) {
+        gesture.rejected = true;
+        return;
+      }
+
+      if (Math.abs(deltaX) > 12 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        event.preventDefault();
+      }
+    }, { capture: true, passive: false });
+
+    surface.addEventListener("pointerup", (event) => {
+      if (!gesture || event.pointerId !== gesture.pointerId) {
+        return;
+      }
+
+      const completedGesture = gesture;
+      gesture = null;
+      const deltaX = event.clientX - completedGesture.startX;
+      const deltaY = event.clientY - completedGesture.startY;
+      const elapsed = performance.now() - completedGesture.startedAt;
+      const isHorizontalSwipe = !completedGesture.rejected
+        && elapsed <= maximumDurationMs
+        && Math.abs(deltaX) >= minimumDistance
+        && Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+
+      if (!isHorizontalSwipe) {
+        return;
+      }
+
+      event.preventDefault();
+      suppressClickUntil = performance.now() + 450;
+      completedGesture.pressTarget?.dispatchEvent(new Event("pointercancel"));
+      window.setTimeout(() => navigateByDays(deltaX < 0 ? 1 : -1), 0);
+    }, true);
+
+    surface.addEventListener("pointercancel", () => {
+      gesture = null;
+    }, true);
+
+    surface.addEventListener("click", (event) => {
+      if (performance.now() < suppressClickUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
   }
 
   function clampKey(dateKey) {
