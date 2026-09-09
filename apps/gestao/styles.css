@@ -1037,3 +1037,62 @@ body {
   padding-left: 18px;
   background-position: 0 50%;
 }
+
+/* Balanced Gestão home: every block shares the fixed modal proportionally. */
+.springboard {
+  gap: 6px;
+}
+
+.icon-grid-wrap {
+  padding: 8px;
+}
+
+.icon-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 7px 6px;
+  align-content: stretch;
+  align-items: stretch;
+}
+
+.app-icon,
+.app-icon__text {
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-icon__text {
+  height: 100%;
+  padding: 10px 8px;
+  border-radius: 22px;
+}
+
+.module-link-strip {
+  margin: 0;
+}
+
+.footer-banner {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .icon-grid-wrap {
+    padding: 7px;
+  }
+
+  .icon-grid {
+    gap: 6px 5px;
+  }
+
+  .app-icon__text {
+    padding: 8px 6px;
+    border-radius: 19px;
+  }
+
+  .module-link-strip {
+    margin: 0;
+  }
+}

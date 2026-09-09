@@ -235,7 +235,7 @@ function renderCards() {
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=20260909-01", { updateViaCache: "none" }).catch(() => {
+    navigator.serviceWorker.register("./sw.js?v=20260909-02", { updateViaCache: "none" }).catch(() => {
         // The app still works without the service worker.
       });
     });
