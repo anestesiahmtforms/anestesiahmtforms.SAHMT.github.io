@@ -1686,3 +1686,91 @@ button:hover,
   background: #22c55e;
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), 0 1px 4px rgba(21, 128, 61, 0.24);
 }
+
+/* Balanced Escala home: use the complete modal without oversized empty zones. */
+.app-frame {
+  gap: 8px;
+}
+
+.schedule-card {
+  gap: 8px;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.schedule-card > .search-banner {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.schedule-card .empty-state:not(.hidden) {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.schedule-card .siglas-grid {
+  --sigla-columns: 6;
+  --sigla-rows: 3;
+  width: 100%;
+  min-height: 0;
+  margin-top: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--sigla-columns), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--sigla-rows), minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  align-content: stretch;
+  align-items: stretch;
+  gap: 9px 7px;
+}
+
+.schedule-card .sigla-item {
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+
+.schedule-card .sigla-token {
+  height: 100%;
+  min-height: 42px;
+  padding: 7px 4px;
+}
+
+.module-link-strip {
+  margin: 0;
+}
+
+.footer-banner {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .app-frame {
+    gap: 6px;
+  }
+
+  .schedule-card {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .schedule-card .siglas-grid {
+    gap: 7px 5px;
+  }
+
+  .schedule-card .sigla-token {
+    min-height: 38px;
+    padding: 5px 3px;
+  }
+
+  .module-link-strip {
+    margin: 0;
+  }
+}

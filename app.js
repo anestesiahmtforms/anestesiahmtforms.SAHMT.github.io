@@ -235,7 +235,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260908-01", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-03", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -337,6 +337,11 @@
 
   function renderSiglas(siglas, weekdayLabel) {
     elements.siglasGrid.innerHTML = "";
+    const totalItems = siglas.length + 1;
+    const columnCount = totalItems <= 15 ? 5 : 6;
+    const rowCount = Math.ceil(totalItems / columnCount);
+    elements.siglasGrid.style.setProperty("--sigla-columns", String(columnCount));
+    elements.siglasGrid.style.setProperty("--sigla-rows", String(rowCount));
     const activeDate = elements.dateInput.value;
     const vacationSiglas = getVacationSiglasForDate(activeDate);
     const vacationOrder = getVacationOrderForDate(activeDate);
