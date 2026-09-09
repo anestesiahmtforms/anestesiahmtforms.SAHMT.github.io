@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v133";
+const CACHE_NAME = "sahmt-pwa-v134";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -114,6 +114,22 @@ self.addEventListener("fetch", (event) => {
       }
       return response;
     });
+
+    const needsFreshInterface = event.request.mode === "navigate"
+      || event.request.destination === "style"
+      || event.request.destination === "script";
+
+    if (needsFreshInterface) {
+      return network.catch(async () => {
+        if (cached) return cached;
+        const requestUrl = new URL(event.request.url);
+        if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
+        if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
+        if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
+        if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
+        return caches.match("./index.html");
+      });
+    }
 
     if (cached) {
       event.waitUntil(network.catch(() => {}));
