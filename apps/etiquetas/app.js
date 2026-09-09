@@ -239,9 +239,21 @@ entryPanelEl?.addEventListener("focusin", (event) => {
     if (!(formGrid instanceof HTMLElement)) {
       return;
     }
-    const targetCenter = target.offsetTop + target.offsetHeight / 2;
-    const scrollTop = Math.max(0, targetCenter - formGrid.clientHeight / 2);
-    formGrid.scrollTo({ top: scrollTop, behavior: "smooth" });
+    const field = target.closest("label") || target;
+    const formRect = formGrid.getBoundingClientRect();
+    const fieldRect = field.getBoundingClientRect();
+    const safeGap = 10;
+    let nextScrollTop = formGrid.scrollTop;
+
+    if (fieldRect.top < formRect.top + safeGap) {
+      nextScrollTop += fieldRect.top - formRect.top - safeGap;
+    } else if (fieldRect.bottom > formRect.bottom - safeGap) {
+      nextScrollTop += fieldRect.bottom - formRect.bottom + safeGap;
+    }
+
+    if (Math.abs(nextScrollTop - formGrid.scrollTop) > 1) {
+      formGrid.scrollTo({ top: Math.max(0, nextScrollTop), behavior: "auto" });
+    }
   }, 80);
 });
 window.addEventListener("focus", refreshDisplayedSummaries);
@@ -1042,7 +1054,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("./sw.js?v=20260906-20", { updateViaCache: "none" });
+    await navigator.serviceWorker.register("./sw.js?v=20260909-01", { updateViaCache: "none" });
   } catch (error) {
     console.warn("Falha ao registrar service worker:", error);
   }

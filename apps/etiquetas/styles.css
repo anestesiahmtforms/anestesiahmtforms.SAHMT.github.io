@@ -5932,3 +5932,28 @@ body::before {
   font-weight: 950 !important;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
+
+/* Preserve each manual-entry field's natural height while the phone keyboard
+   is open. The form scrolls internally without allowing adjacent rows to
+   overlap or jump into the focused field. */
+@media (max-width: 680px) {
+  #entry-panel.manual-entry-expanded.entry-keyboard-open > #label-form {
+    grid-template-rows: none;
+    grid-auto-rows: max-content;
+    align-content: start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: auto;
+    scroll-padding-block: 10px 18px;
+  }
+
+  #entry-panel.manual-entry-expanded.entry-keyboard-open > #label-form > label {
+    min-height: max-content;
+    overflow: visible;
+  }
+
+  #entry-panel.manual-entry-expanded.entry-keyboard-open #plantonistas-options {
+    max-height: 180px;
+    overflow-y: auto;
+  }
+}
