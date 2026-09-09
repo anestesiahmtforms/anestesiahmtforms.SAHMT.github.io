@@ -1774,13 +1774,3 @@ button:hover,
     margin: 0;
   }
 }
-
-/* Preserve the original button design; only fit three-sigla content internally. */
-.schedule-card .sigla-token--multi .sigla-token__content {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  transform: scale(0.72);
-  transform-origin: center;
-}
