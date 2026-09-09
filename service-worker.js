@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 const CACHE_NAME = "sahmt-pwa-v135";
-=======
-const CACHE_NAME = "sahmt-pwa-v130";
->>>>>>> 5c3e12e (style(escala): alinhar botoes de siglas a eventos)
 const APP_SHELL = [
   "./",
   "./index.html",
