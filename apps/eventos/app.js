@@ -349,7 +349,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-08", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-09", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -421,23 +421,21 @@
       bindSiglaInteractions(token, sigla, weekdayLabel, dateKey);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
-      appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions);
+      if (dcVacationSiglas.length >= 2) {
+        appendStackedDcDisplay(token, dcVacationSiglas, vacationOrder, showVacationPositions);
+      } else {
+        appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions);
 
-      if (dcVacationSiglas.length) {
-        token.appendChild(document.createTextNode(" - "));
-        dcVacationSiglas.forEach((vacationSigla, position) => {
-          if (position > 0) {
-            token.appendChild(document.createTextNode(", "));
-          }
-
+        if (dcVacationSiglas.length) {
+          token.appendChild(document.createTextNode(" - "));
           token.appendChild(
             createVacationSiglaNode(
-              vacationSigla,
+              dcVacationSiglas[0],
               "dc-vacation-sigla",
-              getVacationPosition(vacationSigla, vacationOrder, showVacationPositions)
+              getVacationPosition(dcVacationSiglas[0], vacationOrder, showVacationPositions)
             )
           );
-        });
+        }
       }
 
       if (isWholeSiglaOnVacation(sigla, vacationSiglas)) {
@@ -3567,6 +3565,37 @@
 
       token.appendChild(partWrap);
     });
+  }
+
+  function appendStackedDcDisplay(token, vacationSiglas, vacationOrder, showVacationPositions) {
+    token.classList.add("sigla-token--stacked");
+
+    const topRow = document.createElement("span");
+    topRow.className = "sigla-token__stacked-top";
+    topRow.textContent = "DC";
+
+    const bottomRow = document.createElement("span");
+    bottomRow.className = "sigla-token__stacked-bottom";
+
+    vacationSiglas.forEach((vacationSigla, position) => {
+      if (position > 0) {
+        const separator = document.createElement("span");
+        separator.className = "sigla-token__stacked-separator";
+        separator.textContent = "/";
+        separator.setAttribute("aria-hidden", "true");
+        bottomRow.appendChild(separator);
+      }
+
+      bottomRow.appendChild(
+        createVacationSiglaNode(
+          vacationSigla,
+          "dc-vacation-sigla",
+          getVacationPosition(vacationSigla, vacationOrder, showVacationPositions)
+        )
+      );
+    });
+
+    token.append(topRow, bottomRow);
   }
 
   function createVacationSiglaNode(sigla, className, position) {
