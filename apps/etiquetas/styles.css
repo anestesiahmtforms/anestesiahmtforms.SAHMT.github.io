@@ -5484,7 +5484,402 @@ body::before {
   font-weight: 800;
 }
 
-.report-authenticated-email {
-  color: #c62828 !important;
-  font-weight: 950;
+/* Escala-aligned modal design system: one visual language for every workflow. */
+.modal-panel,
+#edit-overlay .edit-card,
+#confirm-overlay .confirm-card {
+  border: 1px solid rgba(199, 154, 62, 0.52);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(24, 183, 183, 0.1), transparent 30%),
+    linear-gradient(150deg, rgba(255, 253, 248, 0.99), rgba(246, 234, 212, 0.98));
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.42),
+    0 24px 52px rgba(8, 18, 31, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.modal-panel > .section-title,
+#edit-overlay .edit-card > .section-title {
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  min-height: 66px;
+  margin: 0 0 9px;
+  padding: 7px 10px;
+  border: 1px solid rgba(199, 154, 62, 0.4);
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.74), transparent 32%),
+    linear-gradient(100deg, rgba(255, 220, 151, 0.42), rgba(232, 217, 187, 0.94));
+  box-shadow:
+    0 12px 24px rgba(181, 100, 4, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  text-align: center;
+}
+
+.modal-panel > .section-title::before,
+#edit-overlay .edit-card > .section-title::before {
+  content: "" !important;
+  display: block !important;
+  width: 42px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  border-radius: 14px !important;
+  background:
+    url("../../sahmt_option1.png") center / 36px 36px no-repeat,
+    linear-gradient(145deg, #ffffff, #c4dae5) !important;
+  box-shadow:
+    0 0 0 2px rgba(116, 190, 226, 0.22),
+    0 8px 14px rgba(8, 35, 55, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.98) !important;
+}
+
+.modal-panel > .section-title::after,
+#edit-overlay .edit-card > .section-title::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 1px;
+}
+
+.modal-panel > .section-title .section-title-copy,
+#edit-overlay .edit-card > .section-title .section-title-copy {
+  width: 100%;
+  min-width: 0;
+  justify-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.modal-panel > .section-title h2,
+#edit-overlay .edit-card > .section-title h2 {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #143254;
+  font-family: var(--display-font);
+  font-size: clamp(0.92rem, 3.3vw, 1.14rem) !important;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.015em;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.68);
+}
+
+.modal-panel .modal-auth-user,
+.modal-panel .section-title [data-auth-user]:not([hidden]),
+#edit-overlay .section-title [data-auth-user]:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding-left: 0;
+  background-image: none;
+  color: rgba(20, 50, 84, 0.66);
+  font-size: 0.62rem !important;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.modal-panel .modal-auth-user::before,
+.modal-panel .section-title [data-auth-user]:not([hidden])::before,
+#edit-overlay .section-title [data-auth-user]:not([hidden])::before {
+  content: "";
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18);
+}
+
+/* Uniform content blocks, following the Escala panel-card geometry. */
+#entry-panel #label-form > label,
+#confirm-overlay .confirm-edit-grid > label,
+#edit-overlay #edit-summary .confirm-edit-grid > label {
+  border: 1px solid rgba(13, 50, 87, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 6px 14px rgba(13, 50, 87, 0.06);
+}
+
+#entry-panel #label-form > label > span,
+#confirm-overlay .confirm-edit-grid > label > span,
+#edit-overlay #edit-summary .confirm-edit-grid > label > span {
+  color: rgba(20, 50, 84, 0.78);
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+}
+
+#entry-panel #label-form > label > input,
+#entry-panel #label-form > label > select,
+#entry-panel #label-form .multi-select-toggle,
+#confirm-overlay .confirm-edit-grid input,
+#confirm-overlay .confirm-edit-grid select,
+#confirm-overlay .confirm-edit-grid textarea,
+#edit-overlay #edit-summary .confirm-edit-grid input,
+#edit-overlay #edit-summary .confirm-edit-grid select,
+#edit-overlay #edit-summary .confirm-edit-grid textarea {
+  border: 1px solid rgba(23, 98, 161, 0.18);
+  border-radius: 11px;
+  background: rgba(220, 232, 238, 0.76);
+  color: #143254;
+  box-shadow:
+    inset 0 1px 2px rgba(13, 50, 87, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+#entry-panel #label-form > label:focus-within,
+#confirm-overlay .confirm-edit-grid > label:focus-within,
+#edit-overlay #edit-summary .confirm-edit-grid > label:focus-within {
+  border-color: rgba(23, 98, 161, 0.48);
+  box-shadow:
+    0 0 0 3px rgba(147, 197, 253, 0.26),
+    0 8px 18px rgba(13, 50, 87, 0.08);
+}
+
+/* Reports: aligned filters, record area and export action. */
+.summary-panel .summary-bottom-tools,
+.monthly-panel .monthly-month-control,
+.monthly-panel .monthly-report-panel {
+  border: 1px solid rgba(13, 50, 87, 0.12);
+  border-radius: 17px;
+  background: rgba(220, 232, 238, 0.46);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    0 8px 18px rgba(13, 50, 87, 0.06);
+}
+
+.summary-panel .summary-bottom-tools {
+  margin: 0 0 7px;
+  padding: 8px;
+}
+
+.monthly-panel .monthly-month-control {
+  min-height: 50px;
+  margin: 0 0 7px;
+  padding: 6px 9px;
+}
+
+.summary-panel .summary-date-field input,
+.monthly-panel .monthly-month-control input {
+  min-height: 40px;
+  border: 2px solid rgba(23, 98, 161, 0.48);
+  border-radius: 12px;
+  background: rgba(220, 232, 238, 0.94);
+  color: #143254;
+  font-weight: 850;
+  text-align: center;
+}
+
+.summary-panel .summary-list,
+.monthly-panel .monthly-list {
+  border: 1px solid rgba(13, 50, 87, 0.1);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.64);
+}
+
+.summary-panel .record-card,
+.monthly-panel .record-card {
+  border-radius: 15px;
+}
+
+/* One button system: consistent height, radius, typography and distribution. */
+#entry-panel > .actions,
+#confirm-overlay .confirm-actions,
+#edit-overlay .confirm-actions {
+  display: grid;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+
+#entry-panel > .actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#confirm-overlay .confirm-actions,
+#edit-overlay .confirm-actions {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#entry-panel > .actions > button,
+#confirm-overlay .confirm-actions > button,
+#edit-overlay .confirm-actions > button,
+.monthly-panel .monthly-whatsapp-button,
+.modal-panel .panel-home-button {
+  width: 100%;
+  min-height: 46px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#send-sheet,
+#confirm-send,
+#edit-save,
+.monthly-panel .monthly-whatsapp-button {
+  border: 1px solid rgba(70, 132, 198, 0.5);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255, 255, 255, 0.3), transparent 34%),
+    linear-gradient(135deg, #1762a1, #0d3257);
+  color: #fff;
+  box-shadow:
+    0 0 0 2px rgba(219, 241, 255, 0.46),
+    0 10px 18px rgba(13, 50, 87, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+#clear-form.secondary {
+  border: 1px solid rgba(23, 98, 161, 0.2);
+  background: linear-gradient(180deg, #eef4f7, #dce8ee);
+  color: #143254;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.52),
+    0 8px 16px rgba(13, 50, 87, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.modal-panel .panel-base-action,
+#edit-overlay .panel-base-action {
+  width: 100%;
+  min-height: 0;
+  margin: 6px 0 0;
+  padding: 7px 0 0;
+  border-top: 1px solid rgba(13, 50, 87, 0.12);
+}
+
+.modal-panel .panel-home-button,
+#edit-overlay .panel-home-button {
+  max-width: none;
+  border: 1px solid rgba(24, 183, 183, 0.5);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.34), transparent 34%),
+    linear-gradient(135deg, #35c7c4, #138b91);
+  color: #f7ffff;
+  box-shadow:
+    0 0 0 2px rgba(207, 250, 254, 0.42),
+    0 10px 18px rgba(13, 111, 113, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+.record-card__edit-button,
+.summary-item.daily-table-card .summary-edit-button {
+  min-width: 106px;
+  min-height: 38px;
+  border: 1px solid rgba(23, 98, 161, 0.28);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #eef6fb, #d8e9f2);
+  color: #143254;
+  box-shadow:
+    0 6px 12px rgba(13, 50, 87, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+#confirm-overlay .confirm-card {
+  padding: 14px;
+  border-radius: 24px;
+}
+
+#confirm-overlay .confirm-title-alert {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 12px;
+  border-color: rgba(199, 154, 62, 0.4);
+  border-radius: 17px;
+  background: linear-gradient(100deg, rgba(255, 220, 151, 0.4), rgba(232, 217, 187, 0.92));
+  color: #143254 !important;
+  font-family: var(--display-font);
+  text-align: center;
+}
+
+#confirm-overlay .confirm-title-alert::before {
+  background: #b56404;
+}
+
+@media (max-width: 680px) {
+  .modal-panel,
+  #edit-overlay .edit-card {
+    padding: 8px;
+    border-radius: 21px;
+  }
+
+  .modal-panel > .section-title,
+  #edit-overlay .edit-card > .section-title {
+    grid-template-columns: 39px minmax(0, 1fr) 39px;
+    min-height: 56px;
+    margin-bottom: 6px;
+    padding: 5px 7px;
+    border-radius: 16px;
+  }
+
+  .modal-panel > .section-title::before,
+  #edit-overlay .edit-card > .section-title::before {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+    background-size: 31px 31px, auto !important;
+  }
+
+  .modal-panel > .section-title::after,
+  #edit-overlay .edit-card > .section-title::after {
+    width: 36px;
+  }
+
+  .modal-panel > .section-title h2,
+  #edit-overlay .edit-card > .section-title h2 {
+    font-size: 0.84rem !important;
+  }
+
+  #entry-panel > .actions {
+    gap: 6px;
+  }
+
+  #entry-panel > .actions > button,
+  #confirm-overlay .confirm-actions > button,
+  #edit-overlay .confirm-actions > button,
+  .monthly-panel .monthly-whatsapp-button,
+  .modal-panel .panel-home-button {
+    min-height: 42px;
+    padding: 7px 9px;
+    font-size: 0.67rem;
+  }
+
+  .summary-panel .summary-bottom-tools,
+  .monthly-panel .monthly-month-control {
+    margin-bottom: 5px;
+  }
+
+  .monthly-panel .monthly-month-control {
+    min-height: 44px;
+  }
+
+  .summary-panel .summary-date-field input,
+  .monthly-panel .monthly-month-control input {
+    min-height: 36px;
+  }
+
+  #entry-panel #label-form > label,
+  #confirm-overlay .confirm-edit-grid > label,
+  #edit-overlay #edit-summary .confirm-edit-grid > label {
+    border-radius: 11px;
+  }
 }
