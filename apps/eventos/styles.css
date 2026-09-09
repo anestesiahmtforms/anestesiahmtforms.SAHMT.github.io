@@ -1429,12 +1429,8 @@ button:hover,
 .siglas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
-  gap: 6px;
-  margin-top: 7px;
-  padding: 8px 6px 10px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.24);
-  border: 1px solid rgba(13, 50, 87, 0.08);
+  gap: 5px;
+  margin-top: 6px;
 }
 
 .sigla-item {
@@ -1446,7 +1442,7 @@ button:hover,
 .sigla-token {
   position: relative;
   width: 100%;
-  min-height: 34px;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2691,12 +2687,10 @@ button:hover,
   .siglas-grid {
     gap: 4px;
     grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
-    margin-top: 4px;
-    padding: 6px 4px 8px;
   }
 
   .sigla-token {
-    min-height: 31px;
+    min-height: 26px;
     padding: 2px 3px;
     font-size: 0.68rem;
   }
@@ -2751,12 +2745,6 @@ button:hover,
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
-}
-
-.schedule-card .siglas-grid {
-  flex: 1 1 auto;
-  align-content: space-evenly;
   min-height: 0;
 }
 
@@ -3150,47 +3138,6 @@ button:hover,
   margin-bottom: 0;
 }
 
-.schedule-card .siglas-grid {
-  --sigla-columns: 4;
-  --sigla-rows: 5;
-  width: 100%;
-  min-height: 0;
-  margin-top: 0;
-  padding: 5px 3px 3px;
-  display: grid;
-  grid-template-columns: repeat(var(--sigla-columns), minmax(0, 1fr));
-  grid-template-rows: repeat(var(--sigla-rows), minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
-  align-content: stretch;
-  align-items: stretch;
-  gap: 7px 5px;
-}
-
-.schedule-card .sigla-item {
-  min-width: 0;
-  min-height: 0;
-  grid-template-rows: minmax(0, 1fr) auto;
-  align-items: stretch;
-}
-
-.schedule-card .sigla-token {
-  height: auto;
-  min-height: 28px;
-  padding: 3px 4px;
-  border-radius: 14px;
-  font-size: 0.73rem;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.82),
-    0 10px 20px rgba(0, 0, 0, 0.08),
-    0 0 16px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.92);
-}
-
-.schedule-card .sigla-index {
-  font-size: 0.52rem;
-  font-weight: 700;
-}
-
 .schedule-card .empty-state:not(.hidden) {
   flex: 1 1 auto;
   display: grid;
@@ -3229,47 +3176,7 @@ button:hover,
     padding: 6px;
   }
 
-  .schedule-card .siglas-grid {
-    gap: 5px 4px;
-    padding: 4px 2px 2px;
-  }
-
-  .schedule-card .sigla-token {
-    min-height: 26px;
-    padding: 2px 3px;
-    font-size: 0.68rem;
-  }
-
   .module-link-strip {
     margin: 0;
-  }
-}
-/* Modelo visual dos botoes de siglas do backup de 27/08. */
-.siglas-grid {
-  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)) !important;
-  gap: 5px !important;
-  margin-top: 6px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-}
-
-.sigla-token {
-  min-height: 28px !important;
-  padding: 3px 4px !important;
-  font-size: 0.73rem !important;
-}
-
-@media (max-width: 640px) {
-  .siglas-grid {
-    gap: 4px !important;
-    grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)) !important;
-  }
-
-  .sigla-token {
-    min-height: 26px !important;
-    padding: 2px 3px !important;
-    font-size: 0.68rem !important;
   }
 }
