@@ -1,4 +1,8 @@
-const CACHE_NAME = "sahmt-pwa-v161";
+const CACHE_NAME = "sahmt-pwa-v162";
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+});
 const APP_SHELL = [
   "./",
   "./index.html",

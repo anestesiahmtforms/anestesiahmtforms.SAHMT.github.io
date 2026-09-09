@@ -235,8 +235,11 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-12", { updateViaCache: "none" })
-        .then((registration) => registration.update())
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-13", { updateViaCache: "none" })
+        .then(async (registration) => {
+          await registration.update();
+          registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+        })
         .catch(() => {});
     });
   }
