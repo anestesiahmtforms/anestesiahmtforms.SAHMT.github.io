@@ -5883,3 +5883,52 @@ body::before {
     border-radius: 11px;
   }
 }
+
+/* Restore the live validation colors above the premium field surfaces. */
+#entry-panel #label-form > label.is-required-empty {
+  border-color: rgba(220, 38, 38, 0.42);
+  background: linear-gradient(145deg, rgba(255, 241, 242, 0.98), rgba(254, 226, 226, 0.9));
+  box-shadow:
+    inset 0 0 0 1px rgba(220, 38, 38, 0.2),
+    0 7px 16px rgba(185, 28, 28, 0.09);
+}
+
+#entry-panel #label-form > label.is-required-filled {
+  border-color: rgba(22, 163, 74, 0.38);
+  background: linear-gradient(145deg, rgba(240, 253, 244, 0.98), rgba(220, 252, 231, 0.88));
+  box-shadow:
+    inset 0 0 0 1px rgba(22, 163, 74, 0.18),
+    0 7px 16px rgba(22, 101, 52, 0.08);
+}
+
+#entry-panel #label-form input.is-required-empty,
+#entry-panel #label-form select.is-required-empty,
+#entry-panel #label-form textarea.is-required-empty,
+#entry-panel #label-form .multi-select-toggle.is-required-empty {
+  border-color: rgba(220, 38, 38, 0.56);
+  background: #fff1f2;
+  box-shadow:
+    inset 0 0 0 2px rgba(220, 38, 38, 0.38),
+    0 6px 14px rgba(185, 28, 28, 0.1);
+}
+
+#entry-panel #label-form input.is-required-filled,
+#entry-panel #label-form select.is-required-filled,
+#entry-panel #label-form textarea.is-required-filled,
+#entry-panel #label-form .multi-select-toggle.is-required-filled {
+  border-color: rgba(22, 163, 74, 0.5);
+  background: #f0fdf4;
+  box-shadow:
+    inset 0 0 0 2px rgba(22, 163, 74, 0.34),
+    0 6px 14px rgba(22, 101, 52, 0.09);
+}
+
+/* Highlight only the authenticated user's email in registration/edit history. */
+.summary-list .record-card__row--registration .record-card__value.record-card__value--authenticated-user,
+.monthly-list .record-card__row--registration .record-card__value.record-card__value--authenticated-user,
+.summary-panel .summary-edit-block .record-card__history-value.record-card__history-value--authenticated-user,
+.monthly-panel .summary-edit-block .record-card__history-value.record-card__history-value--authenticated-user {
+  color: #dc2626 !important;
+  font-weight: 950 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}

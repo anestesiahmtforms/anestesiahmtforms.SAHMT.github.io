@@ -2317,7 +2317,8 @@ function renderMonthlyList(rows, emptyMessage = "Nenhum registro encontrado para
         <article class="record-card record-card--tone-${(index % 4) + 1} summary-item${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
           <div class="record-card__number">${index + 1}</div>
           <div class="record-card__rows">
-            ${renderEtiquetaRecordFields(row, true)}
+            ${renderEtiquetaRecordFields(row)}
+            ${renderSummaryEditBlock(row)}
             ${renderSummaryObservationBlock(row, true)}
           </div>
         </article>
@@ -2357,7 +2358,7 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
       <article class="record-card record-card--tone-${(index % 4) + 1} summary-item${alertClass}${editedClass}" data-row-number="${escapeHtml(row.rowNumber || "")}" tabindex="0">
         <div class="record-card__number">${index + 1}</div>
         <div class="record-card__rows">
-          ${renderEtiquetaRecordFields(row, false)}
+          ${renderEtiquetaRecordFields(row)}
           ${editBlock}
           ${observationBlock}
           <div class="record-card__actions">
@@ -2387,7 +2388,7 @@ function renderSummary(rows, emptyMessage = "Nenhuma entrada encontrada nesta da
   });
 }
 
-function renderEtiquetaRecordFields(row, monthly) {
+function renderEtiquetaRecordFields(row) {
   const fields = [
     ["Data", formatDate(row.data || "")],
     ["Nome do Paciente", row.nomePaciente],
@@ -2398,27 +2399,28 @@ function renderEtiquetaRecordFields(row, monthly) {
     ["Valor", row.valor ? formatStoredCurrency(row.valor) : ""],
     ["Credor", row.credor],
     ["Plantonista(s)", row.plantonistas],
+    ["Responsável pelo Registro", row.criadoPor],
   ];
-  fields.push(["Responsável pelo Registro", row.criadoPor]);
   return fields
     .filter(([, value]) => String(value || "").trim() && String(value).trim() !== "-")
-    .map(([label, value]) => `<div class="record-card__row"><span class="record-card__label">${escapeHtml(label)}</span><span class="record-card__value">${highlightAuthenticatedEmail(value)}</span></div>`)
+    .map(([label, value]) => {
+      const isRegistration = label === "Responsável pelo Registro";
+      const rowClass = isRegistration ? " record-card__row--registration" : "";
+      const labelClass = isRegistration ? " record-card__label--registration" : "";
+      const userClass = isRegistration && isAuthenticatedUserEmail(value)
+        ? " record-card__value--authenticated-user"
+        : "";
+      return `<div class="record-card__row${rowClass}"><span class="record-card__label${labelClass}">${escapeHtml(label)}</span><span class="record-card__value${userClass}">${escapeHtml(value)}</span></div>`;
+    })
     .join("");
 }
 
-function highlightAuthenticatedEmail(value) {
-  const text = String(value == null ? "" : value);
-  const escapedText = escapeHtml(text);
-  const authenticatedEmail = String(state.auth?.email || "").trim();
-  if (!authenticatedEmail || !text.toLowerCase().includes(authenticatedEmail.toLowerCase())) {
-    return escapedText;
-  }
-
-  const escapedEmail = escapeHtml(authenticatedEmail).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return escapedText.replace(
-    new RegExp(escapedEmail, "gi"),
-    (match) => `<span class="report-authenticated-email">${match}</span>`
-  );
+function isAuthenticatedUserEmail(value) {
+  const authenticatedEmail = String(state.auth?.email || "").trim().toLowerCase();
+  const candidate = String(value || "").trim().toLowerCase();
+  return Boolean(authenticatedEmail && candidate && (
+    candidate === authenticatedEmail || candidate.includes(authenticatedEmail)
+  ));
 }
 
 function renderSummaryField(label, value) {
@@ -2438,7 +2440,7 @@ function renderSummaryObservationBlock(row) {
   return `
     <div class="record-card__row record-card__row--registration summary-observation-block">
       <span class="record-card__label record-card__label--registration">Observacao</span>
-      <span>${highlightAuthenticatedEmail(composeHistoryLine(
+      <span>${escapeHtml(composeHistoryLine(
         row.observacaoAtualizadaEm || "Sem data registrada",
         row.observacaoAtualizadaPor || "Sem responsavel registrado",
         row.observacoes || "Sem texto de observacao."
@@ -2507,7 +2509,10 @@ function renderEditHistoryEntry(line) {
 }
 
 function renderHistoryLine(label, value) {
-  return `<div class="record-card__history-line"><span class="record-card__history-label">${escapeHtml(label)}:</span><span class="record-card__history-value">${highlightAuthenticatedEmail(value)}</span></div>`;
+  const userClass = label === "Responsável" && isAuthenticatedUserEmail(value)
+    ? " record-card__history-value--authenticated-user"
+    : "";
+  return `<div class="record-card__history-line"><span class="record-card__history-label">${escapeHtml(label)}:</span><span class="record-card__history-value${userClass}">${escapeHtml(value)}</span></div>`;
 }
 
 function composeHistoryLine(dateTime, responsible, detail) {
