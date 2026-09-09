@@ -39,34 +39,6 @@
     "wx2064@gmail.com",
     "marcio.henrique82@gmail.com"
   ]);
-  const eventMemberEmailBySigla = new Map([
-    ["DE", "deilerjeunon19@gmail.com"],
-    ["DN", "deneradiniz@gmail.com"],
-    ["FL", "macielfonseca@gmail.com"],
-    ["FR", "wx2064@gmail.com"],
-    ["GU", "25.guilherme@gmail.com"],
-    ["GB", "gpbicalho@gmail.com"],
-    ["IG", "igorfagundesvieira@gmail.com"],
-    ["JA", "jaymebc@gmail.com"],
-    ["L2", "lalvesaraujo1@gmail.com"],
-    ["LE", "bovino3.lf@gmail.com"],
-    ["LD", "leodcp1@gmail.com"],
-    ["LC", "lucas.cardoso.andrade@gmail.com"],
-    ["LH", "luciah1509@gmail.com"],
-    ["LU", "luc3101@gmail.com"],
-    ["LA", "luizacs4182@gmail.com"],
-    ["LO", "luizotavio.andrade@gmail.com"],
-    ["MA", "giovannoni1806@gmail.com"],
-    ["MH", "marcio.henrique82@gmail.com"],
-    ["PR", "paulorenato12021@gmail.com"],
-    ["RA", "rafael.augusto.rezende@gmail.com"],
-    ["RL", "ericardolucas@gmail.com"],
-    ["RC", "rodrigocapuano12@gmail.com"],
-    ["RO", "digoanestesia@gmail.com"],
-    ["RU", "rubenscpinheiro0217@gmail.com"],
-    ["WE", "wendellvcp@gmail.com"],
-    ["TE", "wx2901@gmail.com"]
-  ]);
   const highlightedEventPeople = [
     "Fernando Astrogildo",
     "Bernardo Guimaraes",
@@ -373,7 +345,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260906-02", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260909-04", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -423,6 +395,11 @@
 
   function renderSiglas(siglas, weekdayLabel, dateKey) {
     elements.siglasGrid.innerHTML = "";
+    const totalItems = siglas.length + 1;
+    const columnCount = totalItems <= 15 ? 5 : 6;
+    const rowCount = Math.ceil(totalItems / columnCount);
+    elements.siglasGrid.style.setProperty("--sigla-columns", String(columnCount));
+    elements.siglasGrid.style.setProperty("--sigla-rows", String(rowCount));
     const vacationSiglas = getVacationSiglasForDate(dateKey);
     const vacationOrder = getVacationOrderForDate(dateKey);
     const scheduledVacationSiglas = getScheduledVacationSiglas(siglas, vacationSiglas);
@@ -662,7 +639,6 @@
       window.SAHMT_AUTH.onChange((nextAuth) => {
         currentAccessLabel = String(nextAuth?.email || "").trim();
         applyWriteAccessUi();
-        hydrateEventRecords().catch(() => {});
       });
     }
 
@@ -781,10 +757,6 @@
 
     if (activeEventLaunch?.dateKey === normalizedDate && activeEventLaunch?.sigla === normalizedSigla) {
       return true;
-    }
-
-    if (!canViewAllEventRecords() && getAuthenticatedSigla() !== normalizedSigla) {
-      return false;
     }
 
     return Array.isArray(siglaEventState[normalizedDate]) && siglaEventState[normalizedDate].includes(normalizedSigla);
@@ -1771,15 +1743,14 @@
     try {
       const cachedRecords = loadSyncCache(recordsSyncStorageKey);
       if (Array.isArray(cachedRecords)) {
-        eventRecords = filterEventRecordsForViewer(cachedRecords);
+        eventRecords = cachedRecords;
         renderRecordsForDate(elements.recordsDateInput?.value || todayKey);
         if (isMonthlyRecordsModalOpen()) {
           renderMonthlyRecordsForMonth(elements.monthlyRecordsInput?.value || todayKey.slice(0, 7));
         }
       }
-      const freshRecords = await fetchEventRecordsRows();
-      saveSyncCache(recordsSyncStorageKey, freshRecords);
-      eventRecords = filterEventRecordsForViewer(freshRecords);
+      eventRecords = await fetchEventRecordsRows();
+      saveSyncCache(recordsSyncStorageKey, eventRecords);
     } catch (error) {
       // Preserve cached records when the live spreadsheet is temporarily slow.
     } finally {
@@ -1836,68 +1807,6 @@
       window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value }));
     } catch (error) {
       // Storage can be unavailable in private browsing; network sync still works.
-    }
-  }
-
-  function canViewAllEventRecords() {
-    return eventWriteUsers.has(getAuthenticatedEmail());
-  }
-
-  function filterEventRecordsForViewer(records) {
-    const source = Array.isArray(records) ? records : [];
-    if (canViewAllEventRecords()) {
-      return source;
-    }
-
-    const authenticatedSigla = getAuthenticatedSigla();
-    if (!authenticatedSigla) {
-      return [];
-    }
-
-    return source.filter((record) => getEventMemberSigla(record?.membro) === authenticatedSigla);
-  }
-
-  function getAuthenticatedSigla() {
-    const authenticatedEmail = getAuthenticatedEmail();
-    if (!authenticatedEmail) {
-      return "";
-    }
-
-    for (const [sigla, memberEmail] of eventMemberEmailBySigla.entries()) {
-      if (memberEmail === authenticatedEmail) {
-        return sigla;
-      }
-    }
-
-    return "";
-  }
-
-  function getEventMemberSigla(value) {
-    const normalized = String(value || "")
-      .trim()
-      .toUpperCase()
-      .replace(/[ÁÀÃÂÄ]/g, "A");
-
-    if (!normalized) {
-      return "";
-    }
-
-    const match = normalized.match(/^(DE|DN|FL|FR|GU|GB|IG|JA|L2|LE|LD|LC|LH|LU|LA|LO|MA|MH|PR|RA|RL|RC|RO|RU|WE|TE)(?=\s|[-–—/:]|$)/);
-    return match ? match[1] : "";
-  }
-
-  function updateEventReportsEmptyMessages() {
-    const message = canViewAllEventRecords()
-      ? "Nenhum registro encontrado para esta data."
-      : "Não há eventos registrados para você.";
-
-    if (elements.recordsEmptyState) {
-      elements.recordsEmptyState.textContent = message;
-    }
-    if (elements.monthlyRecordsEmptyState) {
-      elements.monthlyRecordsEmptyState.textContent = canViewAllEventRecords()
-        ? "Nenhum registro encontrado para o mes escolhido."
-        : "Não há eventos registrados para você.";
     }
   }
 
@@ -2125,7 +2034,6 @@
       return;
     }
 
-    updateEventReportsEmptyMessages();
     const activeDate = String(dateKey || todayKey).trim();
     const records = eventRecords.filter((record) => record.dataDoEventoKey === activeDate);
     elements.recordsList.innerHTML = "";
@@ -2221,7 +2129,6 @@
       return;
     }
 
-    updateEventReportsEmptyMessages();
     const activeMonth = normalizeMonthKey(monthKey) || todayKey.slice(0, 7);
     const records = getMonthlyRecords(activeMonth);
     elements.monthlyRecordsList.innerHTML = "";
