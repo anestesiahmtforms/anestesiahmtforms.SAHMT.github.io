@@ -1,0 +1,23 @@
+/* Ajuste independente: preserva o styles.css e ocupa o bloco sem esticar demais. */
+.schedule-card .siglas-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: space-evenly;
+  grid-auto-rows: max-content;
+}
+
+.schedule-card .sigla-item {
+  align-self: center;
+}
+
+.schedule-card .sigla-token {
+  min-height: clamp(36px, 5.4dvh, 48px);
+  padding-block: clamp(4px, 0.7dvh, 7px);
+}
+
+@media (max-height: 700px) {
+  .schedule-card .sigla-token {
+    min-height: clamp(32px, 5dvh, 40px);
+    padding-block: 4px;
+  }
+}

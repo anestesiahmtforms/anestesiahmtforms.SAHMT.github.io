@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v136";
+const CACHE_NAME = "sahmt-pwa-v137";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,6 +13,7 @@ const APP_SHELL = [
   "./escala-ferias-imagens.html",
   "./escala-ferias-imagens.css",
   "./styles.css",
+  "./siglas-layout.css",
   "./app.js",
   "./sync-config.js",
   "./notices.js",
