@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v156";
+const CACHE_NAME = "sahmt-pwa-v157";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -87,6 +87,15 @@ self.addEventListener("fetch", (event) => {
       }
       return response;
     });
+
+    const needsFreshInterface = event.request.mode === "navigate"
+      || event.request.destination === "style"
+      || event.request.destination === "script";
+
+    if (needsFreshInterface) {
+      return network.catch(() => cached || caches.match("./index.html"));
+    }
+
     if (cached) {
       event.waitUntil(network.catch(() => {}));
       return cached;
