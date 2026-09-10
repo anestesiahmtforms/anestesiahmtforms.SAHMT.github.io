@@ -5,6 +5,8 @@
   let session = null, stream = null, scanning = false, current = null, report = null, prefetchedReport = null, prefetchStartedDay = '';
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
   const isMaintenance = item => MAINTENANCE_UNITS.has(String(item?.id || '').replace(/\D/g, ''));
+  const isInactiveMaintenance = item => isMaintenance(item) && !item?.record;
+  const numericUnitId = item => Number(String(item?.id || '').replace(/\D/g, '')) || Number.MAX_SAFE_INTEGER;
   let pendingRecord = null, pendingSignature = null, busy = false;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
@@ -68,13 +70,13 @@
   function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
   function renderReport(data){
     if(!data.responsible && report?.day===data.day)data.responsible=report.responsible;
-    report=data;const activeItems=data.items.filter(item=>!isMaintenance(item));const done=activeItems.filter(item=>item.record).length;
+    report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a))-Number(isInactiveMaintenance(b)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isInactiveMaintenance(item));const done=activeItems.filter(item=>item.record).length;
     $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL');
     addText($('responsible'),'p',data.responsible?.email || data.responsible?.reason || 'Responsável indisponível.');
     $('responsible').className='signature responsible-compact';
     $('equipmentList').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
-    data.items.forEach(item=>{const maintenance=isMaintenance(item);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',`${item.name}, ${maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'}`);const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>maintenance?showMaintenance(item):showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
+    orderedItems.forEach(item=>{const maintenance=isInactiveMaintenance(item);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',`${item.name}, ${maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'}`);const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>maintenance?showMaintenance(item):showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
     $('signatureStatus').replaceChildren();
     const text=data.signature?`Assinado por ${data.signature.name || data.signature.email} (${data.signature.email}), em ${new Date(data.signature.at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})}.`:data.staleSignature?'O checklist mudou após a assinatura. É necessária uma nova assinatura.':!data.canSign?'A assinatura está reservada ao grupo autorizado.':done!==activeItems.length || !done?'Conclua todos os checklists para assinar.':'Relatório pronto para assinatura.';
     addText($('signatureStatus'),'p',text).className='signature';
