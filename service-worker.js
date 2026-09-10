@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v152";
+const CACHE_NAME = "sahmt-pwa-v153";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -52,7 +52,7 @@ const APP_SHELL = [
   "./apps/etiquetas/sw.js",
   "./apps/etiquetas/manifest.webmanifest",
   "./apps/gestao/index.html",
-  "./integration/sahmt-checklist.js?v=20260910-3",
+  "./integration/sahmt-checklist.js?v=20260910-4",
   "./apps/checklist/index.html",
   "./apps/checklist/styles.css",
   "./apps/checklist/app.js",
