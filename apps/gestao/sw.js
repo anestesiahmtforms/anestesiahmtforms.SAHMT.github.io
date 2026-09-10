@@ -1,10 +1,10 @@
-const CACHE_NAME = "sahmt-gestao-shell-v32";
+const CACHE_NAME = "sahmt-gestao-shell-v33";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
-  "../../integration/sahmt-checklist.js?v=20260910-1",
+  "../../integration/sahmt-checklist.js?v=20260910-3",
   "./manifest.webmanifest",
   "./assets/icon-192.svg",
   "./assets/icon-512.svg",
