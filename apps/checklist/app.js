@@ -63,18 +63,33 @@
   }
   function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
   function renderReport(data){
+    if(!data.responsible && report?.day===data.day)data.responsible=report.responsible;
     report=data;const done=data.items.filter(item=>item.record).length;
+    $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL');
+    addText($('responsible'),'p',data.responsible?.email || data.responsible?.reason || 'Responsável indisponível.');
+    if(data.responsible?.sigla)addText($('responsible'),'p',`Sigla ${data.responsible.sigla} • 3ª disponível em EVENTOS`);
     $('summary').textContent=`${done} de ${data.items.length} checklists concluídos em ${data.day.split('-').reverse().join('/')}.`;
     $('equipmentList').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
-    data.items.forEach(item=>{const card=document.createElement('article');card.className='equipment '+(item.record?.condition || 'PENDENTE');addText(card,'h3',item.name);addText(card,'strong',item.record?(item.record.condition==='SIM'?'Liberado':'Sem condições de uso'):'Checklist pendente');if(item.record){addText(card,'p',`${item.record.name || item.record.email} • ${new Date(item.record.at).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})}`);if(item.record.occurrence)addText(card,'p',item.record.occurrence);}$('equipmentList').append(card);});
+    data.items.forEach(item=>{const card=document.createElement('article');card.className='equipment '+(item.record?.condition || 'PENDENTE');addText(card,'h3',item.name);addText(card,'strong',item.record?(item.record.condition==='SIM'?'Liberado':'Sem condições de uso'):'Checklist pendente');if(item.record){addText(card,'p',`Checklist realizado por: ${item.record.email}`);if(item.record.name)addText(card,'p',item.record.name);addText(card,'p',`Registrado às ${new Date(item.record.at).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})}`);if(item.record.occurrence)addText(card,'p',item.record.occurrence);}$('equipmentList').append(card);});
     $('signatureStatus').replaceChildren();
     const text=data.signature?`Assinado por ${data.signature.name || data.signature.email} (${data.signature.email}), em ${new Date(data.signature.at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})}.`:data.staleSignature?'O checklist mudou após a assinatura. É necessária uma nova assinatura.':!data.canSign?'A assinatura está reservada ao grupo autorizado.':done!==data.items.length || !done?'Conclua todos os checklists para assinar.':'Relatório pronto para assinatura.';
     addText($('signatureStatus'),'p',text).className='signature';
     $('signForm').hidden=!!data.signature;$('declaration').checked=false;
     $('sign').disabled=!!data.signature || !data.canSign || !done || done!==data.items.length;
   }
-  async function loadReport(){const day=$('reportDate').value;if(!day)return;const data=await api('report',{day});renderReport(data);pendingSignature=null;}
+  async function loadReport(){const day=$('reportDate').value;if(!day)return;$('sign').disabled=true;const data=await api('report',{day});renderReport(data);pendingSignature=null;$('nextDay').disabled=day>=dateKey();}
+  async function loadMonthly(){
+    const month=$('reportMonth').value;if(!month)return;$('monthlyDays').replaceChildren();$('monthlySummary').textContent='Consultando o mês…';
+    try{const data=await api('monthly',{month});$('monthlySummary').textContent=`${data.days.filter(d=>d.status==='checked').length} dias com checagem final assinada.`;
+      for(const day of data.days){const card=document.createElement('article');card.className='monthly-day '+day.status;addText(card,'h3',day.day.split('-').reverse().join('/'));addText(card,'span','RESPONSÁVEL');addText(card,'p',day.responsible?.email || day.responsible?.reason || 'Referência de e-mail pendente.').className='responsible-email';
+        addText(card,'p',day.status==='checked'?'Checagem final concluída':day.status==='future'?'Dia futuro':day.status==='notApplicable'?'Sem checklists previstos':day.staleSignature?'Alterado após assinatura. Nova checagem necessária.':'Checagem final pendente');
+        if(day.signature)addText(card,'p',`Assinado por: ${day.signature.email}`);
+        if(day.status!=='future'&&day.status!=='notApplicable'){const button=addText(card,'button','Abrir relatório diário');button.type='button';button.onclick=()=>run(async()=>{$('reportDate').value=day.day;await loadReport();close('monthlyDialog');$('reportDialog').showModal();});}
+        $('monthlyDays').append(card);
+      }
+    }catch(error){$('monthlySummary').textContent='Não foi possível carregar o mês.';throw error;}
+  }
   async function run(action){if(busy)return;busy=true;try{await action();}catch(error){fail(error);}finally{busy=false;}}
   $('scan').onclick=()=>run(startCamera);
   $('photo').onchange=()=>run(async()=>{const file=$('photo').files[0];if(!file)return;try{const bitmap=await createImageBitmap(file);let qr;try{qr=decode(bitmap,bitmap.width,bitmap.height);}finally{bitmap.close();}if(!qr)throw new Error('QR Code não identificado. Fotografe de frente, com boa iluminação.');await identify(qr);}finally{$('photo').value='';}});
@@ -89,13 +104,20 @@
   });};
   $('report').onclick=()=>run(async()=>{$('reportDate').value=dateKey();await loadReport();$('reportDialog').showModal();});
   $('reportDate').onchange=()=>run(async()=>{$('sign').disabled=true;await loadReport();});
+  $('reportDate').max=dateKey();
+  $('openCalendar').onclick=()=>{try{$('reportDate').showPicker();}catch{$('reportDate').focus();}};
+  const changeDay=delta=>run(async()=>{const date=new Date(($('reportDate').value || dateKey())+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+delta);const next=date.toISOString().slice(0,10);if(next>dateKey())return;$('reportDate').value=next;await loadReport();});
+  $('previousDay').onclick=()=>changeDay(-1);$('nextDay').onclick=()=>changeDay(1);
+  $('todayReport').onclick=()=>run(async()=>{$('reportDate').value=dateKey();await loadReport();});
+  $('monthly').onclick=()=>run(async()=>{$('reportMonth').value=dateKey().slice(0,7);$('monthlyDialog').showModal();await loadMonthly();});
+  $('reportMonth').onchange=()=>run(loadMonthly);
   $('signForm').onsubmit=event=>{event.preventDefault();run(async()=>{
     if(!$('declaration').checked || !report || $('sign').disabled)return;
     pendingSignature ||= crypto.randomUUID();$('sign').disabled=true;
     try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
   });};
   $('return').onclick=()=>{stopCamera();if(window.parent!==window){window.parent.postMessage({type:'sahmt-checklist-close'},cfg.parentOrigin);}else{location.href=cfg.parentOrigin+cfg.parentPath;}};
-  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;}
+  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;}
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
   try{if(window.parent!==window && window.parent.location.origin===cfg.parentOrigin)receiveSession(window.parent.SAHMT_AUTH?.getSession());}catch{}
