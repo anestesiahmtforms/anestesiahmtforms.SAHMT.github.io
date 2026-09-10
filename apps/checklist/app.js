@@ -4,9 +4,11 @@
   const cfg = window.CHECKLIST_CONFIG;
   let session = null, stream = null, scanning = false, current = null, report = null, prefetchedReport = null, prefetchStartedDay = '';
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
-  const isMaintenance = item => MAINTENANCE_UNITS.has(String(item?.id || '').replace(/\D/g, ''));
-  const isInactiveMaintenance = item => isMaintenance(item) && !item?.record;
-  const numericUnitId = item => Number(String(item?.id || '').replace(/\D/g, '')) || Number.MAX_SAFE_INTEGER;
+  const activatedMaintenance = new Set();
+  const unitKey = item => String(item?.id || '').replace(/\D/g, '');
+  const isMaintenance = item => MAINTENANCE_UNITS.has(unitKey(item));
+  const isInactiveMaintenance = item => isMaintenance(item) && !activatedMaintenance.has(unitKey(item));
+  const numericUnitId = item => Number(unitKey(item)) || Number.MAX_SAFE_INTEGER;
   let pendingRecord = null, pendingSignature = null, busy = false;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
@@ -42,7 +44,7 @@
   function fail(error){ notice(error.message || 'Não foi possível concluir.'); }
   async function identify(raw){
     stopCamera();close('cameraDialog');notice('Identificando unidade…');
-    const data=await api('resolve',{qr:String(raw)});current=data.unit;pendingRecord=null;
+    const data=await api('resolve',{qr:String(raw)});current=data.unit;if(isMaintenance(current))activatedMaintenance.add(unitKey(current));pendingRecord=null;
     $('recordForm').reset();$('occurrenceLabel').hidden=true;$('occurrence').required=false;
     $('unitName').textContent=current.name;notice('');$('recordDialog').showModal();
   }
