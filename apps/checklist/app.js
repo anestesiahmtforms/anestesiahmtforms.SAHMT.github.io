@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const cfg = window.CHECKLIST_CONFIG;
-  let session = null, stream = null, scanning = false, current = null, report = null, prefetchedReport = null;
+  let session = null, stream = null, scanning = false, current = null, report = null, prefetchedReport = null, prefetchStartedDay = '';
   let pendingRecord = null, pendingSignature = null, busy = false;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
@@ -113,9 +113,11 @@
     try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
   });};
   $('return').onclick=()=>{stopCamera();if(window.parent!==window){window.parent.postMessage({type:'sahmt-checklist-close'},cfg.parentOrigin);}else{location.href=cfg.parentOrigin+cfg.parentPath;}};
-  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();api('report',{day}).then(data=>{if($('reportDate').value===day)prefetchedReport=data;}).catch(()=>{});}}
+  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();$('reportDate').value=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).then(data=>{if($('reportDate').value===day)prefetchedReport=data;}).catch(()=>{});}}}
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
+  $('reportDate').value=dateKey();
+  ['reportDialog','monthlyDialog','recordDialog','cameraDialog'].forEach(id=>{const dialog=$(id);if(dialog?.open)dialog.close();});
   try{if(window.parent!==window && window.parent.location.origin===cfg.parentOrigin)receiveSession(window.parent.SAHMT_AUTH?.getSession());}catch{}
   if(window.parent!==window)window.parent.postMessage({type:'sahmt-checklist-ready'},cfg.parentOrigin);
   if(!cfg.apiUrl)notice('Cadastro das unidades e conexão com a planilha em configuração.');
