@@ -11,6 +11,7 @@
   const dateKey = () => new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const notice = message => {
     $('message').textContent = message;
+    $('message').dataset.state = /identificando unidade/i.test(message) ? 'identifying' : message ? 'notice' : '';
     document.querySelectorAll('.dialog-message').forEach(node=>node.remove());
     const dialog=document.querySelector('dialog[open]');
     if(message && dialog){const node=document.createElement('p');node.className='dialog-message';node.setAttribute('role','alert');node.textContent=message;dialog.querySelector('.dialog-head').after(node);}
@@ -60,7 +61,8 @@
       const acquired=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
       if(!scanning){acquired.getTracks().forEach(track=>track.stop());return;}
       stream=acquired;$('video').srcObject=stream;$('cameraDialog').showModal();await $('video').play();
-      const tick=()=>{if(!scanning)return;try{const v=$('video');if(v.readyState>=2){const qr=decode(v,v.videoWidth,v.videoHeight);if(qr){identify(qr).catch(fail);return;}}setTimeout(tick,220);}catch(error){stopCamera();close('cameraDialog');fail(error);}};tick();
+      let lastQr='', stableReads=0;
+      const tick=()=>{if(!scanning)return;try{const v=$('video');if(v.readyState>=2){const qr=decode(v,v.videoWidth,v.videoHeight);if(qr){if(qr===lastQr){stableReads+=1;}else{lastQr=qr;stableReads=1;}if(stableReads>=3){identify(qr).catch(fail);return;}}else{lastQr='';stableReads=0;}}setTimeout(tick,350);}catch(error){stopCamera();close('cameraDialog');fail(error);}};tick();
     }catch(error){stopCamera();throw new Error(error.name==='NotAllowedError'?'Permita o acesso à câmera ou use uma foto do QR Code.':error.message);}
   }
   function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
