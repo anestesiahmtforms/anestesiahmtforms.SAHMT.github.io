@@ -67,8 +67,7 @@
     report=data;const done=data.items.filter(item=>item.record).length;
     $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL');
     addText($('responsible'),'p',data.responsible?.email || data.responsible?.reason || 'Responsável indisponível.');
-    if(data.responsible?.sigla)addText($('responsible'),'p',`Sigla ${data.responsible.sigla} • 3ª disponível em EVENTOS`);
-    $('summary').textContent=`${done} de ${data.items.length} checklists concluídos em ${data.day.split('-').reverse().join('/')}.`;
+    $('responsible').className='signature responsible-compact';
     $('equipmentList').replaceChildren();$('statusBanner').hidden=true;$('statusBanner').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
     data.items.forEach(item=>{const state=item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button';button.dataset.unitId=item.id;button.setAttribute('aria-label',`${item.name}, ${state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'}`);const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
@@ -79,7 +78,7 @@
     $('sign').disabled=!!data.signature || !data.canSign || !done || done!==data.items.length;
   }
   function showStatus(item,state){document.querySelectorAll('.equipment .status-banner').forEach(node=>{node.hidden=true;});const card=[...$('equipmentList').children].find(node=>node.querySelector('[data-unit-id]')?.dataset.unitId===item.id);const banner=card?.querySelector('.status-banner');if(!banner)return;banner.replaceChildren();const title=state==='SIM'?'Checklist Realizado!':state==='NAO'?'Alerta!':'Checklist não realizado!';addText(banner,'strong',title);if(state==='NAO'&&item.record?.occurrence)addText(banner,'p',item.record.occurrence);if(item.record){addText(banner,'p',`Registrado por: ${item.record.email}`).className='status-email';}banner.hidden=false;}
-  async function loadReport(){const day=$('reportDate').value;if(!day)return;$('sign').disabled=true;const data=prefetchedReport?.day===day?prefetchedReport:await api('report',{day});prefetchedReport=null;renderReport(data);pendingSignature=null;$('nextDay').disabled=day>=dateKey();}
+  async function loadReport(){const day=$('reportDate').value;if(!day)return;$('sign').disabled=true;const data=prefetchedReport?.day===day?prefetchedReport:await api('report',{day});prefetchedReport=null;renderReport(data);pendingSignature=null;}
   async function loadMonthly(){
     const month=$('reportMonth').value;if(!month)return;$('monthlyDays').replaceChildren();$('monthlySummary').textContent='Consultando o mês…';
     try{const data=await api('monthly',{month});$('monthlySummary').textContent=`${data.days.filter(d=>d.status==='checked').length} dias com checagem final assinada.`;
@@ -106,10 +105,6 @@
   $('report').onclick=()=>run(async()=>{$('reportDate').value=dateKey();$('reportDialog').showModal();await loadReport();});
   $('reportDate').onchange=()=>run(async()=>{$('sign').disabled=true;await loadReport();});
   $('reportDate').max=dateKey();
-  $('openCalendar').onclick=()=>{try{$('reportDate').showPicker();}catch{$('reportDate').focus();}};
-  const changeDay=delta=>run(async()=>{const date=new Date(($('reportDate').value || dateKey())+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+delta);const next=date.toISOString().slice(0,10);if(next>dateKey())return;$('reportDate').value=next;await loadReport();});
-  $('previousDay').onclick=()=>changeDay(-1);$('nextDay').onclick=()=>changeDay(1);
-  $('todayReport').onclick=()=>run(async()=>{$('reportDate').value=dateKey();await loadReport();});
   $('monthly').onclick=()=>run(async()=>{$('reportMonth').value=dateKey().slice(0,7);$('monthlyDialog').showModal();await loadMonthly();});
   $('reportMonth').onchange=()=>run(loadMonthly);
   $('signForm').onsubmit=event=>{event.preventDefault();run(async()=>{
