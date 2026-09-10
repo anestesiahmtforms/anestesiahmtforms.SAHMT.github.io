@@ -117,7 +117,7 @@
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
   $('reportDate').value=dateKey();
-  ['reportDialog','monthlyDialog','recordDialog','cameraDialog'].forEach(id=>{const dialog=$(id);if(dialog?.open)dialog.close();});
+  ['reportDialog','monthlyDialog','recordDialog','cameraDialog'].forEach(id=>{const dialog=$(id);if(dialog?.open)dialog.close();dialog?.removeAttribute('open');});
   try{if(window.parent!==window && window.parent.location.origin===cfg.parentOrigin)receiveSession(window.parent.SAHMT_AUTH?.getSession());}catch{}
   if(window.parent!==window)window.parent.postMessage({type:'sahmt-checklist-ready'},cfg.parentOrigin);
   if(!cfg.apiUrl)notice('Cadastro das unidades e conexão com a planilha em configuração.');
