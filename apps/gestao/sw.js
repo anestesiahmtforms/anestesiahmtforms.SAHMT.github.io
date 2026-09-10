@@ -1,9 +1,10 @@
-const CACHE_NAME = "sahmt-gestao-shell-v31";
+const CACHE_NAME = "sahmt-gestao-shell-v32";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "../../integration/sahmt-checklist.js?v=20260910-1",
   "./manifest.webmanifest",
   "./assets/icon-192.svg",
   "./assets/icon-512.svg",
@@ -24,7 +25,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key.startsWith("sahmt-gestao-shell-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )

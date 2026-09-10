@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahmt-pwa-v140";
+const CACHE_NAME = "sahmt-pwa-v141";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -52,6 +52,14 @@ const APP_SHELL = [
   "./apps/etiquetas/sw.js",
   "./apps/etiquetas/manifest.webmanifest",
   "./apps/gestao/index.html",
+  "./integration/sahmt-checklist.js?v=20260910-1",
+  "./apps/checklist/index.html",
+  "./apps/checklist/styles.css",
+  "./apps/checklist/app.js",
+  "./apps/checklist/config.js",
+  "./apps/checklist/vendor/zxing.min.js",
+  "./apps/checklist/icons/icon.svg",
+  "./apps/checklist/manifest.webmanifest",
   "./apps/gestao/styles.css",
   "./apps/gestao/app.js",
   "./apps/gestao/sw.js",
@@ -88,7 +96,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key.startsWith("sahmt-pwa-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
@@ -128,6 +136,7 @@ self.addEventListener("fetch", (event) => {
         if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
         if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
         if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
+        if (requestUrl.pathname.includes("/apps/checklist/")) return caches.match("./apps/checklist/index.html");
         return caches.match("./index.html");
       });
     }
@@ -143,6 +152,7 @@ self.addEventListener("fetch", (event) => {
       if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
       if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
       if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
+      if (requestUrl.pathname.includes("/apps/checklist/")) return caches.match("./apps/checklist/index.html");
       return caches.match("./index.html");
     });
   })());

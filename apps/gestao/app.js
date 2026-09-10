@@ -65,8 +65,7 @@ const managementItems = [
   },
   {
     title: "CHECKLIST",
-    gestorUrl: "#",
-    equipeUrl: "#"
+    checklist: true
   },
   {
     title: "NOTIFICAÇÕES",
@@ -218,6 +217,10 @@ function renderCards() {
     tile.dataset.index = String(index + 1);
     tile.setAttribute("aria-label", formatLabel(item.title));
     tile.addEventListener("click", () => {
+      if (item.checklist) {
+        window.openArsenalChecklist().catch(error => window.alert(error.message));
+        return;
+      }
       if (item.directUrl) {
         openDirectItem(item);
         return;
@@ -235,7 +238,7 @@ function renderCards() {
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=20260909-02", { updateViaCache: "none" }).catch(() => {
+    navigator.serviceWorker.register("./sw.js?v=20260910-checklist-1", { updateViaCache: "none" }).catch(() => {
         // The app still works without the service worker.
       });
     });
