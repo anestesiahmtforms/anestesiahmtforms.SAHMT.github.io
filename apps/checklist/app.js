@@ -68,7 +68,7 @@
     $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL');
     addText($('responsible'),'p',data.responsible?.email || data.responsible?.reason || 'Responsável indisponível.');
     $('responsible').className='signature responsible-compact';
-    $('equipmentList').replaceChildren();$('statusBanner').hidden=true;$('statusBanner').replaceChildren();
+    $('equipmentList').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
     data.items.forEach(item=>{const state=item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button';button.dataset.unitId=item.id;button.setAttribute('aria-label',`${item.name}, ${state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'}`);const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
     $('signatureStatus').replaceChildren();
