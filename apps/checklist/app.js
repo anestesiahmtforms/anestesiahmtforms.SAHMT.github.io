@@ -21,7 +21,7 @@
   async function api(action, payload={}) {
     if(!cfg.apiUrl) throw new Error('A conexão com a planilha ainda está em configuração.');
     if(!navigator.onLine) throw new Error('Sem conexão. Conecte-se à internet para consultar ou registrar o checklist.');
-    const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),25000);
+    const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),60000);
     try {
       const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...authPayload(),action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
       const result=await response.json();
