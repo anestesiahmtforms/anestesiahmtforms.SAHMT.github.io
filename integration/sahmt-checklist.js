@@ -12,13 +12,12 @@
   frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-modals');
   dialog.append(frame);document.body.append(dialog);
   function send(){frame.contentWindow?.postMessage({type:'sahmt-checklist-session',session:window.SAHMT_AUTH?.getSession() || null},origin);}
-  function close(){dialog.close();frame.src='about:blank';}
+  function close(){if(dialog.open)dialog.close();frame.src='about:blank';}
   window.addEventListener('message',event=>{if(event.origin!==origin || event.source!==frame.contentWindow)return;if(event.data?.type==='sahmt-checklist-ready')send();if(event.data?.type==='sahmt-checklist-close')close();});
   dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
   window.SAHMT_AUTH?.onChange(send);
   window.openArsenalChecklist=async()=>{
     if(!window.SAHMT_AUTH?.getSession()?.email)await window.SAHMT_AUTH.requireAccess({moduleId:'GESTAO',pageId:'checklist'});
-    dialog.close();frame.src='about:blank';
-    frame.src=checklistUrl;dialog.showModal();
+    frame.src=checklistUrl;if(!dialog.open)dialog.showModal();
   };
 })();
