@@ -3180,3 +3180,19 @@ button:hover,
     margin: 0;
   }
 }
+
+/* Base visual espelhada entre Escala e Eventos, com cores do app. */
+.sigla-token:not(.sigla-token--vacation):not(.sigla-token--checked):not(.sigla-token--event):not(.sigla-token--support) {
+  color: #173653;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(235, 244, 247, 0.98) 56%, rgba(211, 229, 234, 0.96) 100%);
+  border-color: rgba(72, 126, 151, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.86),
+    0 8px 16px rgba(13, 50, 87, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -3px 8px rgba(92, 151, 171, 0.12);
+}
+
+.sigla-token:not(.sigla-token--vacation):not(.sigla-token--checked):not(.sigla-token--event):not(.sigla-token--support):hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(226, 240, 245, 0.98) 56%, rgba(198, 222, 230, 0.96) 100%);
+}
