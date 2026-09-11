@@ -2,7 +2,8 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const cfg = window.CHECKLIST_CONFIG;
-  let session = null, stream = null, scanning = false, current = null, report = null, prefetchedReport = null, prefetchStartedDay = '';
+  let session = null, stream = null, scanning = false, current = null, report = null, prefetchStartedDay = '';
+  const reportCache = new Map(), pendingReads = new Map(), REPORT_CACHE_MS = 15000;
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
   const activatedMaintenance = new Set();
   const unitKey = item => String(item?.id || '').replace(/\D/g, '');
@@ -25,19 +26,33 @@
     if(!session?.email) throw new Error('Abra este checklist pelo SAHMT-BH e entre com sua conta.');
     return {authToken:session.token || '',deviceToken:session.deviceToken || '',userEmail:session.email};
   }
-  async function api(action, payload={}) {
+  function requestKey(action,payload){return action+':'+JSON.stringify(payload || {});}
+  function rememberReport(data){if(data?.day)reportCache.set(requestKey('report',{day:data.day}),{at:Date.now(),data});return data;}
+  function patchCachedReport(day,record){
+    const key=requestKey('report',{day});const cached=reportCache.get(key);if(!cached?.data?.items)return;
+    const data=JSON.parse(JSON.stringify(cached.data));const item=data.items.find(entry=>String(entry.id)===String(record.unitId));if(!item)return;
+    item.record={id:record.id,at:record.at,condition:record.condition,occurrence:record.occurrence,email:record.email,name:record.name};data.signature=null;data.staleSignature=true;data.revision='';reportCache.set(key,{at:Date.now(),data});
+  }
+  async function refreshReport(day){try{const data=await api('report',{day},{force:true});if(report?.day===day)renderReport(data);return data;}catch{return null;}}
+  async function api(action, payload={}, options={}) {
     if(!cfg.apiUrl) throw new Error('A conexão com a planilha ainda está em configuração.');
     if(!navigator.onLine) throw new Error('Sem conexão. Conecte-se à internet para consultar ou registrar o checklist.');
-    const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),60000);
-    try {
-      const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...authPayload(),action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
-      const result=await response.json();
-      if(!response.ok || result.ok !== true) throw new Error(result.message || 'Não foi possível concluir a operação.');
-      return result;
-    } catch(error) {
-      if(error.name==='AbortError') throw new Error('A resposta demorou. Tente novamente; o mesmo envio não será duplicado.');
-      throw error;
-    } finally {clearTimeout(timeout);}
+    const isRead=action==='report' || action==='monthly';const key=isRead?requestKey(action,payload):'';
+    if(isRead){const running=pendingReads.get(key);if(running)return running;if(!options.force){const cached=reportCache.get(key);if(cached && Date.now()-cached.at<REPORT_CACHE_MS)return cached.data;}}
+    const request=(async()=>{const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),60000);
+      try {
+        const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...authPayload(),action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
+        const result=await response.json();
+        if(!response.ok || result.ok !== true) throw new Error(result.message || 'Não foi possível concluir a operação.');
+        if(action==='report')rememberReport(result);
+        return result;
+      } catch(error) {
+        if(error.name==='AbortError') throw new Error('A resposta demorou. Tente novamente; o mesmo envio não será duplicado.');
+        throw error;
+      } finally {clearTimeout(timeout);}
+    })();
+    if(!isRead)return request;
+    pendingReads.set(key,request);try{return await request;}finally{pendingReads.delete(key);}
   }
   function stopCamera(){scanning=false;stream?.getTracks().forEach(track=>track.stop());stream=null;$('video').srcObject=null;}
   function close(id){if(id==='cameraDialog')stopCamera();$(id).close();}
@@ -88,7 +103,7 @@
   function showStatus(item,state){document.querySelectorAll('.equipment .status-banner').forEach(node=>{node.hidden=true;});const card=[...$('equipmentList').children].find(node=>node.querySelector('[data-unit-id]')?.dataset.unitId===item.id);const banner=card?.querySelector('.status-banner');if(!banner)return;banner.replaceChildren();const title=state==='SIM'?'Checklist Realizado!':state==='NAO'?'Alerta!':'Checklist não realizado!';addText(banner,'strong',title);if(state==='NAO'&&item.record?.occurrence)addText(banner,'p',item.record.occurrence);if(item.record){addText(banner,'p',`Registrado por: ${item.record.email}`).className='status-email';}banner.hidden=false;}
   function showMaintenance(item){document.querySelectorAll('.equipment .status-banner').forEach(node=>{node.hidden=true;});const card=[...$('equipmentList').children].find(node=>node.querySelector('[data-unit-id]')?.dataset.unitId===item.id);const banner=card?.querySelector('.status-banner');if(!banner)return;banner.replaceChildren();addText(banner,'strong','Em manutenção');addText(banner,'p','Checklist temporariamente inativo para este arsenal.');banner.hidden=false;}
   function openReportDialog(){const dialog=$('reportDialog');dialog.showModal();dialog.focus({preventScroll:true});}
-  async function loadReport(){const day=$('reportDate').value;if(!day)return;$('sign').disabled=true;const data=prefetchedReport?.day===day?prefetchedReport:await api('report',{day});prefetchedReport=null;renderReport(data);pendingSignature=null;}
+  async function loadReport(){const day=$('reportDate').value;if(!day)return;$('sign').disabled=true;const cached=reportCache.get(requestKey('report',{day}));if(cached)renderReport(cached.data);const data=await api('report',{day},{force:true});renderReport(data);pendingSignature=null;}
   async function loadMonthly(){
     const month=$('reportMonth').value;if(!month)return;$('monthlyDays').replaceChildren();$('monthlySummary').textContent='Consultando o mês…';
     try{const data=await api('monthly',{month});$('monthlySummary').textContent=`${data.days.filter(d=>d.status==='checked').length} dias com checagem final assinada.`;
@@ -111,7 +126,7 @@
     const condition=$('recordForm').elements.condition.value;const occurrence=condition==='NAO'?$('occurrence').value.trim():'';
     if(condition==='NAO'&&!occurrence)throw new Error('Descreva a ocorrência antes de salvar.');
     pendingRecord ||= crypto.randomUUID();const button=$('recordForm').querySelector('[type=submit]');button.disabled=true;
-    try{await api('record',{unitId:current.id,condition,occurrence,requestId:pendingRecord});pendingRecord=null;close('recordDialog');notice('Checklist registrado na planilha com sucesso.');}finally{button.disabled=false;}
+    try{const requestId=pendingRecord;await api('record',{unitId:current.id,condition,occurrence,requestId});const day=dateKey();patchCachedReport(day,{unitId:current.id,id:requestId,at:new Date().toISOString(),condition,occurrence,email:session.email,name:session.name || ''});pendingRecord=null;close('recordDialog');notice('Checklist registrado na planilha com sucesso.');void refreshReport(day);}finally{button.disabled=false;}
   });};
   $('report').onclick=()=>run(async()=>{$('reportDate').value=dateKey();openReportDialog();await loadReport();});
   $('reportDate').onchange=()=>run(async()=>{$('sign').disabled=true;await loadReport();});
@@ -121,10 +136,10 @@
   $('signForm').onsubmit=event=>{event.preventDefault();run(async()=>{
     if(!$('declaration').checked || !report || $('sign').disabled)return;
     pendingSignature ||= crypto.randomUUID();$('sign').disabled=true;
-    try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
+    try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});rememberReport(result);renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
   });};
   $('return').onclick=()=>{stopCamera();if(window.parent!==window){window.parent.postMessage({type:'sahmt-checklist-close'},cfg.parentOrigin);}else{location.href=cfg.parentOrigin+cfg.parentPath;}};
-  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('scanSymbol').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();$('reportDate').value=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).then(data=>{if($('reportDate').value===day)prefetchedReport=data;}).catch(()=>{});}}}
+  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('scanSymbol').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();$('reportDate').value=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).catch(()=>{});}}}
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
   $('reportDate').value=dateKey();
