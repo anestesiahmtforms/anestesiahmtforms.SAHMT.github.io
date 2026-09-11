@@ -1,5 +1,5 @@
 window.CHECKLIST_CONFIG = Object.freeze({
-  apiUrl: "https://script.google.com/macros/s/AKfycbwK2TGZND2mqGAP9B4q--noZtNmgoXuk8fnTbvg1YQuMGXIdSe4aSa-1YihmoTCE_EN_Q/exec",
+  apiUrl: "https://script.google.com/macros/s/AKfycbzcogpJMwQ5uHb-tGiHfxdV4vBXYCSTMuiquDSfOa9XaxPyMMFfa7LW9153eQuiuAM_/exec",
   parentOrigin: "https://anestesiahmtforms.github.io",
   parentPath: "/anestesiahmtforms.SAHMT.github.io/"
 });
