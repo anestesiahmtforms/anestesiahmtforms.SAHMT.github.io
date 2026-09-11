@@ -73,3 +73,11 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
   .report-dialog .equipment-grid{grid-auto-rows:minmax(38px,1fr)}
   .report-dialog .arsenal-icon{min-height:38px}
 }
+
+/* Campo de calendário centralizado, com bordas laterais nítidas. */
+.report-date-banner .date-field{padding-inline:5px}
+.report-date-banner .date-field input{width:calc(100% - 10px);max-width:420px;justify-self:center}
+@media(max-width:430px){
+  .report-date-banner .date-field{padding-inline:4px}
+  .report-date-banner .date-field input{width:calc(100% - 8px)}
+}
