@@ -1,4 +1,4 @@
-const CACHE = 'sahmt-checklist-v10';
+const CACHE = 'sahmt-checklist-v11';
 const FILES = ['./','./index.html','./styles.css','./premium-icons.css','./report-layout.css','./app.js','./config.js','./manifest.webmanifest','./icons/icon.svg','./vendor/zxing.min.js'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES))));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('sahmt-checklist-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
