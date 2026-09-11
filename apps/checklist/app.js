@@ -102,17 +102,32 @@
     }catch(error){stopCamera();throw new Error(error.name==='NotAllowedError'?'Permita o acesso à câmera ou use uma foto do QR Code.':error.message);}
   }
   function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
+  function normalizedEmail(value){return String(value || '').trim().toLowerCase();}
+  function signatureState(responsible,signature){
+    const signer=normalizedEmail(signature && signature.email), expected=normalizedEmail(responsible && responsible.email);
+    if(!signer)return 'pending';
+    return expected && signer===expected ? 'responsible' : 'other';
+  }
+  function signatureLabel(state){return state==='responsible'?'Concluído pelo responsável':state==='other'?'Concluído por outro autorizado':'Checagem final pendente';}
+  function appendEmail(parent,label,email,className){
+    if(label)addText(parent,'span',label).className='email-label';
+    return addText(parent,'p',email || 'E-mail não disponível.').className=className;
+  }
   function renderReport(data){
-    if(!data.responsible && report?.day===data.day)data.responsible=report.responsible;
-    report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a,data.day))-Number(isInactiveMaintenance(b,data.day)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isInactiveMaintenance(item,data.day));const done=activeItems.filter(item=>item.record).length;const isToday=data.day===dateKey();
-    $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL');
-    addText($('responsible'),'p',data.responsible?.email || data.responsible?.reason || 'Responsável indisponível.');
-    $('responsible').className='signature responsible-compact';
+    if(!data.responsible && report && report.day===data.day)data.responsible=report.responsible;
+    report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a,data.day))-Number(isInactiveMaintenance(b,data.day)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isInactiveMaintenance(item,data.day));const done=activeItems.filter(item=>item.record).length;const isToday=data.day===dateKey();const state=signatureState(data.responsible,data.signature);
+    $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL DO DIA');
+    const responsibleEmail=data.responsible && data.responsible.email;
+    appendEmail($('responsible'),'',
+      responsibleEmail || (data.responsible && data.responsible.reason) || 'Responsável indisponível.',
+      'responsible-email signature-' + state);
+    if(data.signature && state==='other')appendEmail($('responsible'),'ASSINADO POR',data.signature.email,'signer-email signature-signed');
+    $('responsible').className='signature responsible-compact signature-' + state;
     $('equipmentList').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
-    orderedItems.forEach(item=>{const maintenance=isInactiveMaintenance(item,data.day);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',`${item.name}, ${maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'}`);const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>maintenance?showMaintenance(item):showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
+    orderedItems.forEach(item=>{const maintenance=isInactiveMaintenance(item,data.day);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',item.name+', '+(maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'));const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>maintenance?showMaintenance(item):showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
     $('signatureStatus').replaceChildren();
-    const text=data.signature?`Assinado por ${data.signature.name || data.signature.email} (${data.signature.email}), em ${new Date(data.signature.at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})}.`:!isToday?'Histórico do dia — somente consulta.':data.staleSignature?'O checklist mudou após a assinatura. É necessária uma nova assinatura.':!data.canSign?'A assinatura está reservada ao grupo autorizado.':done!==activeItems.length || !done?'Conclua todos os checklists para assinar.':'Relatório pronto para assinatura.';
+    const text=data.signature?signatureLabel(state)+' — '+(data.signature.name || data.signature.email)+' ('+data.signature.email+'), em '+new Date(data.signature.at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})+'.':!isToday?'Histórico do dia — somente consulta.':data.staleSignature?'O checklist mudou após a assinatura. É necessária uma nova assinatura.':!data.canSign?'A assinatura está reservada ao grupo autorizado.':done!==activeItems.length || !done?'Conclua todos os checklists para assinar.':'Relatório pronto para assinatura.';
     addText($('signatureStatus'),'p',text).className='signature';
     $('signForm').hidden=!!data.signature || !isToday;$('declaration').checked=false;
     $('sign').disabled=!!data.signature || !isToday || !data.canSign || !done || done!==activeItems.length;
@@ -123,11 +138,19 @@
   async function loadReport(){const today=dateKey();const day=$('reportDate').value;$('reportDate').max=today;if(!isIsoDay(day) || day>today){$('reportDate').value=lastValidReportDay || today;return;}lastValidReportDay=day;$('sign').disabled=true;startReportSync();try{const cached=reportCache.get(requestKey('report',{day}));if(cached)renderReport(cached.data);const data=await api('report',{day},{force:true});renderReport(data);pendingSignature=null;finishReportSync();}catch(error){failReportSync();throw error;}}
   async function loadMonthly(){
     const month=$('reportMonth').value;if(!month)return;$('monthlyDays').replaceChildren();$('monthlySummary').textContent='Consultando o mês…';
-    try{const data=await api('monthly',{month});$('monthlySummary').textContent=`${data.days.filter(d=>d.status==='checked').length} dias com checagem final assinada.`;
-      for(const day of data.days){const card=document.createElement('article');card.className='monthly-day '+day.status;addText(card,'h3',day.day.split('-').reverse().join('/'));addText(card,'span','RESPONSÁVEL');addText(card,'p',day.responsible?.email || day.responsible?.reason || 'Referência de e-mail pendente.').className='responsible-email';
-        addText(card,'p',day.status==='checked'?'Checagem final concluída':day.status==='future'?'Dia futuro':day.status==='notApplicable'?'Sem checklists previstos':day.staleSignature?'Alterado após assinatura. Nova checagem necessária.':'Checagem final pendente');
-        if(day.signature)addText(card,'p',`Assinado por: ${day.signature.email}`);
-        if(day.status!=='future'&&day.status!=='notApplicable'){const button=addText(card,'button','Abrir relatório diário');button.type='button';button.onclick=()=>run(async()=>{$('reportDate').value=day.day;await loadReport();close('monthlyDialog');openReportDialog();});}
+    try{const data=await api('monthly',{month});$('monthlySummary').textContent=data.days.filter(d=>d.status==='checked').length+' dias com checagem final assinada.';
+      for(const day of data.days){
+        const state=day.status==='future'||day.status==='notApplicable'?'pending':signatureState(day.responsible,day.signature);
+        const card=document.createElement('article');card.className='monthly-day '+day.status+' signature-'+state;card.setAttribute('role','row');
+        addText(card,'h3',day.day.split('-').reverse().join('/')).className='monthly-date';
+        const people=document.createElement('div');people.className='monthly-people';
+        const responsibleBox=document.createElement('div');responsibleBox.className='monthly-person';
+        appendEmail(responsibleBox,'RESPONSÁVEL DO DIA',(day.responsible && day.responsible.email) || (day.responsible && day.responsible.reason) || 'Referência de e-mail pendente.','responsible-email signature-'+state);
+        people.append(responsibleBox);
+        if(day.signature && state==='other'){const signerBox=document.createElement('div');signerBox.className='monthly-person';appendEmail(signerBox,'ASSINADO POR',day.signature.email,'signer-email signature-signed');people.append(signerBox);}
+        card.append(people);
+        addText(card,'p',day.status==='future'?'Dia futuro':day.status==='notApplicable'?'Sem checklists previstos':day.staleSignature?'Alterado após assinatura. Nova checagem necessária.':signatureLabel(state)).className='monthly-status';
+        if(day.status!=='future'&&day.status!=='notApplicable'){const button=addText(card,'button','Abrir relatório diário');button.type='button';button.onclick=()=>run(async()=>{$('reportDate').value=day.day;await loadReport();close('monthlyDialog');openReportDialog();});card.append(button);}
         $('monthlyDays').append(card);
       }
     }catch(error){$('monthlySummary').textContent='Não foi possível carregar o mês.';throw error;}
@@ -169,3 +192,4 @@
   else if(!session)notice('Abra este checklist pelo app principal SAHMT-BH.');
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
 })();
+
