@@ -13,3 +13,32 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
   .monthly-status{grid-column:2;grid-row:3;text-align:left}
   .monthly-day button{grid-column:2;grid-row:4;justify-self:stretch}
 }
+
+/* Área de datas espelhada da Escala semanal. */
+.report-date-banner{margin:0 0 8px;padding:8px;border-radius:18px;background:rgba(220,232,238,.34);border:1px solid rgba(13,50,87,.08)}
+.report-date-banner .card-header{display:block;position:relative;width:100%;text-align:center}
+.report-date-banner .card-title{width:100%;margin:0;text-align:center;font-size:.7rem;font-weight:700}
+.report-date-banner .controls-grid{display:grid;gap:5px;margin-top:6px}
+.report-date-banner .date-field{display:grid;min-width:0;gap:4px;overflow:hidden;border-radius:12px;font-size:.55rem;font-weight:700}
+.report-date-banner .date-field input{display:block;width:100%;min-height:48px;margin:0;padding:12px 10px;border:2px solid rgba(23,98,161,.56);border-radius:12px;outline:1px solid rgba(255,255,255,.72);background:#dce8ee;color:var(--ink);font:inherit;text-align:center;box-sizing:border-box;box-shadow:0 0 0 3px rgba(219,241,255,.44),0 8px 16px rgba(23,98,161,.12),inset 0 1px 0 rgba(255,255,255,.78)}
+.report-date-banner .date-field input::-webkit-datetime-edit{text-align:center}
+.report-date-banner .date-field input:focus{outline:0;border-color:rgba(23,98,161,.52);box-shadow:0 0 0 4px rgba(147,197,253,.38),0 10px 18px rgba(23,98,161,.16),inset 0 1px 0 rgba(255,255,255,.88)}
+.report-date-banner .quick-actions{display:flex;gap:6px;flex-wrap:nowrap;align-items:stretch;justify-content:space-between}
+.report-date-banner .quick-actions button{flex:1 1 0;min-width:0;min-height:48px;padding:10px 5px;border:0;border-radius:14px;font:inherit;font-weight:800;cursor:pointer;transition:transform 140ms ease,opacity 140ms ease,box-shadow 140ms ease;touch-action:manipulation}
+.report-date-banner .soft-button{background:#e5ebee;color:var(--ink);box-shadow:0 6px 12px rgba(20,50,84,.12),inset 0 1px 0 rgba(255,255,255,.9)}
+.report-date-banner .primary-button{color:#fff;background:linear-gradient(90deg,#0d3257 0%,#1762a1 100%);box-shadow:0 8px 16px rgba(13,50,87,.18)}
+.report-date-banner .quick-actions button:not(:disabled):active{transform:translateY(1px) scale(.98)}
+.report-date-banner .quick-actions button:focus-visible{outline:3px solid #18b7b7;outline-offset:2px}
+.report-date-banner .quick-actions button:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.35);box-shadow:none}
+.report-date-banner .report-sync-status{display:flex;align-items:center;justify-content:center;gap:5px;min-height:16px;margin:1px 0 0;color:#b51f2b;font-size:10px;font-weight:800;white-space:nowrap}
+.report-date-banner .report-sync-status[data-state=syncing]{animation:report-sync-pulse 850ms ease-in-out infinite}
+.report-date-banner .report-sync-status[data-state=updated]{color:#16803d}
+.report-date-banner .report-sync-status[data-state=updated] .report-sync-dot{background:#16803d;box-shadow:0 0 0 3px #c5e6cf}
+.report-date-banner .report-sync-status[data-state=error]{color:#b51f2b}
+@media(max-width:430px){
+  .report-date-banner{padding:6px;margin-bottom:6px}
+  .report-date-banner .controls-grid{gap:5px;margin-top:5px}
+  .report-date-banner .date-field input{min-height:48px;padding:11px 8px;font-size:.68rem}
+  .report-date-banner .quick-actions{gap:5px}
+  .report-date-banner .quick-actions button{min-height:48px;padding:10px 4px;font-size:.68rem}
+}

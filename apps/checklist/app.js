@@ -170,6 +170,7 @@
   });};
   $('report').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').max=today;$('reportDate').value=today;openReportDialog();await loadReport();});
   $('previousReportDay').onclick=()=>run(async()=>{const currentDay=isIsoDay($('reportDate').value)?$('reportDate').value:lastValidReportDay || dateKey();const previous=shiftDay(currentDay,-1);lastValidReportDay=previous;$('reportDate').value=previous;await loadReport();});
+  $('todayReportDay').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').value=today;$('reportDate').max=today;await loadReport();});
   $('reportDate').oninput=()=>{const today=dateKey();$('reportDate').max=today;if($('reportDate').value>today)$('reportDate').value=lastValidReportDay || today;};
   $('reportDate').onchange=()=>{const today=dateKey();$('reportDate').max=today;const selected=$('reportDate').value;if(!isIsoDay(selected) || selected>today){$('reportDate').value=lastValidReportDay || today;return;}lastValidReportDay=selected;run(async()=>{$('sign').disabled=true;await loadReport();});};
   lastValidReportDay=dateKey();$('reportDate').value=lastValidReportDay;$('reportDate').max=lastValidReportDay;
