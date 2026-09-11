@@ -102,6 +102,7 @@
   }
   async function run(action){if(busy)return;busy=true;try{await action();}catch(error){fail(error);}finally{busy=false;}}
   $('scan').onclick=()=>run(startCamera);
+  $('scanSymbol').onclick=()=>run(startCamera);
   $('photo').onchange=()=>run(async()=>{const file=$('photo').files[0];if(!file)return;try{const bitmap=await createImageBitmap(file);let qr;try{qr=decode(bitmap,bitmap.width,bitmap.height);}finally{bitmap.close();}if(!qr)throw new Error('QR Code não identificado. Fotografe de frente, com boa iluminação.');await identify(qr);}finally{$('photo').value='';}});
   document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>close(button.dataset.close));
   $('cameraDialog').addEventListener('cancel',stopCamera);document.addEventListener('visibilitychange',()=>{if(document.hidden){stopCamera();close('cameraDialog');}});
@@ -123,7 +124,7 @@
     try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
   });};
   $('return').onclick=()=>{stopCamera();if(window.parent!==window){window.parent.postMessage({type:'sahmt-checklist-close'},cfg.parentOrigin);}else{location.href=cfg.parentOrigin+cfg.parentPath;}};
-  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();$('reportDate').value=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).then(data=>{if($('reportDate').value===day)prefetchedReport=data;}).catch(()=>{});}}}
+  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('scanSymbol').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();$('reportDate').value=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).then(data=>{if($('reportDate').value===day)prefetchedReport=data;}).catch(()=>{});}}}
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
   $('reportDate').value=dateKey();
