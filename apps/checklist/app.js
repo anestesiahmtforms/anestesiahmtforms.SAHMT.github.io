@@ -15,7 +15,7 @@
   const isInactiveMaintenance = (item, day = dateKey()) => isMaintenance(item) && !item.record && !(day === activatedMaintenanceDay && activatedMaintenance.has(unitKey(item)));
   const numericUnitId = item => Number(unitKey(item)) || Number.MAX_SAFE_INTEGER;
   const isIsoDay = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
-  let pendingRecord = null, pendingSignature = null, busy = false;
+  let pendingRecord = null, pendingSignature = null, busy = false, reportSyncTimer = null, reportSyncStartedAt = 0;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
   const dateKey = () => {const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const values=Object.fromEntries(parts.filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));return `${values.year}-${values.month}-${values.day}`;};
@@ -26,6 +26,18 @@
     const dialog=document.querySelector('dialog[open]');
     if(message && dialog){const node=document.createElement('p');node.className='dialog-message';node.setAttribute('role','alert');node.textContent=message;dialog.querySelector('.dialog-head').after(node);}
   };
+  function syncIndicator(state, elapsed = 0) {
+    const node=$('reportSyncStatus'),label=$('reportSyncLabel');if(!node||!label)return;
+    node.dataset.state=state;
+    label.textContent=state==='syncing'?`Sincronizando ${String(elapsed).padStart(2,'0')}s`:state==='updated'?'Atualizado':state==='error'?'Falha na atualização':'Aguardando atualização';
+  }
+  function startReportSync() {
+    clearInterval(reportSyncTimer);reportSyncStartedAt=Date.now();syncIndicator('syncing',0);
+    reportSyncTimer=setInterval(()=>syncIndicator('syncing',Math.floor((Date.now()-reportSyncStartedAt)/1000)),1000);
+  }
+  function finishReportSync() {const elapsed=Math.floor((Date.now()-reportSyncStartedAt)/1000);clearInterval(reportSyncTimer);reportSyncTimer=null;syncIndicator('updated',elapsed);}
+  function failReportSync() {clearInterval(reportSyncTimer);reportSyncTimer=null;syncIndicator('error');}
+  function shiftDay(day,delta) {const value=new Date(`${day}T12:00:00Z`);value.setUTCDate(value.getUTCDate()+delta);return value.toISOString().slice(0,10);}
   function authPayload() {
     try { const live = window.parent.SAHMT_AUTH?.getSession(); if(live) session=live; } catch {}
     if(!session?.email) throw new Error('Abra este checklist pelo SAHMT-BH e entre com sua conta.');
@@ -38,7 +50,7 @@
     const data=JSON.parse(JSON.stringify(cached.data));const item=data.items.find(entry=>String(entry.id)===String(record.unitId));if(!item)return;
     item.record={id:record.id,at:record.at,condition:record.condition,occurrence:record.occurrence,email:record.email,name:record.name};data.signature=null;data.staleSignature=true;data.revision='';reportCache.set(key,{at:Date.now(),data});
   }
-  async function refreshReport(day){try{const data=await api('report',{day},{force:true});if(report?.day===day)renderReport(data);return data;}catch{return null;}}
+  async function refreshReport(day){startReportSync();try{const data=await api('report',{day},{force:true});if(report?.day===day)renderReport(data);finishReportSync();return data;}catch{failReportSync();return null;}}
   async function api(action, payload={}, options={}) {
     if(!cfg.apiUrl) throw new Error('A conexão com a planilha ainda está em configuração.');
     if(!navigator.onLine) throw new Error('Sem conexão. Conecte-se à internet para consultar ou registrar o checklist.');
@@ -108,7 +120,7 @@
   function showStatus(item,state){document.querySelectorAll('.equipment .status-banner').forEach(node=>{node.hidden=true;});const card=[...$('equipmentList').children].find(node=>node.querySelector('[data-unit-id]')?.dataset.unitId===item.id);const banner=card?.querySelector('.status-banner');if(!banner)return;banner.replaceChildren();const title=state==='SIM'?'Checklist Realizado!':state==='NAO'?'Alerta!':'Checklist não realizado!';addText(banner,'strong',title);if(state==='NAO'&&item.record?.occurrence)addText(banner,'p',item.record.occurrence);if(item.record){addText(banner,'p',`Registrado por: ${item.record.email}`).className='status-email';}banner.hidden=false;}
   function showMaintenance(item){document.querySelectorAll('.equipment .status-banner').forEach(node=>{node.hidden=true;});const card=[...$('equipmentList').children].find(node=>node.querySelector('[data-unit-id]')?.dataset.unitId===item.id);const banner=card?.querySelector('.status-banner');if(!banner)return;banner.replaceChildren();addText(banner,'strong','Em manutenção');addText(banner,'p','Checklist temporariamente inativo para este arsenal.');banner.hidden=false;}
   function openReportDialog(){const dialog=$('reportDialog');dialog.showModal();dialog.focus({preventScroll:true});}
-  async function loadReport(){const today=dateKey();const day=$('reportDate').value;$('reportDate').max=today;if(!isIsoDay(day) || day>today){$('reportDate').value=lastValidReportDay || today;return;}lastValidReportDay=day;$('sign').disabled=true;const cached=reportCache.get(requestKey('report',{day}));if(cached)renderReport(cached.data);const data=await api('report',{day},{force:true});renderReport(data);pendingSignature=null;}
+  async function loadReport(){const today=dateKey();const day=$('reportDate').value;$('reportDate').max=today;if(!isIsoDay(day) || day>today){$('reportDate').value=lastValidReportDay || today;return;}lastValidReportDay=day;$('sign').disabled=true;startReportSync();try{const cached=reportCache.get(requestKey('report',{day}));if(cached)renderReport(cached.data);const data=await api('report',{day},{force:true});renderReport(data);pendingSignature=null;finishReportSync();}catch(error){failReportSync();throw error;}}
   async function loadMonthly(){
     const month=$('reportMonth').value;if(!month)return;$('monthlyDays').replaceChildren();$('monthlySummary').textContent='Consultando o mês…';
     try{const data=await api('monthly',{month});$('monthlySummary').textContent=`${data.days.filter(d=>d.status==='checked').length} dias com checagem final assinada.`;
@@ -134,6 +146,7 @@
     try{const requestId=pendingRecord;await api('record',{unitId:current.id,condition,occurrence,requestId});const day=dateKey();patchCachedReport(day,{unitId:current.id,id:requestId,at:new Date().toISOString(),condition,occurrence,email:session.email,name:session.name || ''});pendingRecord=null;close('recordDialog');notice('Checklist registrado na planilha com sucesso.');void refreshReport(day);}finally{button.disabled=false;}
   });};
   $('report').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').max=today;$('reportDate').value=today;openReportDialog();await loadReport();});
+  $('previousReportDay').onclick=()=>run(async()=>{const currentDay=isIsoDay($('reportDate').value)?$('reportDate').value:lastValidReportDay || dateKey();const previous=shiftDay(currentDay,-1);lastValidReportDay=previous;$('reportDate').value=previous;await loadReport();});
   $('reportDate').oninput=()=>{const today=dateKey();$('reportDate').max=today;if($('reportDate').value>today)$('reportDate').value=lastValidReportDay || today;};
   $('reportDate').onchange=()=>{const today=dateKey();$('reportDate').max=today;const selected=$('reportDate').value;if(!isIsoDay(selected) || selected>today){$('reportDate').value=lastValidReportDay || today;return;}lastValidReportDay=selected;run(async()=>{$('sign').disabled=true;await loadReport();});};
   lastValidReportDay=dateKey();$('reportDate').value=lastValidReportDay;$('reportDate').max=lastValidReportDay;
