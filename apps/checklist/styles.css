@@ -28,3 +28,22 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
 .scan-symbol:not(:disabled):hover,.scan-symbol:not(:disabled):focus-visible{transform:translateY(-2px);box-shadow:0 0 0 4px rgba(219,241,255,.78),0 12px 22px rgba(23,98,161,.2),inset 0 1px 0 #fff}
 .scan-symbol:disabled{cursor:not-allowed;opacity:.52}
 @media(max-width:430px){.scan{min-height:180px;padding:22px 12px}.scan-symbol{width:84px;height:84px;margin-bottom:10px}.scan-symbol svg{width:60px;height:60px}}
+
+/* Ajuste final de proporção da página inicial. */
+.checklist-hero{min-height:138px;padding:24px 18px}
+.checklist-hero .hero-copy h1{margin:0;font-size:clamp(1.32rem,5.6vw,1.78rem);text-transform:uppercase}
+.return-strip{min-height:118px;padding:10px 8px;gap:8px}
+.return-strip a{min-height:100px;padding:7px 3px 9px}
+.return-strip img{width:min(100%,72px);height:72px}
+@media(max-width:430px){
+  .checklist-hero{min-height:124px;padding:15px 14px}
+  .return-strip{min-height:94px;padding:7px 5px;gap:5px}
+  .return-strip a{min-height:82px;padding:4px 2px 7px}
+  .return-strip img{width:60px;height:58px}
+}
+@media(max-width:380px){
+  .checklist-hero{min-height:118px;padding:13px 11px}
+  .return-strip{min-height:88px;padding:6px 4px;gap:4px}
+  .return-strip a{min-height:76px}
+  .return-strip img{width:54px;height:52px}
+}
