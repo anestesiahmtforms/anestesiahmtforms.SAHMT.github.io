@@ -115,7 +115,7 @@
   }
   function renderReport(data){
     if(!data.responsible && report && report.day===data.day)data.responsible=report.responsible;
-    report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a,data.day))-Number(isInactiveMaintenance(b,data.day)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isInactiveMaintenance(item,data.day));const done=activeItems.filter(item=>item.record).length;const isToday=data.day===dateKey();const state=signatureState(data.responsible,data.signature);
+    report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a,data.day))-Number(isInactiveMaintenance(b,data.day)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isMaintenance(item));const done=activeItems.filter(item=>item.record).length;const isToday=data.day===dateKey();const state=signatureState(data.responsible,data.signature);
     $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL DO DIA');
     const responsibleEmail=data.responsible && data.responsible.email;
     appendEmail($('responsible'),'',
