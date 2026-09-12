@@ -77,7 +77,7 @@
   async function identify(raw){
     stopCamera();close('cameraDialog');notice('Identificando unidade…');
     const data=await api('resolve',{qr:String(raw)});current=data.unit;if(isMaintenance(current))syncMaintenanceDay(dateKey()).add(unitKey(current));pendingRecord=null;
-    $('recordForm').reset();$('occurrenceLabel').hidden=true;$('occurrence').required=false;
+    $('recordForm').reset();$('recordForm').querySelector('[type=submit]').hidden=true;$('occurrenceLabel').hidden=true;$('occurrence').required=false;
     $('unitName').textContent=current.name;notice('');$('recordDialog').showModal();
   }
   function decode(source,width,height){
@@ -161,14 +161,15 @@
   $('photo').onchange=()=>run(async()=>{const file=$('photo').files[0];if(!file)return;try{const bitmap=await createImageBitmap(file);let qr;try{qr=decode(bitmap,bitmap.width,bitmap.height);}finally{bitmap.close();}if(!qr)throw new Error('QR Code não identificado. Fotografe de frente, com boa iluminação.');await identify(qr);}finally{$('photo').value='';}});
   document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>close(button.dataset.close));
   $('cameraDialog').addEventListener('cancel',stopCamera);document.addEventListener('visibilitychange',()=>{if(document.hidden){stopCamera();close('cameraDialog');}});
-  $('recordForm').onchange=()=>{const no=$('recordForm').elements.condition.value==='NAO';$('occurrenceLabel').hidden=!no;$('occurrence').required=no;pendingRecord=null;};
-  $('recordForm').onsubmit=event=>{event.preventDefault();run(async()=>{
+  async function saveRecord(){
     const condition=$('recordForm').elements.condition.value;const occurrence=condition==='NAO'?$('occurrence').value.trim():'';
     if(condition==='NAO'&&!occurrence)throw new Error('Descreva a ocorrência antes de salvar.');
+    if(!['SIM','NAO'].includes(condition))throw new Error('Selecione SIM ou NÃO.');
     pendingRecord ||= crypto.randomUUID();const button=$('recordForm').querySelector('[type=submit]');button.disabled=true;
     try{const requestId=pendingRecord;await api('record',{unitId:current.id,condition,occurrence,requestId});const day=dateKey();patchCachedReport(day,{unitId:current.id,id:requestId,at:new Date().toISOString(),condition,occurrence,email:session.email,name:session.name || ''});pendingRecord=null;close('recordDialog');notice('Checklist registrado na planilha com sucesso.');void refreshReport(day);}finally{button.disabled=false;}
-  });};
-  $('report').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').max=today;$('reportDate').value=today;openReportDialog();await loadReport();});
+  }
+  $('recordForm').onchange=()=>{const no=$('recordForm').elements.condition.value==='NAO';$('occurrenceLabel').hidden=!no;$('occurrence').required=no;$('recordForm').querySelector('[type=submit]').hidden=!no;pendingRecord=null;if(!no)run(saveRecord);};
+  $('recordForm').onsubmit=event=>{event.preventDefault();if($('recordForm').elements.condition.value==='NAO')run(saveRecord);};  $('report').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').max=today;$('reportDate').value=today;openReportDialog();await loadReport();});
   $('previousReportDay').onclick=()=>run(async()=>{const currentDay=isIsoDay($('reportDate').value)?$('reportDate').value:lastValidReportDay || dateKey();const previous=shiftDay(currentDay,-1);lastValidReportDay=previous;$('reportDate').value=previous;await loadReport();});
   $('todayReportDay').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').value=today;$('reportDate').max=today;await loadReport();});
   $('reportDate').oninput=()=>{const today=dateKey();$('reportDate').max=today;if($('reportDate').value>today)$('reportDate').value=lastValidReportDay || today;};
