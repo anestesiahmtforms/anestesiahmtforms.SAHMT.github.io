@@ -5,6 +5,8 @@
   let session = null, stream = null, scanning = false, current = null, report = null, prefetchStartedDay = '', lastValidReportDay = '';
   const reportCache = new Map(), pendingReads = new Map(), REPORT_CACHE_MS = 15000;
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
+  const DIRECT_RECORD_USERS = new Set(['marcio.henrique82@gmail.com','wx2064@gmail.com']);
+  const LONG_PRESS_MS = 3000;
   let activatedMaintenance = new Set(), activatedMaintenanceDay = '';
   const unitKey = item => String(item?.id || '').replace(/\D/g, '');
   const isMaintenance = item => MAINTENANCE_UNITS.has(unitKey(item));
@@ -15,7 +17,7 @@
   const isInactiveMaintenance = (item, day = dateKey()) => isMaintenance(item) && !item.record && !(day === activatedMaintenanceDay && activatedMaintenance.has(unitKey(item)));
   const numericUnitId = item => Number(unitKey(item)) || Number.MAX_SAFE_INTEGER;
   const isIsoDay = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''));
-  let pendingRecord = null, pendingSignature = null, busy = false, reportSyncTimer = null, reportSyncStartedAt = 0;
+  let pendingRecord = null, pendingRecordMode = 'qr', pendingSignature = null, busy = false, reportSyncTimer = null, reportSyncStartedAt = 0;
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', {willReadFrequently:true});
   const dateKey = () => {const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const values=Object.fromEntries(parts.filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));return `${values.year}-${values.month}-${values.day}`;};
@@ -74,13 +76,15 @@
   function stopCamera(){scanning=false;stream?.getTracks().forEach(track=>track.stop());stream=null;$('video').srcObject=null;}
   function close(id){if(id==='cameraDialog')stopCamera();$(id).close();}
   function fail(error){ notice(error.message || 'Não foi possível concluir.'); }
-  async function identify(raw){
-    stopCamera();close('cameraDialog');notice('Identificando unidade…');
-    const data=await api('resolve',{qr:String(raw)});current=data.unit;if(isMaintenance(current))syncMaintenanceDay(dateKey()).add(unitKey(current));pendingRecord=null;
+  function openRecordForUnit(unit,{direct=false}={}){
+    stopCamera();close('cameraDialog');current=unit;if(isMaintenance(current))syncMaintenanceDay(dateKey()).add(unitKey(current));pendingRecord=null;pendingRecordMode=direct?'direct':'qr';
     $('recordForm').reset();$('recordForm').querySelector('[type=submit]').hidden=true;$('occurrenceLabel').hidden=true;$('occurrence').required=false;
     $('unitName').textContent=current.name;notice('');$('recordDialog').showModal();
   }
-  function decode(source,width,height){
+  async function identify(raw){
+    stopCamera();close('cameraDialog');notice('Identificando unidade…');
+    const data=await api('resolve',{qr:String(raw)});openRecordForUnit(data.unit);
+  }  function decode(source,width,height){
     const ratio=Math.min(1,1400/Math.max(width,height));canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
     ctx.drawImage(source,0,0,canvas.width,canvas.height);
     const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
@@ -113,7 +117,16 @@
     if(label)addText(parent,'span',label).className='email-label';
     return addText(parent,'p',email || 'E-mail não disponível.').className=className;
   }
-  function renderReport(data){
+  function canDirectRecord(){return DIRECT_RECORD_USERS.has(normalizedEmail(session?.email));}
+  function bindDirectRecord(button,item){
+    if(!canDirectRecord() || report?.day!==dateKey())return;
+    let timer=null;
+    const clear=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+    const start=event=>{if(event.pointerType==='mouse'&&event.button!==0)return;clear();timer=setTimeout(()=>{timer=null;button._longPressTriggered=true;run(()=>openRecordForUnit(item,{direct:true}));},LONG_PRESS_MS);};
+    const end=()=>clear();
+    button.title='Pressione por 3 segundos para registrar este arsenal';
+    button.addEventListener('pointerdown',start,{passive:true});button.addEventListener('pointerup',end);button.addEventListener('pointercancel',end);button.addEventListener('pointerleave',end);button.addEventListener('contextmenu',event=>event.preventDefault());
+  }  function renderReport(data){
     if(!data.responsible && report && report.day===data.day)data.responsible=report.responsible;
     report=data;const orderedItems=[...data.items].sort((a,b)=>Number(isInactiveMaintenance(a,data.day))-Number(isInactiveMaintenance(b,data.day)) || numericUnitId(a)-numericUnitId(b));const activeItems=orderedItems.filter(item=>!isMaintenance(item));const done=activeItems.filter(item=>item.record).length;const isToday=data.day===dateKey();const state=signatureState(data.responsible,data.signature);
     $('responsible').replaceChildren();addText($('responsible'),'strong','RESPONSÁVEL DO DIA');
@@ -125,7 +138,7 @@
     $('responsible').className='signature responsible-compact signature-' + state;
     $('equipmentList').replaceChildren();
     if(!data.items.length)addText($('equipmentList'),'p','A relação de unidades ainda não foi cadastrada.');
-    orderedItems.forEach(item=>{const maintenance=isInactiveMaintenance(item,data.day);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',item.name+', '+(maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'));const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button.onclick=()=>maintenance?showMaintenance(item):showStatus(item,state);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
+    orderedItems.forEach(item=>{const maintenance=isInactiveMaintenance(item,data.day);const state=maintenance?'MANUTENCAO':item.record?(item.record.condition==='SIM'?'SIM':'NAO'):'PENDENTE';const card=document.createElement('article');card.className='equipment '+state;const button=document.createElement('button');button.type='button';button.className='arsenal-icon sigla-button '+state;button.dataset.unitId=item.id;button.setAttribute('aria-label',item.name+', '+(maintenance?'Em manutenção':state==='SIM'?'Checklist realizado':state==='NAO'?'Alerta de ocorrência':'Checklist não realizado'));const badge=document.createElement('span');badge.className='arsenal-number';badge.textContent=item.id.replace(/^.*?(\d+)$/,'$1');button.append(badge);button._longPressTriggered=false;button.onclick=()=>{if(button._longPressTriggered){button._longPressTriggered=false;return;}maintenance?showMaintenance(item):showStatus(item,state);};bindDirectRecord(button,item);card.append(button);const banner=document.createElement('section');banner.className='status-banner '+state;banner.hidden=true;card.append(banner);if(item.record){const audit=document.createElement('span');audit.className='sr-only';audit.textContent=item.record.email;card.append(audit);}$('equipmentList').append(card);});
     $('signatureStatus').replaceChildren();
     const text=data.signature?signatureLabel(state)+' — '+(data.signature.name || data.signature.email)+' ('+data.signature.email+'), em '+new Date(data.signature.at).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})+'.':!isToday?'Histórico do dia — somente consulta.':data.staleSignature?'O checklist mudou após a assinatura. É necessária uma nova assinatura.':!data.canSign?'A assinatura está reservada ao grupo autorizado.':done!==activeItems.length || !done?'Conclua todos os checklists para assinar.':'Relatório pronto para assinatura.';
     addText($('signatureStatus'),'p',text).className='signature signature-'+state;
@@ -166,7 +179,7 @@
     if(condition==='NAO'&&!occurrence)throw new Error('Descreva a ocorrência antes de salvar.');
     if(!['SIM','NAO'].includes(condition))throw new Error('Selecione SIM ou NÃO.');
     pendingRecord ||= crypto.randomUUID();const button=$('recordForm').querySelector('[type=submit]');button.disabled=true;
-    try{const requestId=pendingRecord;await api('record',{unitId:current.id,condition,occurrence,requestId});const day=dateKey();patchCachedReport(day,{unitId:current.id,id:requestId,at:new Date().toISOString(),condition,occurrence,email:session.email,name:session.name || ''});pendingRecord=null;close('recordDialog');notice('Checklist registrado na planilha com sucesso.');void refreshReport(day);}finally{button.disabled=false;}
+    try{const requestId=pendingRecord;await api('record',{unitId:current.id,condition,occurrence,requestId,direct:pendingRecordMode==='direct'});const day=dateKey();patchCachedReport(day,{unitId:current.id,id:requestId,at:new Date().toISOString(),condition,occurrence,email:session.email,name:session.name || ''});pendingRecord=null;pendingRecordMode='qr';close('recordDialog');notice('Checklist registrado na planilha com sucesso.');void refreshReport(day);}finally{button.disabled=false;}
   }
   $('recordForm').onchange=()=>{const no=$('recordForm').elements.condition.value==='NAO';$('occurrenceLabel').hidden=!no;$('occurrence').required=no;$('recordForm').querySelector('[type=submit]').hidden=!no;pendingRecord=null;if(!no)run(saveRecord);};
   $('recordForm').onsubmit=event=>{event.preventDefault();if($('recordForm').elements.condition.value==='NAO')run(saveRecord);};  $('report').onclick=()=>run(async()=>{const today=dateKey();lastValidReportDay=today;$('reportDate').max=today;$('reportDate').value=today;openReportDialog();await loadReport();});
