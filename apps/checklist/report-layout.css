@@ -89,9 +89,9 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
 .report-dialog .responsible-compact.signature-other{background:#fff7d6;border:1px solid rgba(180,132,20,.34);box-shadow:0 4px 12px rgba(180,132,20,.09)}
 .report-dialog .responsible-compact.signature-other .responsible-email{color:#9a6700;font-weight:900}
 .report-dialog .responsible-compact .signer-email.signature-signed{color:#16803d;font-weight:900}
-.report-dialog #signatureStatus.signature-pending{color:#b4232b;background:#fff1f1}
-.report-dialog #signatureStatus.signature-responsible{color:#166534;background:#edf9f0}
-.report-dialog #signatureStatus.signature-other{color:#9a6700;background:#fff7d6}
+.report-dialog #signatureStatus .signature-pending{color:#b4232b;background:#fff1f1}
+.report-dialog #signatureStatus .signature-responsible{color:#166534;background:#edf9f0}
+.report-dialog #signatureStatus .signature-other{color:#9a6700;background:#fff7d6}
 .monthly-day.signature-pending .responsible-email{color:#b4232b!important}
 .monthly-day.signature-responsible .responsible-email{color:#166534!important}
 .monthly-day.signature-other .responsible-email{color:#9a6700!important}
