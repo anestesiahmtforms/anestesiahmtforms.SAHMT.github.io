@@ -81,3 +81,18 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
   .report-date-banner .date-field{padding-inline:4px}
   .report-date-banner .date-field input{width:calc(100% - 8px)}
 }
+/* Cores da assinatura final no relatório diário e mensal. */
+.report-dialog .responsible-compact.signature-pending{background:#fff1f1;border:1px solid rgba(180,35,45,.28);box-shadow:0 4px 12px rgba(180,35,45,.08)}
+.report-dialog .responsible-compact.signature-pending .responsible-email{color:#b4232b;font-weight:900}
+.report-dialog .responsible-compact.signature-responsible{background:#edf9f0;border:1px solid rgba(35,122,87,.28);box-shadow:0 4px 12px rgba(35,122,87,.08)}
+.report-dialog .responsible-compact.signature-responsible .responsible-email{color:#166534;font-weight:900}
+.report-dialog .responsible-compact.signature-other{background:#fff7d6;border:1px solid rgba(180,132,20,.34);box-shadow:0 4px 12px rgba(180,132,20,.09)}
+.report-dialog .responsible-compact.signature-other .responsible-email{color:#9a6700;font-weight:900}
+.report-dialog .responsible-compact .signer-email.signature-signed{color:#16803d;font-weight:900}
+.report-dialog #signatureStatus.signature-pending{color:#b4232b;background:#fff1f1}
+.report-dialog #signatureStatus.signature-responsible{color:#166534;background:#edf9f0}
+.report-dialog #signatureStatus.signature-other{color:#9a6700;background:#fff7d6}
+.monthly-day.signature-pending .responsible-email{color:#b4232b!important}
+.monthly-day.signature-responsible .responsible-email{color:#166534!important}
+.monthly-day.signature-other .responsible-email{color:#9a6700!important}
+.monthly-day .signer-email.signature-signed{color:#16803d!important;font-weight:900}
