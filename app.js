@@ -379,7 +379,7 @@
       } else if (dcVacationSiglas.length >= 2) {
         appendStackedDcDisplay(token, dcVacationSiglas, vacationOrder, showVacationPositions);
       } else {
-        appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions);
+        appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions, activeDate);
 
         if (dcVacationSiglas.length) {
           token.appendChild(document.createTextNode(" - "));
@@ -800,7 +800,7 @@
     return scheduled;
   }
 
-  function appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions) {
+  function appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions, activeDate) {
     const parts = String(sigla || "").toUpperCase().split(/([/-])/);
     const isCombinedSigla = parts.some((part) => part === "/" || part === "-");
 
@@ -822,7 +822,13 @@
           )
         );
       } else {
-        partWrap.appendChild(document.createTextNode(part));
+        const partLabel = document.createElement("span");
+        partLabel.className = "sigla-token__released-part";
+        partLabel.textContent = part;
+        if (isCombinedSigla && isSiglaChecked(activeDate, part)) {
+          partLabel.classList.add("sigla-token__released-part--checked");
+        }
+        partWrap.appendChild(partLabel);
       }
 
       token.appendChild(partWrap);
