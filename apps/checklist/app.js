@@ -39,9 +39,33 @@
   function finishReportSync() {const elapsed=Math.floor((Date.now()-reportSyncStartedAt)/1000);clearInterval(reportSyncTimer);reportSyncTimer=null;syncIndicator('updated',elapsed);}
   function failReportSync() {clearInterval(reportSyncTimer);reportSyncTimer=null;syncIndicator('error');}
   function shiftDay(day,delta) {const value=new Date(`${day}T12:00:00Z`);value.setUTCDate(value.getUTCDate()+delta);return value.toISOString().slice(0,10);}
-  function authPayload() {
-    try { const live = window.parent.SAHMT_AUTH?.getSession(); if(live) session=live; } catch {}
+  async function authPayload() {
+    try {
+      const parentAuth = window.parent.SAHMT_AUTH;
+      const live = parentAuth?.getSession?.();
+      if (live) session = live;
+      if (session?.email && session.authenticated !== true && parentAuth?.onChange) {
+        await new Promise((resolve) => {
+          let settled = false;
+          let unsubscribe = () => {};
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            unsubscribe();
+            clearTimeout(timeout);
+            resolve();
+          };
+          const timeout = window.setTimeout(finish, 8000);
+          unsubscribe = parentAuth.onChange((next) => {
+            if (next?.authenticated === true) { session = next; finish(); }
+          });
+          const refreshed = parentAuth.getSession?.();
+          if (refreshed?.authenticated === true) { session = refreshed; finish(); }
+        });
+      }
+    } catch {}
     if(!session?.email) throw new Error('Abra este checklist pelo SAHMT-BH e entre com sua conta.');
+    if(session.authenticated !== true && !session.token) throw new Error('A autenticação ainda está sendo confirmada. Aguarde alguns segundos e tente novamente.');
     return {authToken:session.token || '',deviceToken:session.deviceToken || '',userEmail:session.email};
   }
   function requestKey(action,payload){return action+':'+JSON.stringify(payload || {});}
@@ -71,7 +95,7 @@
     if(isRead){const running=pendingReads.get(key);if(running)return running;if(!options.force){const cached=reportCache.get(key);if(cached && Date.now()-cached.at<REPORT_CACHE_MS)return cached.data;}}
     const request=(async()=>{const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),60000);
       try {
-        const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...authPayload(),action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
+        const auth = await authPayload(); const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...auth,action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
         const result=await parseJsonResponse(response);
         if(!response.ok || result.ok !== true) throw new Error(result.message || 'Não foi possível concluir a operação.');
         if(action==='report')rememberReport(result);
