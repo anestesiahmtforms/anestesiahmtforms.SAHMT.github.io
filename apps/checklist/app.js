@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const cfg = window.CHECKLIST_CONFIG;
-  let session = null, stream = null, scanning = false, cameraDetector = null, current = null, report = null, prefetchStartedDay = '', lastValidReportDay = '';
+  let session = null, stream = null, scanning = false, cameraDetector = null, current = null, report = null, prefetchStartedDay = '', prefetchStartedMonth = '', lastValidReportDay = '';
   const reportCache = new Map(), pendingReads = new Map(), REPORT_CACHE_MS = 15000;
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
   const DIRECT_RECORD_USERS = new Set(['marcio.henrique82@gmail.com','wx2064@gmail.com']);
@@ -234,7 +234,7 @@
     try{const result=await api('sign',{day:report.day,revision:report.revision,accepted:true,requestId:pendingSignature});rememberReport(result);renderReport(result);pendingSignature=null;notice('Relatório diário assinado e registrado na planilha.');}catch(error){await loadReport().catch(()=>{});throw error;}
   });};
   $('return').onclick=()=>{stopCamera();if(window.parent!==window){window.parent.postMessage({type:'sahmt-checklist-close'},cfg.parentOrigin);}else{location.href=cfg.parentOrigin+cfg.parentPath;}};
-  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('scanSymbol').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();syncMaintenanceDay(day);lastValidReportDay=day;$('reportDate').value=day;$('reportDate').max=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;api('report',{day}).catch(()=>{});}}}
+  function receiveSession(value){session=value; $('identity').textContent=value?.email?`${value.name || 'Usuário identificado'} • ${value.email}`:'Entre no SAHMT-BH para registrar o checklist.';const enabled=!!value?.email&&!!cfg.apiUrl;$('scan').disabled=!enabled;$('scanSymbol').disabled=!enabled;$('photo').disabled=!enabled;$('report').disabled=!enabled;$('monthly').disabled=!enabled;if(enabled){const day=dateKey();syncMaintenanceDay(day);lastValidReportDay=day;$('reportDate').value=day;$('reportDate').max=day;if(prefetchStartedDay!==day){prefetchStartedDay=day;const month=day.slice(0,7);const warmups=[api('report',{day})];if(prefetchStartedMonth!==month){prefetchStartedMonth=month;warmups.push(api('monthly',{month}));}Promise.allSettled(warmups);}}}
   window.addEventListener('message',event=>{if(event.origin!==cfg.parentOrigin || event.source!==window.parent || event.data?.type!=='sahmt-checklist-session')return;receiveSession(event.data.session);});
   $('today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'America/Sao_Paulo'}).format(new Date());
   lastValidReportDay=dateKey();$('reportDate').value=lastValidReportDay;$('reportDate').max=lastValidReportDay;

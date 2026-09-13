@@ -1,4 +1,4 @@
-const CONFIG = {
+﻿const CONFIG = {
   storageKey: "etiqueta-hmt-ia-v1",
   authSessionKey: "etiqueta-hmt-auth-session-v1",
   authSessionBackupKey: "etiqueta-hmt-auth-session-backup-v1",
@@ -578,20 +578,17 @@ function initializeAuthorizedApp() {
     reportMonthEl.value = today.slice(0, 7);
   }
 
-  // Confirm the AI first. The report reads start afterwards so they cannot
-  // compete with the health check during Apps Script cold start.
-  state.authorizedWarmupPromise = (async () => {
-    await loadAiHealthWithRetry();
-    await Promise.allSettled([
-      loadMetadata(),
-      loadSummary({ silent: true, date: today }),
-      loadMonthlySummary({ silent: true }),
-    ]);
-  })().then(() => undefined);
+  // Warm every authorized dependency in parallel after the session is ready.
+  // A slow AI health check must not delay spreadsheet summaries or page entry.
+  state.authorizedWarmupPromise = Promise.allSettled([
+    loadAiHealthWithRetry(),
+    loadMetadata(),
+    loadSummary({ silent: true, date: today }),
+    loadMonthlySummary({ silent: true }),
+  ]).then(() => undefined);
 
   return state.authorizedWarmupPromise;
 }
-
 async function loadAiHealthWithRetry() {
   const delays = [0, 800, 2200];
   for (let attempt = 0; attempt < delays.length; attempt += 1) {
