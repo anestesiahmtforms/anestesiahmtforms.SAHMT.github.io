@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const cfg = window.CHECKLIST_CONFIG;
@@ -52,6 +52,18 @@
     item.record={id:record.id,at:record.at,condition:record.condition,occurrence:record.occurrence,email:record.email,name:record.name};data.signature=null;data.staleSignature=true;data.revision='';reportCache.set(key,{at:Date.now(),data});
   }
   async function refreshReport(day){startReportSync();try{const data=await api('report',{day},{force:true});if(report?.day===day)renderReport(data);finishReportSync();return data;}catch{failReportSync();return null;}}
+  async function parseJsonResponse(response) {
+    const body = await response.text();
+    const contentType = response.headers.get("content-type") || "";
+    try {
+      return JSON.parse(body);
+    } catch {
+      if (body.trimStart().startsWith("<") || /text\/html/i.test(contentType)) {
+        throw new Error("O serviço de dados está temporariamente indisponível. Tente atualizar em alguns segundos.");
+      }
+      throw new Error("O serviço de dados retornou uma resposta inválida. Tente atualizar novamente.");
+    }
+  }
   async function api(action, payload={}, options={}) {
     if(!cfg.apiUrl) throw new Error('A conexão com a planilha ainda está em configuração.');
     if(!navigator.onLine) throw new Error('Sem conexão. Conecte-se à internet para consultar ou registrar o checklist.');
@@ -60,7 +72,7 @@
     const request=(async()=>{const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),60000);
       try {
         const response = await fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,...authPayload(),action}),signal:controller.signal,cache:'no-store',redirect:'follow'});
-        const result=await response.json();
+        const result=await parseJsonResponse(response);
         if(!response.ok || result.ok !== true) throw new Error(result.message || 'Não foi possível concluir a operação.');
         if(action==='report')rememberReport(result);
         return result;
