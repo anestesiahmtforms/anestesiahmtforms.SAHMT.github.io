@@ -374,7 +374,9 @@
       bindSiglaInteractions(token, sigla, weekdayLabel);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
-      if (dcVacationSiglas.length >= 2) {
+      if (sigla === "DC") {
+        appendDcReleaseDisplay(token, dcAliasesByWeekday.get(weekdayLabel) || siglaAliases.get("DC") || [], activeDate);
+      } else if (dcVacationSiglas.length >= 2) {
         appendStackedDcDisplay(token, dcVacationSiglas, vacationOrder, showVacationPositions);
       } else {
         appendSiglaDisplay(token, sigla, vacationSiglas, vacationOrder, showVacationPositions);
@@ -390,7 +392,6 @@
           );
         }
       }
-
       if (isWholeSiglaOnVacation(sigla, vacationSiglas)) {
         token.classList.add("sigla-token--vacation");
       }
@@ -450,34 +451,38 @@
       return;
     }
 
+    const marked = !isSiglaChecked(activeDate, contact.sigla);
+    const tokenWasMarked = isSiglaChecked(activeDate, token);
+    const tokenMarked = groupContacts.every((groupContact) =>
+      groupContact.sigla === contact.sigla ? marked : isSiglaChecked(activeDate, groupContact.sigla)
+    );
+
     button.disabled = true;
-    button.classList.add("contact-card__release--released");
-    updateSiglaCheckState(activeDate, contact.sigla, true);
-    persistSiglaCheckState();
-
-    const allReleased = groupContacts.every((groupContact) => isSiglaChecked(activeDate, groupContact.sigla));
-    if (!allReleased) {
-      return;
-    }
-
-    updateSiglaCheckState(activeDate, token, true);
+    updateSiglaCheckState(activeDate, contact.sigla, marked);
+    updateSiglaCheckState(activeDate, token, tokenMarked);
     persistSiglaCheckState();
     render(activeDate);
 
     if (!sharedStateEndpoint) {
+      button.disabled = false;
       return;
     }
 
     try {
-      const remoteState = await pushSharedSiglaCheck(activeDate, token, true);
-      if (remoteState) {
-        replaceSiglaCheckState(remoteState);
+      const contactState = await pushSharedSiglaCheck(activeDate, contact.sigla, marked);
+      if (tokenMarked !== tokenWasMarked) {
+        await pushSharedSiglaCheck(activeDate, token, tokenMarked);
+      }
+      if (contactState) {
+        replaceSiglaCheckState(contactState);
       }
     } catch (error) {
-      // Keep the local release when the shared endpoint is temporarily unavailable.
+      // Keep the local toggle when the shared endpoint is temporarily unavailable.
+    } finally {
+      button.disabled = false;
+      button.classList.toggle("contact-card__release--released", marked);
     }
-  }
-  function isSiglaChecked(dateKey, sigla) {
+  }  function isSiglaChecked(dateKey, sigla) {
     return Array.isArray(siglaCheckState[dateKey]) && siglaCheckState[dateKey].includes(sigla);
   }
 
@@ -824,6 +829,36 @@
     });
   }
 
+  function appendDcReleaseDisplay(token, dcSiglas, activeDate) {
+    token.classList.add("sigla-token--stacked");
+
+    const topRow = document.createElement("span");
+    topRow.className = "sigla-token__stacked-top";
+    topRow.textContent = "DC";
+
+    const bottomRow = document.createElement("span");
+    bottomRow.className = "sigla-token__stacked-bottom sigla-token__dc-members";
+
+    dcSiglas.forEach((dcSigla, position) => {
+      if (position > 0) {
+        const separator = document.createElement("span");
+        separator.className = "sigla-token__stacked-separator";
+        separator.textContent = "/";
+        separator.setAttribute("aria-hidden", "true");
+        bottomRow.appendChild(separator);
+      }
+
+      const member = document.createElement("span");
+      member.className = "sigla-token__dc-member";
+      member.textContent = dcSigla;
+      if (isSiglaChecked(activeDate, dcSigla)) {
+        member.classList.add("sigla-token__dc-member--released");
+      }
+      bottomRow.appendChild(member);
+    });
+
+    token.append(topRow, bottomRow);
+  }
   function appendStackedDcDisplay(token, vacationSiglas, vacationOrder, showVacationPositions) {
     token.classList.add("sigla-token--stacked");
 
@@ -1173,20 +1208,17 @@
       releaseButton.type = "button";
       releaseButton.textContent = "LIBERAR";
       releaseButton.setAttribute("aria-label", `Liberar ${contact.name}`);
-      const alreadyReleased = isSiglaChecked(activeDate, contact.sigla) || isSiglaChecked(activeDate, token);
+      const alreadyReleased = isSiglaChecked(activeDate, contact.sigla);
       if (alreadyReleased) {
         releaseButton.classList.add("contact-card__release--released");
-        releaseButton.disabled = true;
-      } else {
-        releaseButton.addEventListener("click", () => releaseContactForDate(
-          releaseButton,
-          contact,
-          token,
-          activeDate,
-          matchedContacts
-        ));
       }
-      nameLine.appendChild(releaseButton);
+      releaseButton.addEventListener("click", () => releaseContactForDate(
+        releaseButton,
+        contact,
+        token,
+        activeDate,
+        matchedContacts
+      ));
     }
 
     const meta = document.createElement("p");
