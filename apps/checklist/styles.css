@@ -112,3 +112,20 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
   .arsenal-visual { padding: 6px; }
   .arsenal-visual-image { max-height: 34vh; border-radius: 11px; }
 }
+
+
+/* Prioriza a imagem inteira e libera espaço para os controles essenciais. */
+.arsenal-visual { padding: 4px; }
+.arsenal-visual-image { max-height: 38vh; width: 100%; object-fit: contain; }
+.scan { min-height: 124px; padding: 10px 12px; gap: 4px; }
+.scan-symbol { width: 56px; height: 56px; margin-bottom: 4px; }
+.scan-symbol svg { width: 40px; height: 40px; }
+.report-actions { grid-template-columns: 1fr; }
+.report-button { min-height: 42px; padding: 7px 10px; }
+@media (max-width: 430px) {
+  .arsenal-visual-image { max-height: 38vh; }
+  .scan { min-height: 112px; padding: 8px 10px; }
+  .scan-symbol { width: 50px; height: 50px; }
+  .scan-symbol svg { width: 36px; height: 36px; }
+  .report-button { min-height: 38px; }
+}
