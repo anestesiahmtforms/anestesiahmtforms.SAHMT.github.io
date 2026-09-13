@@ -84,6 +84,8 @@
     closeEventsModal: document.getElementById("closeEventsModal"),
     eventsFrame: document.getElementById("eventsFrame"),
     labelsLauncher: document.getElementById("labelsLauncher"),
+    checklistLauncher: document.getElementById("checklistLauncher"),
+    trainingLauncher: document.getElementById("trainingLauncher"),
     labelsModal: document.getElementById("labelsModal"),
     labelsBackdrop: document.getElementById("labelsBackdrop"),
     closeLabelsModal: document.getElementById("closeLabelsModal"),
@@ -192,6 +194,17 @@
     });
   }
 
+  if (elements.checklistLauncher) {
+    elements.checklistLauncher.addEventListener("click", () => {
+      window.openArsenalChecklist?.().catch((error) => console.warn("Falha ao abrir Checklist:", error));
+    });
+  }
+
+  if (elements.trainingLauncher) {
+    elements.trainingLauncher.addEventListener("click", () => {
+      openTraining().catch((error) => console.warn("Falha ao abrir Treinamentos:", error));
+    });
+  }
   if (elements.closeEventsModal) {
     elements.closeEventsModal.addEventListener("click", closeEventsModal);
   }
@@ -964,6 +977,16 @@
     updateBodyModalState();
   }
 
+  async function openTraining() {
+    window.SAHMT_AUTH?.track("area_open", "Treinamentos");
+    await ensureSharedAccess();
+    const target = new URL("./apps/treinamentos/", window.location.href);
+    const email = window.SAHMT_AUTH?.getUserLabel?.();
+    if (email) {
+      target.searchParams.set("userEmail", email);
+    }
+    window.location.assign(target.href);
+  }
   function openEventsModal() {
     window.SAHMT_AUTH?.track("area_open", "Eventos de Escala");
     window.location.href = new URL(eventsUrl, window.location.href).href;

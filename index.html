@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://docs.google.com">
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css?v=20260912-03">
+    <link rel="stylesheet" href="./styles.css?v=20260912-04">
     <link rel="stylesheet" href="./siglas-layout.css?v=20260909-04">
 </head>
 <body>
@@ -66,6 +66,20 @@
 
       </section>
 
+      <section class="ecosystem-action-strip" aria-label="Acessos rápidos SAHMT">
+        <button id="checklistLauncher" class="ecosystem-action ecosystem-action--checklist" type="button">
+          <span class="ecosystem-action__icon" aria-hidden="true">✓</span>
+          <span>Checklist</span>
+        </button>
+        <button id="trainingLauncher" class="ecosystem-action ecosystem-action--training" type="button">
+          <span class="ecosystem-action__icon" aria-hidden="true">▶</span>
+          <span>Treinamentos</span>
+        </button>
+        <button id="notificationsLauncher" class="ecosystem-action ecosystem-action--notifications" type="button" disabled title="Em breve">
+          <span class="ecosystem-action__icon" aria-hidden="true">!</span>
+          <span>Notificações</span>
+        </button>
+      </section>
       <section class="module-link-strip" aria-label="Módulos SAHMT">
         <a class="module-link-card" href="./apps/eventos/" aria-label="Abrir Eventos de Escala">
           <img src="./gestao_operacional.png" alt="Operacional" class="module-link-card__image">
@@ -180,6 +194,7 @@
   <script src="./sync-config.js?v=20260804-3"></script>
   <script src="./notices.js?v=20260908-06"></script>
   <script src="./auth/shared-auth.js?v=20260828-1"></script>
-  <script src="./app.js?v=20260912-09"></script>
+  <script src="./integration/sahmt-checklist.js?v=20260913-1"></script>
+  <script src="./app.js?v=20260912-10"></script>
 </body>
 </html>

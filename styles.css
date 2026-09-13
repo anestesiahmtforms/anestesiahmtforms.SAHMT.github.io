@@ -1867,3 +1867,52 @@ button:hover,
   font-weight: 950;
   text-shadow: 0 0 4px rgba(34, 197, 94, 0.55), 0 1px 1px rgba(21, 128, 61, 0.24);
 }
+
+.ecosystem-action-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.ecosystem-action {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff 0%, #dcebf0 52%, #bdd8e1 100%);
+  color: #123f60;
+  box-shadow: 0 7px 15px rgba(13, 50, 87, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.ecosystem-action:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.ecosystem-action__icon {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.ecosystem-action--training {
+  background: linear-gradient(145deg, #fffdf5 0%, #f5ead1 52%, #e4ca98 100%);
+  color: #6f4a18;
+}
+
+.ecosystem-action--notifications {
+  background: linear-gradient(145deg, #f9fbfc 0%, #e4e8eb 52%, #cdd4d9 100%);
+  color: #68737b;
+}
+
+.ecosystem-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.78;
+}
