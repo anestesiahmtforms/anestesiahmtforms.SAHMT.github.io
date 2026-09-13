@@ -23,8 +23,8 @@
   ]);
   const dcAliasesByWeekday = new Map([
     ["Segunda", ["CR", "LH"]],
-    ["Terca", ["CR", "LH", "AD"]],
-    ["Quarta", ["CR", "LH", "AD"]],
+    ["Terca", ["CR", "AD", "LH"]],
+    ["Quarta", ["CR", "AD", "LH"]],
     ["Quinta", ["CR", "LH"]],
     ["Sexta", ["CR", "LA"]]
   ]);
@@ -63,6 +63,7 @@
   let orderedDates = [];
   let deferredInstallPrompt = null;
   let activeContactToken = "";
+  let activeContactWeekday = "";
   let sharedStateHash = serializeSiglaState(siglaCheckState);
   let sharedStateTimer = null;
   const pendingSharedUpdates = new Map();
@@ -116,7 +117,7 @@
   ensureSharedAccess().catch((error) => console.warn("Falha na autenticacao inicial:", error));
   window.SAHMT_AUTH?.onChange?.(() => {
     if (activeContactToken && !elements.contactModal.classList.contains("hidden")) {
-      openTokenDetails(activeContactToken);
+      openTokenDetails(activeContactToken, activeContactWeekday);
     }
   });
 
@@ -370,7 +371,7 @@
       token.type = "button";
       token.setAttribute("aria-label", `Abrir contato da sigla ${sigla}.`);
       token.title = "Abrir contato";
-      bindSiglaInteractions(token, sigla);
+      bindSiglaInteractions(token, sigla, weekdayLabel);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
       if (dcVacationSiglas.length >= 2) {
@@ -427,12 +428,12 @@
     elements.siglasGrid.appendChild(offlineItem);
   }
 
-  function bindSiglaInteractions(token, sigla) {
-    token.addEventListener("click", () => openTokenDetails(sigla));
+  function bindSiglaInteractions(token, sigla, weekdayLabel) {
+    token.addEventListener("click", () => openTokenDetails(sigla, weekdayLabel));
     token.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        openTokenDetails(sigla);
+        openTokenDetails(sigla, weekdayLabel);
       }
     });
   }
@@ -891,9 +892,10 @@
     return (dcAliasesByWeekday.get(weekdayLabel) || []).filter((value) => vacationSiglas.has(value));
   }
 
-  function openTokenDetails(token) {
+  function openTokenDetails(token, weekdayLabel) {
     activeContactToken = token;
-    const details = resolveTokenDetails(token);
+    activeContactWeekday = weekdayLabel || "";
+    const details = resolveTokenDetails(token, activeContactWeekday);
     const matchedContacts = details.contacts;
     const unresolved = details.unresolved;
 
@@ -914,6 +916,7 @@
 
   function closeContactModal() {
     activeContactToken = "";
+    activeContactWeekday = "";
     elements.contactModal.classList.add("hidden");
     elements.contactModal.setAttribute("aria-hidden", "true");
     updateBodyModalState();
@@ -1246,8 +1249,8 @@
     return link;
   }
 
-  function resolveTokenDetails(token) {
-    const parts = extractSiglas(token);
+  function resolveTokenDetails(token, weekdayLabel) {
+    const parts = extractSiglas(token, weekdayLabel);
     const contactsFound = [];
     const seen = new Set();
     const unresolved = [];
@@ -1271,8 +1274,11 @@
     return { contacts: contactsFound, unresolved };
   }
 
-  function extractSiglas(token) {
+  function extractSiglas(token, weekdayLabel) {
     const normalized = String(token || "").toUpperCase();
+    if (normalized === "DC") {
+      return [...(dcAliasesByWeekday.get(weekdayLabel) || siglaAliases.get("DC") || [])];
+    }
     if (siglaAliases.has(normalized)) {
       return [...siglaAliases.get(normalized)];
     }
