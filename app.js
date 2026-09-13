@@ -112,6 +112,7 @@
   // restores the trusted device.
   const scheduleWarmupPromise = loadScheduleDataWithTimeout(12000).catch(() => null);
   preloadLabelsModule();
+  void preloadEcosystemShells();
   // Render the local schedule immediately; authentication continues in the background.
   // This prevents a slow session restore from leaving the main page blank.
   ensureSharedAccess().catch((error) => console.warn("Falha na autenticacao inicial:", error));
@@ -980,6 +981,17 @@
     elements.labelsModal.classList.remove("hidden");
     elements.labelsModal.setAttribute("aria-hidden", "false");
     updateBodyModalState();
+  }
+
+  function preloadEcosystemShells() {
+    const moduleUrls = [eventsUrl, labelsUrl, "./apps/checklist/", managementSiteUrl];
+    return Promise.allSettled(moduleUrls.map((moduleUrl) =>
+      fetch(new URL(moduleUrl, window.location.href).href, {
+        method: "GET",
+        cache: "force-cache",
+        credentials: "same-origin"
+      }).catch(() => null)
+    ));
   }
 
   function preloadLabelsModule() {
