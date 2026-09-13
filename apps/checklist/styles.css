@@ -56,3 +56,16 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
 .camera-frame::after{transform:rotate(180deg)}
 .camera-hint{margin:12px 0 0;text-align:center;color:#38566e;font-size:13px;font-weight:750;line-height:1.4}
 @media(max-width:430px){.camera-stage{width:100%;max-width:330px}.camera-frame{width:min(68%,210px)}.camera-hint{font-size:12px}}
+
+
+/* Authentication indicator: red until the shared session is effectively validated. */
+[data-auth-user][data-authenticated="false"]:not([hidden]) {
+  --auth-dot-color: #ef4444;
+  background-image: radial-gradient(circle, #ef4444 0 6px, transparent 7px);
+}
+
+.hero-copy > [data-auth-user][data-authenticated="false"]:not([hidden])::before {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18), 0 1px 4px rgba(153, 27, 27, 0.24);
+}
+/* auth-authenticated-state */

@@ -303,6 +303,7 @@
     document.querySelectorAll("#auth-user, [data-auth-user]").forEach((element) => {
       element.textContent = label || "Aguardando login";
       element.hidden = !label;
+      element.dataset.authenticated = authState?.authenticated === true ? "true" : "false";
     });
   }
 
@@ -425,6 +426,7 @@
       deviceToken: saved.deviceToken,
       trustedDeviceExpiresAt: saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
       expiresAt: 0,
+      authenticated: false,
     });
     return authState;
   }
@@ -437,6 +439,7 @@
       deviceToken: nextState.deviceToken || "",
       trustedDeviceExpiresAt: nextState.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
       expiresAt: Number(nextState.expiresAt || 0),
+      authenticated: nextState.authenticated === true,
     };
     notifyListeners();
   }
@@ -642,6 +645,7 @@
         deviceToken: getOrCreateDeviceToken(config),
         trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
         expiresAt: getJwtExpirationMs(credential),
+        authenticated: true,
       });
       persistSession(config);
       hideGate();
@@ -676,6 +680,7 @@
       deviceToken: saved.deviceToken,
       trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
       expiresAt: 0,
+        authenticated: true,
     });
     persistSession(config);
     return authState;
@@ -696,6 +701,7 @@
         deviceToken: saved.deviceToken,
         trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
         expiresAt: 0,
+      authenticated: true,
       });
       persistSession(config);
       await trackAccess("page_access", "Dispositivo confiavel");

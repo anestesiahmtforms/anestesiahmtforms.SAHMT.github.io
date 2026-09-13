@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg-top: #0d3257;
   --bg-mid: #214463;
   --bg-bottom: #eee4d1;
@@ -1916,3 +1916,15 @@ button:hover,
   cursor: not-allowed;
   opacity: 0.78;
 }
+
+/* Authentication indicator: red until the shared session is effectively validated. */
+[data-auth-user][data-authenticated="false"]:not([hidden]) {
+  --auth-dot-color: #ef4444;
+  background-image: radial-gradient(circle, #ef4444 0 6px, transparent 7px);
+}
+
+.hero-copy > [data-auth-user][data-authenticated="false"]:not([hidden])::before {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18), 0 1px 4px rgba(153, 27, 27, 0.24);
+}
+/* auth-authenticated-state */
