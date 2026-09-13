@@ -248,7 +248,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260912-01", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260912-02", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -394,6 +394,10 @@
         token.classList.add("sigla-token--vacation");
       }
 
+      if (isSiglaChecked(activeDate, sigla)) {
+        token.classList.add("sigla-token--checked");
+        token.setAttribute("aria-pressed", "true");
+      }
 
       const counter = document.createElement("div");
       counter.className = "sigla-index";
