@@ -43,8 +43,12 @@
   const managementSiteUrl = "./apps/gestao/";
   const eventsUrl = "./apps/eventos/";
   const labelsUrl = "./apps/etiquetas/";
+  const RELEASE_AUTHORIZED_EMAILS = new Set([
+    "marcio.henrique82@gmail.com",
+    "wx2064@gmail.com"
+  ]);
   const syncConfig = window.SAHMT_SYNC_CONFIG || {};
-  const siglaStateStorageKey = "sahmt-sigla-checks-v1";
+  const siglaStateStorageKey = "sahmt-sigla-release-v2";
   const clientIdStorageKey = "sahmt-client-id-v1";
   const sharedStateEndpoint = normalizeEndpoint(syncConfig.endpoint);
   const syncPollIntervalMs = Number(syncConfig.pollIntervalMs) > 0 ? Number(syncConfig.pollIntervalMs) : 20000;
@@ -58,6 +62,7 @@
   let byDate = new Map();
   let orderedDates = [];
   let deferredInstallPrompt = null;
+  let activeContactToken = "";
   let sharedStateHash = serializeSiglaState(siglaCheckState);
   let sharedStateTimer = null;
   const pendingSharedUpdates = new Map();
@@ -109,6 +114,11 @@
   // Render the local schedule immediately; authentication continues in the background.
   // This prevents a slow session restore from leaving the main page blank.
   ensureSharedAccess().catch((error) => console.warn("Falha na autenticacao inicial:", error));
+  window.SAHMT_AUTH?.onChange?.(() => {
+    if (activeContactToken && !elements.contactModal.classList.contains("hidden")) {
+      openTokenDetails(activeContactToken);
+    }
+  });
 
   if (elements.closeNoticeModal) {
     elements.closeNoticeModal.addEventListener("click", closeNoticeModal);
@@ -131,7 +141,6 @@
   elements.dateInput.value = clampKey(fallbackDate);
 
   // Shared highlights must never delay the local schedule display.
-  hydrateSharedSiglaState().then(() => render(elements.dateInput.value)).catch(() => {});
 
   elements.dateInput.addEventListener("change", () => {
     render(clampKey(elements.dateInput.value));
@@ -239,7 +248,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=20260909-08", { updateViaCache: "none" })
+      navigator.serviceWorker.register("./service-worker.js?v=20260912-01", { updateViaCache: "none" })
         .then((registration) => registration.update())
         .catch(() => {});
     });
@@ -359,9 +368,9 @@
       const token = document.createElement("button");
       token.className = "sigla-token sigla-button";
       token.type = "button";
-      token.setAttribute("aria-label", `Abrir contato da sigla ${sigla}. Mantenha pressionado por 3 segundos para marcar ou desmarcar.`);
-      token.title = "Toque para contato. Mantenha pressionado por 3 segundos para destacar.";
-      bindSiglaInteractions(token, sigla, activeDate);
+      token.setAttribute("aria-label", `Abrir contato da sigla ${sigla}.`);
+      token.title = "Abrir contato";
+      bindSiglaInteractions(token, sigla);
 
       const dcVacationSiglas = getDcVacationSiglas(sigla, vacationSiglas, weekdayLabel);
       if (dcVacationSiglas.length >= 2) {
@@ -385,10 +394,6 @@
         token.classList.add("sigla-token--vacation");
       }
 
-      if (isSiglaChecked(activeDate, sigla)) {
-        token.classList.add("sigla-token--checked");
-        token.setAttribute("aria-pressed", "true");
-      }
 
       const counter = document.createElement("div");
       counter.className = "sigla-index";
@@ -418,62 +423,8 @@
     elements.siglasGrid.appendChild(offlineItem);
   }
 
-  function bindSiglaInteractions(token, sigla, dateKey) {
-    const holdDurationMs = 3000;
-    let holdTimer = null;
-    let holdCompleted = false;
-    let activePointerId = null;
-    let pressStartedAt = 0;
-
-    const clearHold = () => {
-      if (holdTimer) {
-        clearTimeout(holdTimer);
-        holdTimer = null;
-      }
-      token.classList.remove("sigla-button--pressing");
-    };
-
-    token.addEventListener("pointerdown", (event) => {
-      if (event.button !== undefined && event.button !== 0) {
-        return;
-      }
-
-      event.preventDefault();
-      holdCompleted = false;
-      activePointerId = event.pointerId;
-      pressStartedAt = performance.now();
-      token.classList.add("sigla-button--pressing");
-      holdTimer = window.setTimeout(async () => {
-        holdTimer = null;
-        holdCompleted = true;
-        token.classList.remove("sigla-button--pressing");
-        await toggleSiglaCheck(token, dateKey, sigla);
-      }, holdDurationMs);
-    });
-
-    token.addEventListener("pointerup", (event) => {
-      if (activePointerId !== null && event.pointerId !== activePointerId) {
-        return;
-      }
-
-      // A long press is exclusive. The elapsed-time fallback covers mobile
-      // browsers that dispatch pointerup immediately before a busy timer runs.
-      const wasLongPress = holdCompleted || performance.now() - pressStartedAt >= holdDurationMs - 120;
-      clearHold();
-      activePointerId = null;
-      pressStartedAt = 0;
-
-      if (!wasLongPress) {
-        openTokenDetails(sigla);
-      }
-    });
-
-    token.addEventListener("pointercancel", () => {
-      activePointerId = null;
-      pressStartedAt = 0;
-      clearHold();
-    });
-    token.addEventListener("contextmenu", (event) => event.preventDefault());
+  function bindSiglaInteractions(token, sigla) {
+    token.addEventListener("click", () => openTokenDetails(sigla));
     token.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -482,33 +433,45 @@
     });
   }
 
-  async function toggleSiglaCheck(token, dateKey, sigla) {
-    const marked = !token.classList.contains("sigla-token--checked");
-    applySiglaCheckAppearance(token, marked);
+  function canReleaseSiglas() {
+    const email = String(window.SAHMT_AUTH?.getSession?.()?.email || window.SAHMT_AUTH?.getUserLabel?.() || "")
+      .trim()
+      .toLowerCase();
+    return RELEASE_AUTHORIZED_EMAILS.has(email);
+  }
 
-    if (!dateKey || !sigla) {
+  async function releaseContactForDate(button, contact, token, activeDate, groupContacts) {
+    if (!canReleaseSiglas() || !contact?.sigla || !activeDate) {
       return;
     }
 
-    updateSiglaCheckState(dateKey, sigla, marked);
+    button.disabled = true;
+    button.classList.add("contact-card__release--released");
+    updateSiglaCheckState(activeDate, contact.sigla, true);
     persistSiglaCheckState();
-    registerPendingSharedUpdate(dateKey, sigla, marked);
+
+    const allReleased = groupContacts.every((groupContact) => isSiglaChecked(activeDate, groupContact.sigla));
+    if (!allReleased) {
+      return;
+    }
+
+    updateSiglaCheckState(activeDate, token, true);
+    persistSiglaCheckState();
+    render(activeDate);
 
     if (!sharedStateEndpoint) {
       return;
     }
 
     try {
-      const remoteState = await pushSharedSiglaCheck(dateKey, sigla, marked);
+      const remoteState = await pushSharedSiglaCheck(activeDate, token, true);
       if (remoteState) {
         replaceSiglaCheckState(remoteState);
-        render(elements.dateInput.value);
       }
     } catch (error) {
-      // Keep the local optimistic state when the shared sync endpoint is unavailable.
+      // Keep the local release when the shared endpoint is temporarily unavailable.
     }
   }
-
   function isSiglaChecked(dateKey, sigla) {
     return Array.isArray(siglaCheckState[dateKey]) && siglaCheckState[dateKey].includes(sigla);
   }
@@ -534,11 +497,6 @@
     } catch (error) {
       // Ignore storage failures to avoid blocking the UI on restricted browsers.
     }
-  }
-
-  function applySiglaCheckAppearance(token, marked) {
-    token.classList.toggle("sigla-token--checked", marked);
-    token.setAttribute("aria-pressed", marked ? "true" : "false");
   }
 
   function updateSiglaCheckState(dateKey, sigla, marked) {
@@ -930,6 +888,7 @@
   }
 
   function openTokenDetails(token) {
+    activeContactToken = token;
     const details = resolveTokenDetails(token);
     const matchedContacts = details.contacts;
     const unresolved = details.unresolved;
@@ -941,7 +900,8 @@
         : `Contatos vinculados a ${token}`
       : `Sigla ${token}`;
     elements.contactSummary.textContent = buildSummaryText(token, matchedContacts, unresolved);
-    elements.contactList.replaceChildren(...buildContactNodes(matchedContacts, unresolved));
+    const activeDate = elements.dateInput.value;
+    elements.contactList.replaceChildren(...buildContactNodes(matchedContacts, unresolved, token, activeDate));
 
     elements.contactModal.classList.remove("hidden");
     elements.contactModal.setAttribute("aria-hidden", "false");
@@ -949,6 +909,7 @@
   }
 
   function closeContactModal() {
+    activeContactToken = "";
     elements.contactModal.classList.add("hidden");
     elements.contactModal.setAttribute("aria-hidden", "true");
     updateBodyModalState();
@@ -1157,8 +1118,8 @@
     return `Nao ha ficha de contato nominal cadastrada para ${token} nesta correlacao.`;
   }
 
-  function buildContactNodes(matchedContacts, unresolved) {
-    const nodes = matchedContacts.map((contact) => createContactCard(contact));
+  function buildContactNodes(matchedContacts, unresolved, token, activeDate) {
+    const nodes = matchedContacts.map((contact) => createContactCard(contact, token, activeDate, matchedContacts));
 
     if (!matchedContacts.length || unresolved.length) {
       const note = document.createElement("article");
@@ -1179,7 +1140,7 @@
     return nodes;
   }
 
-  function createContactCard(contact) {
+  function createContactCard(contact, token, activeDate, matchedContacts) {
     const card = document.createElement("article");
     card.className = "contact-card";
 
@@ -1192,14 +1153,40 @@
     siglaBadge.className = "contact-card__sigla";
     siglaBadge.textContent = contact.sigla;
 
+    const nameLine = document.createElement("div");
+    nameLine.className = "contact-card__name-line";
+
     const name = document.createElement("h3");
     name.textContent = contact.name;
+    nameLine.appendChild(name);
+
+    if (canReleaseSiglas()) {
+      const releaseButton = document.createElement("button");
+      releaseButton.className = "contact-card__release";
+      releaseButton.type = "button";
+      releaseButton.textContent = "LIBERAR";
+      releaseButton.setAttribute("aria-label", `Liberar ${contact.name}`);
+      const alreadyReleased = isSiglaChecked(activeDate, contact.sigla) || isSiglaChecked(activeDate, token);
+      if (alreadyReleased) {
+        releaseButton.classList.add("contact-card__release--released");
+        releaseButton.disabled = true;
+      } else {
+        releaseButton.addEventListener("click", () => releaseContactForDate(
+          releaseButton,
+          contact,
+          token,
+          activeDate,
+          matchedContacts
+        ));
+      }
+      nameLine.appendChild(releaseButton);
+    }
 
     const meta = document.createElement("p");
     meta.className = "contact-card__meta";
     meta.textContent = [contact.role, contact.scaleFormatted].filter(Boolean).join(" â€¢ ") || "Equipe SAHMT";
 
-    titleWrap.append(siglaBadge, name, meta);
+    titleWrap.append(siglaBadge, nameLine, meta);
     header.appendChild(titleWrap);
 
     const infoGrid = document.createElement("div");
