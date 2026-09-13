@@ -1,4 +1,4 @@
-const managementItems = [
+﻿const managementItems = [
   {
     title: "GESTÃO DE DOCUMENTOS",
     gestorUrl: "#",
@@ -59,19 +59,7 @@ const managementItems = [
     gestorUrl: "#",
     equipeUrl: "#"
   },
-  {
-    title: "TREINAMENTOS",
-    directUrl: "../treinamentos/"
-  },
-  {
-    title: "CHECKLIST",
-    checklist: true
-  },
-  {
-    title: "NOTIFICAÇÕES",
-    gestorUrl: "#",
-    equipeUrl: "#"
-  }
+
 ];
 
 const themes = [
