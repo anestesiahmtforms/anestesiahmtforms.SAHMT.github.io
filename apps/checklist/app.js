@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const cfg = window.CHECKLIST_CONFIG;
-  let session = null, stream = null, scanning = false, current = null, report = null, prefetchStartedDay = '', lastValidReportDay = '';
+  let session = null, stream = null, scanning = false, cameraDetector = null, current = null, report = null, prefetchStartedDay = '', lastValidReportDay = '';
   const reportCache = new Map(), pendingReads = new Map(), REPORT_CACHE_MS = 15000;
   const MAINTENANCE_UNITS = new Set(['100170004','100170010','100170011','100170016','100170022']);
   const DIRECT_RECORD_USERS = new Set(['marcio.henrique82@gmail.com','wx2064@gmail.com']);
@@ -84,28 +84,63 @@
   async function identify(raw){
     stopCamera();close('cameraDialog');notice('Identificando unidade…');
     const data=await api('resolve',{qr:String(raw)});openRecordForUnit(data.unit);
-  }  function decode(source,width,height){
-    const ratio=Math.min(1,1400/Math.max(width,height));canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
-    ctx.drawImage(source,0,0,canvas.width,canvas.height);
+  }  function cameraCrop(width,height){
+    const side=Math.max(160,Math.floor(Math.min(width,height)*0.68));
+    return {sx:Math.max(0,Math.floor((width-side)/2)),sy:Math.max(0,Math.floor((height-side)/2)),sw:Math.min(side,width),sh:Math.min(side,height)};
+  }
+  function decode(source,width,height,crop=false){
+    const region=crop?cameraCrop(width,height):{sx:0,sy:0,sw:width,sh:height};
+    const ratio=Math.min(1,1200/Math.max(region.sw,region.sh));
+    canvas.width=Math.max(1,Math.round(region.sw*ratio));canvas.height=Math.max(1,Math.round(region.sh*ratio));
+    ctx.drawImage(source,region.sx,region.sy,region.sw,region.sh,0,0,canvas.width,canvas.height);
     const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
     const gray=new Uint8ClampedArray(pixels.width*pixels.height);
     for(let i=0;i<gray.length;i++){const p=i*4;gray[i]=(pixels.data[p]+2*pixels.data[p+1]+pixels.data[p+2])/4;}
     const bitmap=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.RGBLuminanceSource(gray,pixels.width,pixels.height)));
     try{return new ZXing.QRCodeReader().decode(bitmap).getText();}catch{return null;}
   }
+  async function detectCameraFrame(video){
+    if(typeof BarcodeDetector!=='undefined'){
+      try{
+        cameraDetector ||= new BarcodeDetector({formats:['qr_code']});
+        const results=await cameraDetector.detect(video);
+        const raw=results?.find(item=>item.rawValue)?.rawValue;
+        if(raw)return raw;
+      }catch{}
+    }
+    return decode(video,video.videoWidth,video.videoHeight,true);
+  }
   async function startCamera(){
     if(!navigator.mediaDevices?.getUserMedia) throw new Error('A câmera exige HTTPS e permissão do navegador. Use a leitura de uma foto.');
     if(!window.ZXing) throw new Error('Não foi possível carregar o leitor. Atualize a página.');
     stopCamera();scanning=true;
     try {
-      const acquired=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+      const acquired=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
       if(!scanning){acquired.getTracks().forEach(track=>track.stop());return;}
-      stream=acquired;$('video').srcObject=stream;$('cameraDialog').showModal();await $('video').play();
-      let lastQr='', stableReads=0;
-      const tick=()=>{if(!scanning)return;try{const v=$('video');if(v.readyState>=2){const qr=decode(v,v.videoWidth,v.videoHeight);if(qr){if(qr===lastQr){stableReads+=1;}else{lastQr=qr;stableReads=1;}if(stableReads>=3){identify(qr).catch(fail);return;}}else{lastQr='';stableReads=0;}}setTimeout(tick,350);}catch(error){stopCamera();close('cameraDialog');fail(error);}};tick();
+      stream=acquired;
+      const track=stream.getVideoTracks()[0];
+      if(track?.applyConstraints) track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+      $('video').srcObject=stream;$('cameraDialog').showModal();await $('video').play();
+      let lastQr='',stableReads=0,detecting=false;
+      const tick=async()=>{
+        if(!scanning||detecting)return;
+        try{
+          const v=$('video');
+          if(v.readyState>=2&&v.videoWidth>0){
+            detecting=true;
+            const qr=await detectCameraFrame(v);
+            if(qr){
+              if(qr===lastQr)stableReads+=1;else{lastQr=qr;stableReads=1;}
+              if(stableReads>=2){identify(qr).catch(fail);return;}
+            }else{lastQr='';stableReads=0;}
+          }
+        }catch(error){stopCamera();close('cameraDialog');fail(error);return;}
+        finally{detecting=false;}
+        if(scanning)setTimeout(tick,180);
+      };
+      tick();
     }catch(error){stopCamera();throw new Error(error.name==='NotAllowedError'?'Permita o acesso à câmera ou use uma foto do QR Code.':error.message);}
-  }
-  function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
+  }  function addText(parent,tag,text){const node=document.createElement(tag);node.textContent=text;parent.append(node);return node;}
   function normalizedEmail(value){return String(value || '').trim().toLowerCase();}
   function signatureState(responsible,signature){
     const signer=normalizedEmail(signature && signature.email), expected=normalizedEmail(responsible && responsible.email);
