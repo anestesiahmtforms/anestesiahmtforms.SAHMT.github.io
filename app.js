@@ -1,4 +1,4 @@
-﻿(async function () {
+(async function () {
   const fallbackData = window.SAHMT_DATA;
   const contactsPayload = window.SAHMT_CONTACTS;
   const fallbackNoticesPayload = {
@@ -1111,28 +1111,85 @@
       .trim();
     renderNoticeMedia(showAllNotices ? null : activeNotice,
       showAllNotices ? "" : getSafeNoticeUrl(activeNotice.videoUrl || extractNoticeUrl(activeNotice.message)));
+    renderNoticePresentation(showAllNotices ? null : activeNotice);
     elements.closeNoticeModal.disabled = true;
     elements.noticeModal.classList.remove("hidden");
     elements.noticeModal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
 
-    let remaining = 3;
-    elements.noticeCountdown.textContent = `Fechamento liberado em ${remaining} segundos`;
+    if (activeNotice.presentation) {
+      elements.noticeCountdown.textContent = "Apresentação em andamento";
+    } else {
+      let remaining = 3;
+      elements.noticeCountdown.textContent = `Fechamento liberado em ${remaining} segundos`;
 
-    const countdown = window.setInterval(() => {
-      remaining -= 1;
+      const countdown = window.setInterval(() => {
+        remaining -= 1;
 
-      if (remaining > 0) {
-        elements.noticeCountdown.textContent = `Fechamento liberado em ${remaining} segundos`;
-        return;
-      }
+        if (remaining > 0) {
+          elements.noticeCountdown.textContent = `Fechamento liberado em ${remaining} segundos`;
+          return;
+        }
 
-      window.clearInterval(countdown);
-      elements.noticeCountdown.textContent = "Aviso pronto para ser fechado";
-      elements.closeNoticeModal.disabled = false;
-    }, 1000);
+        window.clearInterval(countdown);
+        elements.noticeCountdown.textContent = "Aviso pronto para ser fechado";
+        elements.closeNoticeModal.disabled = false;
+      }, 1000);
+    }
   }
 
+  function renderNoticePresentation(notice) {
+    const container = document.getElementById("noticePresentation");
+    const presentation = notice?.presentation;
+    if (!container) return;
+    container.replaceChildren();
+    window.clearInterval(container._sahmtTimer);
+    if (!presentation?.slides?.length) {
+      container.hidden = true;
+      return;
+    }
+
+    container.hidden = false;
+    const stage = document.createElement("div");
+    stage.className = "notice-presentation__stage";
+    const title = document.createElement("h3");
+    const text = document.createElement("p");
+    const progress = document.createElement("div");
+    progress.className = "notice-presentation__progress";
+    stage.append(title, text, progress);
+    const controls = document.createElement("div");
+    controls.className = "notice-presentation__controls";
+    const pause = document.createElement("button");
+    pause.type = "button";
+    pause.className = "notice-presentation__pause";
+    controls.appendChild(pause);
+    container.append(stage, controls);
+
+    let index = 0;
+    let paused = false;
+    const show = () => {
+      const slide = presentation.slides[index];
+      title.textContent = slide.title || "";
+      text.textContent = slide.text || "";
+      progress.textContent = `${index + 1} / ${presentation.slides.length}`;
+      pause.textContent = paused ? "Continuar" : "Pausar";
+      if (index === presentation.slides.length - 1) {
+        elements.noticeCountdown.textContent = "Apresentação concluída";
+        elements.closeNoticeModal.disabled = false;
+      }
+    };
+    const advance = () => {
+      if (paused || index >= presentation.slides.length - 1) return;
+      index += 1;
+      show();
+    };
+    pause.addEventListener("click", () => {
+      paused = !paused;
+      show();
+    });
+    show();
+    container._sahmtTimer = window.setInterval(advance, presentation.intervalMs || 4200);
+  }
   function renderNoticeMedia(notice, embeddedMediaUrl = "") {
     if (!elements.noticeMedia) {
       return;
@@ -1721,3 +1778,4 @@
     return `${year}-${month}-${day}`;
   }
 })();
+

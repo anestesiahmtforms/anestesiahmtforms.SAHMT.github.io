@@ -1316,6 +1316,22 @@ button:hover,
   transform: translateY(-1px);
 }
 
+.notice-presentation {
+  margin-top: 16px;
+  padding: 22px 18px 14px;
+  border: 1px solid rgba(13, 99, 128, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #eaf7f6, #d5e8ef);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 10px 22px rgba(6,72,98,.12);
+}
+.notice-presentation[hidden] { display: none; }
+.notice-presentation__stage { min-height: 145px; display: flex; flex-direction: column; justify-content: center; text-align: center; animation: notice-slide-in 360ms ease both; }
+.notice-presentation__stage h3 { margin: 0; color: #0b4160; font-size: clamp(1.2rem, 5vw, 1.55rem); line-height: 1.12; }
+.notice-presentation__stage p { margin: 12px 0 0; color: rgba(11,40,68,.84); font-size: .9rem; line-height: 1.45; }
+.notice-presentation__progress { margin-top: 17px; color: #0d7a6c; font-size: .68rem; font-weight: 900; letter-spacing: .08em; }
+.notice-presentation__controls { display: flex; justify-content: center; margin-top: 10px; }
+.notice-presentation__pause { min-height: 34px; padding: 6px 16px; border: 1px solid rgba(13,99,128,.34); border-radius: 999px; background: rgba(255,255,255,.68); color: #0c607c; font-size: .7rem; font-weight: 900; cursor: pointer; }
+@keyframes notice-slide-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .notice-card__footer {
   display: flex;
   align-items: center;
@@ -1937,3 +1953,4 @@ button:hover,
   background: repeating-radial-gradient(ellipse at 50% 100%, transparent 0 3px, #ffd21f 3.5px 5px, transparent 5.5px 8px) top/100% 7px repeat-x, repeating-radial-gradient(ellipse at 50% 0%, transparent 0 3px, #ffd21f 3.5px 5px, transparent 5.5px 8px) bottom/100% 7px repeat-x, repeating-radial-gradient(ellipse at 100% 50%, transparent 0 3px, #ffd21f 3.5px 5px, transparent 5.5px 8px) left/7px 100% repeat-y, repeating-radial-gradient(ellipse at 0% 50%, transparent 0 3px, #ffd21f 3.5px 5px, transparent 5.5px 8px) right/7px 100% repeat-y;
   filter: drop-shadow(0 0 2px rgba(255, 210, 31, .9));
 }
+
