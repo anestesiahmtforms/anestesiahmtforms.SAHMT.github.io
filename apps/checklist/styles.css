@@ -95,3 +95,20 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
   background: #ef4444;
   box-shadow: 0 0 0 2px rgba(239,68,68,.18);
 }
+
+/* Ilustração didática do arsenal no lugar do texto introdutório. */
+.arsenal-visual {
+  padding: 10px;
+  overflow: hidden;
+}.arsenal-visual-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 42vh;
+  object-fit: contain;
+  border-radius: 14px;
+}
+@media (max-width: 430px) {
+  .arsenal-visual { padding: 6px; }
+  .arsenal-visual-image { max-height: 34vh; border-radius: 11px; }
+}
