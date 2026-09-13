@@ -11,6 +11,6 @@
 .status-banner .status-email{padding-top:6px;border-top:1px solid rgba(23,105,170,.18);line-height:1.25}
 @media(max-width:430px){.status-banner{padding:8px;max-height:min(160px,28vh);font-size:10px}.status-banner strong{font-size:11px}.status-banner p{font-size:10px;margin:5px 0}}
 
-.check-banner-button{display:block;width:100%;min-height:34px;margin:8px 0 0;padding:7px 12px;border:1px solid #104b7d;border-radius:9px;color:#fff;background:linear-gradient(135deg,#2b83c6,#1762a1);box-shadow:0 4px 9px rgba(23,98,161,.22),inset 0 1px 0 rgba(255,255,255,.35);font:inherit;font-size:.74rem;font-weight:900;letter-spacing:.08em;cursor:pointer;touch-action:manipulation}
+.check-banner-button{display:block;width:100%;min-height:34px;margin:8px 0 0;padding:7px 12px;border:1px solid #104b7d;border-radius:9px;color:#fff;background:linear-gradient(135deg,#2b83c6,#1762a1);box-shadow:0 4px 9px rgba(23,98,161,.22),inset 0 1px 0 rgba(255,255,255,.35);font:inherit;font-size:.62rem;font-weight:900;letter-spacing:.06em;line-height:1;white-space:nowrap;cursor:pointer;touch-action:manipulation}
 .check-banner-button:hover,.check-banner-button:focus-visible{background:linear-gradient(135deg,#3a96d7,#1b6fae);transform:translateY(-1px)}
 .check-banner-button:active{transform:scale(.98)}
