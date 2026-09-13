@@ -1171,6 +1171,7 @@
       const slide = presentation.slides[index];
       title.textContent = slide.title || "";
       text.textContent = slide.text || "";
+      stage.style.setProperty("--notice-slide-accent", slide.color || "#0d6380");
       progress.textContent = `${index + 1} / ${presentation.slides.length}`;
       pause.textContent = paused ? "Continuar" : "Pausar";
       if (index === presentation.slides.length - 1) {
