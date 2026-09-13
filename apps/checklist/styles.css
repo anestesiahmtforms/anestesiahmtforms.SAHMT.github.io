@@ -69,3 +69,29 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18), 0 1px 4px rgba(153, 27, 27, 0.24);
 }
 /* auth-authenticated-state */
+
+
+/* Cabeçalho: somente o e-mail autenticado, abaixo do título. */
+.checklist-hero .hero-copy > [data-auth-user]:not([hidden]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: #1769aa;
+  font-size: .72rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.checklist-hero .hero-copy > [data-auth-user]:not([hidden])::before {
+  content: "";
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,.18);
+}
+.checklist-hero .hero-copy > [data-auth-user][data-authenticated="false"]:not([hidden])::before {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239,68,68,.18);
+}
