@@ -1219,6 +1219,7 @@
         activeDate,
         matchedContacts
       ));
+      nameLine.appendChild(releaseButton);
     }
 
     const meta = document.createElement("p");
