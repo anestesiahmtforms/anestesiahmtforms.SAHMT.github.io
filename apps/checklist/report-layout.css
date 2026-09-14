@@ -96,3 +96,21 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
 .monthly-day.signature-responsible .responsible-email{color:#166534!important}
 .monthly-day.signature-other .responsible-email{color:#9a6700!important}
 .monthly-day .signer-email.signature-signed{color:#16803d!important;font-weight:900}
+
+/* Assinatura sem conclusão */
+.signature-status-wrap{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;width:100%}
+.signature-status-wrap>p{flex:1 1 220px;margin:0!important}
+.sign-incomplete-button{flex:0 0 auto;min-height:34px;padding:7px 11px;border:0;border-radius:10px;background:linear-gradient(135deg,#1762a1,#0d3257);color:#fff;font:inherit;font-size:.68rem;font-weight:850;box-shadow:0 5px 12px rgba(13,50,87,.22);cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.sign-incomplete-button:active{transform:scale(.97)}
+.sign-incomplete-button.is-signed{background:linear-gradient(135deg,#f5c542,#d99b00);color:#4f3600;box-shadow:0 5px 12px rgba(190,137,0,.25)}
+.incomplete-signature-banner{margin:5px 0 3px;padding:9px;border:1px solid rgba(190,137,0,.36);border-radius:13px;background:#fff7d6;color:#4f3600;box-shadow:0 5px 12px rgba(190,137,0,.1)}
+.incomplete-signature-banner[hidden]{display:none!important}
+.incomplete-signature-banner strong{display:block;text-align:center;font-size:.76rem}
+.incomplete-signature-banner p{margin:4px 0;text-align:center;font-size:.68rem;line-height:1.25}
+.incomplete-signature-banner textarea{display:block;width:100%;min-height:58px;max-height:110px;margin:5px 0;padding:7px 8px;border:1px solid rgba(190,137,0,.48);border-radius:9px;background:#fffdf2;color:#3f321b;font:inherit;font-size:.72rem;line-height:1.3;box-sizing:border-box;resize:vertical}
+.incomplete-signature-banner textarea[readonly]{background:#fffaf0;color:#4f3600}
+.incomplete-signature-actions{display:flex;justify-content:flex-end;gap:6px}
+.incomplete-signature-actions button{min-height:32px;padding:6px 9px;border:0;border-radius:9px;font:inherit;font-size:.66rem;font-weight:800;cursor:pointer}
+.incomplete-signature-actions .soft{margin:0;background:#e5ebee;color:var(--ink)}
+.incomplete-confirm{background:#d99b00;color:#fff;box-shadow:0 4px 9px rgba(190,137,0,.18)}
+@media(max-width:430px){.signature-status-wrap{gap:5px}.signature-status-wrap>p{flex-basis:165px}.sign-incomplete-button{min-height:32px;padding:6px 8px;font-size:.61rem}.incomplete-signature-banner{padding:7px}.incomplete-signature-banner strong{font-size:.7rem}.incomplete-signature-banner p{font-size:.61rem}.incomplete-signature-banner textarea{font-size:.66rem;min-height:54px}}
