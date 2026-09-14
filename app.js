@@ -1172,6 +1172,7 @@
       title.textContent = slide.title || "";
       text.textContent = slide.text || "";
       stage.style.setProperty("--notice-slide-accent", slide.color || "#0d6380");
+      text.style.color = slide.color || "#0d6380";
       progress.textContent = `${index + 1} / ${presentation.slides.length}`;
       pause.textContent = paused ? "Continuar" : "Pausar";
       if (index === presentation.slides.length - 1) {
@@ -1189,7 +1190,7 @@
       show();
     });
     show();
-    container._sahmtTimer = window.setInterval(advance, presentation.intervalMs || 4200);
+    container._sahmtTimer = window.setInterval(advance, presentation.intervalMs || 3000);
   }
   function renderNoticeMedia(notice, embeddedMediaUrl = "") {
     if (!elements.noticeMedia) {

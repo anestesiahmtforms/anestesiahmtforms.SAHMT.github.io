@@ -8,7 +8,7 @@ window.SAHMT_NOTICES = {
       message: "Uma apresentação rápida do ecossistema SAHMT.",
       accent: "blue",
       presentation: {
-        intervalMs: 7200,
+        intervalMs: 3000,
         slides: [
           { title: "Bem-vindo ao SAHMT", text: "Tecnologia para apoiar o trabalho diário da equipe de Anestesiologia.", color: "#0d6380" },
           { title: "Escala", text: "Consulte a programação, os responsáveis e as informações do dia.", color: "#1762a1" },
