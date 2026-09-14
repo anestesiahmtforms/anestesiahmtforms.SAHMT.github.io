@@ -114,3 +114,8 @@ dialog.report-dialog:not([open]){display:none!important}.report-dialog{position:
 .incomplete-signature-actions .soft{margin:0;background:#e5ebee;color:var(--ink)}
 .incomplete-confirm{background:#d99b00;color:#fff;box-shadow:0 4px 9px rgba(190,137,0,.18)}
 @media(max-width:430px){.signature-status-wrap{gap:5px}.signature-status-wrap>p{flex-basis:165px}.sign-incomplete-button{min-height:32px;padding:6px 8px;font-size:.61rem}.incomplete-signature-banner{padding:7px}.incomplete-signature-banner strong{font-size:.7rem}.incomplete-signature-banner p{font-size:.61rem}.incomplete-signature-banner textarea{font-size:.66rem;min-height:54px}}
+/* Área ampliada do responsável */
+.report-dialog .responsible-compact{min-height:58px;box-sizing:border-box;padding:10px 12px;margin:5px 0 6px;display:flex;flex-direction:column;justify-content:center;gap:3px;line-height:1.3}
+.report-dialog .responsible-compact strong{font-size:.72rem;line-height:1.2}
+.report-dialog .responsible-compact p{margin:0;overflow-wrap:anywhere}
+@media(max-width:430px){.report-dialog .responsible-compact{min-height:56px;padding:9px 10px;margin:4px 0 5px}.report-dialog .responsible-compact strong{font-size:.68rem}.report-dialog .responsible-compact p{font-size:.66rem}}
