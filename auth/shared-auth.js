@@ -1,4 +1,5 @@
 (function () {
+  if (window.SAHMT_AUTH) return;
   const DEFAULT_CONFIG = {
     storageKey: "sahmt-google-auth-config-v1",
     authSessionKey: "sahmt-google-auth-session-v1",
@@ -12,6 +13,9 @@
   const TOP_LEVEL_LOGIN_PARAM = "topLogin";
   const listeners = new Set();
   let authState = null;
+  let confirmedAt = 0;
+  let refreshPromise = null;
+  const RECHECK_MS = 5 * 60 * 1000;
   let activeContext = null;
   let activePromise = null;
   let googleScriptPromise = null;
@@ -192,6 +196,7 @@
         <div class="sahmt-auth-actions">
           <div id="sahmt-google-signin" class="sahmt-google-signin" hidden></div>
           <button id="sahmt-auth-open" class="sahmt-auth-button" type="button" hidden>Abrir tela de login</button>
+          <button id="sahmt-auth-retry" class="sahmt-auth-button" type="button" hidden>Tentar novamente</button>
           <button id="sahmt-auth-other-account" class="sahmt-auth-secondary" type="button" hidden>Escolher outra conta Google</button>
         </div>
       </div>
@@ -209,6 +214,9 @@
       });
     });
 
+    gate.querySelector("#sahmt-auth-retry").addEventListener("click", () => {
+      window.dispatchEvent(new Event("sahmt:auth-retry"));
+    });
     return gate;
   }
 
@@ -268,6 +276,7 @@
     const googleEl = gate.querySelector("#sahmt-google-signin");
     const openEl = gate.querySelector("#sahmt-auth-open");
     const otherEl = gate.querySelector("#sahmt-auth-other-account");
+    gate.querySelector("#sahmt-auth-retry").hidden = !options.showRetry;
 
     if (messageEl) {
       messageEl.textContent = message;
@@ -404,7 +413,7 @@
       if (!saved?.deviceToken || !saved?.email || !saved?.trustedDeviceExpiresAt) {
         return null;
       }
-      if (Date.parse(saved.trustedDeviceExpiresAt) <= Date.now() + 120000) {
+      if (!Number.isFinite(Date.parse(saved.trustedDeviceExpiresAt)) || Date.parse(saved.trustedDeviceExpiresAt) <= Date.now() + 120000) {
         clearSession(config);
         return null;
       }
@@ -432,6 +441,7 @@
   }
 
   function applyAuthenticatedUser(nextState) {
+    const previousEmail = authState?.email;
     authState = {
       token: nextState.token || "",
       email: String(nextState.email || "").toLowerCase(),
@@ -441,6 +451,8 @@
       expiresAt: Number(nextState.expiresAt || 0),
       authenticated: nextState.authenticated === true,
     };
+    if (authState.authenticated) confirmedAt = Date.now();
+    if (previousEmail && previousEmail !== authState.email) window.dispatchEvent(new Event("sahmt:account-change"));
     notifyListeners();
   }
 
@@ -490,7 +502,9 @@
     const responseText = await response.text().catch(() => "");
     const result = parseAuthResponseText(responseText);
     if (!response.ok || result.ok !== true) {
-      throw new Error(result.message || "Falha de autenticação.");
+      const error = new Error(result.message || "Falha de autenticação.");
+      error.code = result.code || (response.status === 401 || response.status === 403 ? "UNAUTHORIZED" : "AUTH_FAILED");
+      throw error;
     }
     return result;
   }
@@ -615,6 +629,10 @@
   }
 
   async function chooseAnotherGoogleAccount() {
+    clearSession(getConfig());
+    authState = null; confirmedAt = 0; activePromise = null;
+    notifyListeners();
+    window.dispatchEvent(new Event("sahmt:account-change"));
     await loadGoogleScript();
     initializeGoogleIdentity();
     renderGoogleButton();
@@ -639,17 +657,18 @@
       const config = getConfig();
       const result = await validateGoogleCredential(credential, activeContext || {});
       applyAuthenticatedUser({
-        token: credential,
+        // The server has registered this trusted device; reuse it across modules.
+        token: "",
         email: String(result.email || "").toLowerCase(),
         name: result.name || "",
         deviceToken: getOrCreateDeviceToken(config),
         trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
-        expiresAt: getJwtExpirationMs(credential),
+        expiresAt: 0,
         authenticated: true,
       });
       persistSession(config);
       hideGate();
-      await trackAccess("login_success", "Conta Google autorizada");
+      void trackAccess("login_success", "Conta Google autorizada");
       if (pendingResolve) {
         pendingResolve(authState);
         pendingResolve = null;
@@ -686,81 +705,48 @@
     return authState;
   }
 
-  async function refreshTrustedDeviceSessionInBackground(context) {
-    const config = getConfig();
-    const saved = readStoredSession(config);
-    if (!saved) {
-      return;
-    }
-    try {
-      const result = await validateTrustedDevice(saved, context);
-      applyAuthenticatedUser({
-        token: "",
-        email: String(result.email || saved.email || "").toLowerCase(),
-        name: result.name || saved.name || "",
-        deviceToken: saved.deviceToken,
-        trustedDeviceExpiresAt: result.trustedDeviceExpiresAt || saved.trustedDeviceExpiresAt || getTrustedDeviceFallbackExpiry(),
-        expiresAt: 0,
-      authenticated: true,
-      });
-      persistSession(config);
-      await trackAccess("page_access", "Dispositivo confiavel");
-    } catch {
-      // Keep the device-authenticated session active locally.
-    }
+  async function confirmSession(context) {
+    if (refreshPromise) return refreshPromise;
+    refreshPromise = (async () => {
+      try {
+        const result = await restoreTrustedDeviceSession(context);
+        if (!result) throw new Error("Entre com sua conta Google para continuar.");
+        hideGate();
+        void trackAccess("page_access", "Sessão confirmada");
+        return result;
+      } catch (error) {
+        if (authState) applyAuthenticatedUser({ ...authState, authenticated: false });
+        if (["UNAUTHORIZED", "FORBIDDEN", "REVOKED"].includes(error.code)) {
+          clearSession(getConfig());
+          authState = null;
+          notifyListeners();
+        }
+        showGateMessage(error.message || "Não foi possível confirmar o acesso.", { showRetry: true, showOther: true });
+        throw error;
+      } finally { refreshPromise = null; }
+    })();
+    return refreshPromise;
   }
 
   async function requireAccess(context = {}) {
-    if (activePromise) {
-      return activePromise;
-    }
-
-    ensureStyles();
-    ensureGate();
-    ensureUserPill();
-    activeContext = {
-      moduleId: context.moduleId || "SAHMT",
-      pageId: context.pageId || "home",
-      returnUrl: context.returnUrl || "",
-    };
-
+    activeContext = { moduleId: context.moduleId || "SAHMT", pageId: context.pageId || "home", returnUrl: context.returnUrl || "" };
+    const deviceValid = authState?.deviceToken && Date.parse(authState.trustedDeviceExpiresAt) > Date.now();
+    const tokenValid = authState?.token && authState.expiresAt > Date.now() + 30000;
+    if (authState?.authenticated && (deviceValid || tokenValid) && Date.now() - confirmedAt < RECHECK_MS) return authState;
+    if (activePromise) return activePromise;
+    ensureStyles(); ensureGate(); ensureUserPill();
     activePromise = (async () => {
-      const config = getConfig();
-      const saved = readStoredSession(config);
+      const saved = readStoredSession(getConfig());
       if (saved) {
-        const restored = applyStoredTrustedDeviceSession(saved);
-        if (restored) {
-          hideGate();
-          window.setTimeout(() => {
-            refreshTrustedDeviceSessionInBackground(activeContext).catch(() => {});
-          }, 0);
-          return restored;
-        }
+        applyStoredTrustedDeviceSession(saved);
+        showGateMessage("Confirmando seu acesso…");
+        return await confirmSession(activeContext);
       }
-
-      authState = null;
-      notifyListeners();
-
-      if (shouldRequireTopLevelLogin()) {
-        showGateMessage(
-          "No iPhone, faça o primeiro login Google desta área em tela própria. Depois o dispositivo ficará liberado.",
-          { showOpen: true, openLabel: "Abrir login desta área" }
-        );
-        return new Promise(() => {});
-      }
-
-      await loadGoogleScript();
-      initializeGoogleIdentity();
-      renderGoogleButton();
+      authState = null; notifyListeners();
+      await loadGoogleScript(); initializeGoogleIdentity(); renderGoogleButton();
       showGateMessage("Escolha sua conta Google cadastrada para entrar.", { showGoogle: true, showOther: true });
-      return await new Promise((resolve, reject) => {
-        pendingResolve = resolve;
-        pendingReject = reject;
-      });
-    })().finally(() => {
-      activePromise = null;
-    });
-
+      return await new Promise((resolve, reject) => { pendingResolve = resolve; pendingReject = reject; });
+    })().finally(() => { activePromise = null; });
     return activePromise;
   }
 
@@ -792,6 +778,7 @@
 
   window.SAHMT_AUTH = {
     requireAccess,
+    chooseAnotherAccount: chooseAnotherGoogleAccount,
     getSession() {
       return authState;
     },

@@ -113,8 +113,7 @@
   // Start the public spreadsheet read while the shared authentication surface
   // restores the trusted device.
   const scheduleWarmupPromise = loadScheduleDataWithTimeout(12000).catch(() => null);
-  preloadLabelsModule();
-  void preloadEcosystemShells();
+
   // Render the local schedule immediately; authentication continues in the background.
   // This prevents a slow session restore from leaving the main page blank.
   ensureSharedAccess().catch((error) => console.warn("Falha na autenticacao inicial:", error));
@@ -999,6 +998,7 @@
   }
 
   function openLabelsModal() {
+    if (window.SAHMT_SHELL) { window.location.href = labelsUrl; return; }
     window.SAHMT_AUTH?.track("area_open", "Etiquetas");
     preloadLabelsModule();
     elements.labelsModal.classList.remove("hidden");
