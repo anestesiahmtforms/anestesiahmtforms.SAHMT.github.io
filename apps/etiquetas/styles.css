@@ -5970,3 +5970,34 @@ body::before {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18), 0 1px 4px rgba(153, 27, 27, 0.24);
 }
 /* auth-authenticated-state */
+
+/* The viewport must not follow the video's changing intrinsic dimensions or
+   a previous photo. Stable viewport units also avoid browser-toolbar resizing. */
+.scanner-panel .camera-stage {
+  position: relative;
+  flex: 0 0 auto !important;
+  height: clamp(150px, 24svh, 240px) !important;
+  min-height: clamp(150px, 24svh, 240px) !important;
+  max-height: clamp(150px, 24svh, 240px) !important;
+  overflow: hidden;
+}
+
+.scanner-panel .camera-stage #camera {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.scanner-panel .camera-stage .preview-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.scanner-panel .camera-stage:not(.has-capture) .preview-wrap {
+  display: none !important;
+}
