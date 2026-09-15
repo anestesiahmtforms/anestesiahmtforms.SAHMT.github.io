@@ -1268,10 +1268,8 @@ async function processCurrentImage() {
     return;
   }
 
-  if (!state.aiReady) {
-    setStatus('No momento Ler por IA não está disponível, Aguarde ou entre com os dados pelo "Registro Manual" no Botão abaixo', "info");
-    return;
-  }
+  // The startup health check is advisory: a temporary failure must not prevent
+  // a user-requested read. The AI endpoint still validates the session itself.
 
   stopCamera();
   toggleBusy(true);
@@ -1330,6 +1328,8 @@ async function extractLabelWithAi(imageBlob) {
     message: String(result.message || "IA respondeu na leitura.").trim(),
     checkedAt: new Date().toISOString(),
   };
+  state.aiReady = true;
+  saveAiHealthCache(state.aiHealth);
   renderAiStatus();
 
   return {
