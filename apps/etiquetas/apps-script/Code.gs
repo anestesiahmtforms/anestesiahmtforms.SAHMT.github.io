@@ -97,18 +97,44 @@ function doGet(e) {
   }
 }
 
+// Stage labels are fixed strings; never log payloads, responses or exceptions.
+function diagnoseStage_(stage, operation) {
+  const started = Date.now();
+  const log = (state, httpStatus) => {
+    try {
+      const record = {service: 'etiquetas', diagnosticVersion: 1, stage, state, elapsedMs: Date.now() - started};
+      if (Number.isInteger(httpStatus)) record.httpStatus = httpStatus;
+      console.log(JSON.stringify(record));
+    } catch (_) { /* A logging failure must not affect the request. */ }
+  };
+  log('started');
+  try {
+    const result = operation();
+    const status = result && typeof result.getResponseCode === 'function' ? result.getResponseCode() : undefined;
+    log(Number.isInteger(status) && (status < 200 || status >= 300) ? 'http_error' : 'completed', status);
+    return result;
+  } catch (error) {
+    log('failed');
+    if (error && error.etiquetasDiagnostic) throw error;
+    const code = 'ETQ_' + stage.toUpperCase().replace(/\./g, '_');
+    const safeError = new Error('Não foi possível concluir a operação [' + code + ']. Tente novamente ou informe este código ao suporte.');
+    safeError.etiquetasDiagnostic = { code, stage, elapsedMs: Date.now() - started };
+    throw safeError;
+  }
+}
+
 function doPost(e) {
   try {
-    const payload = JSON.parse((e.postData && e.postData.contents) || "{}");
-    const user = getRequestUser_(payload);
+    const payload = diagnoseStage_('request.parse', () => JSON.parse((e && e.postData && e.postData.contents) || "{}"));
+    const user = diagnoseStage_('auth.validate', () => getRequestUser_(payload));
     const action = String(payload.action || (e.parameter && e.parameter.action) || "").trim();
 
     if (action === "aiHealth") {
-      return handleAiHealth_();
+      return diagnoseStage_('ai.health', () => handleAiHealth_());
     }
 
     if (action === "aiExtract") {
-      return handleAiExtract_(payload);
+      return diagnoseStage_('ai.extract', () => handleAiExtract_(payload));
     }
 
     payload.tipo = normalizeTipoValue_(payload.tipo);
@@ -167,6 +193,7 @@ function doPost(e) {
     return jsonResponse({
       ok: false,
       message: error.message,
+      ...(error.etiquetasDiagnostic ? { diagnostic: error.etiquetasDiagnostic } : {}),
     });
   }
 }
@@ -181,7 +208,7 @@ function getRequestUser_(payload) {
 
   let response;
   try {
-    response = UrlFetchApp.fetch(ETIQUETAS_AUTH_ENDPOINT, {
+    response = diagnoseStage_('auth.http', () => UrlFetchApp.fetch(ETIQUETAS_AUTH_ENDPOINT, {
       method: 'post',
       contentType: 'application/json; charset=utf-8',
       muteHttpExceptions: true,
@@ -194,8 +221,9 @@ function getRequestUser_(payload) {
         moduleId: 'ETIQUETAS',
         pageId: 'api'
       })
-    });
+    }));
   } catch (error) {
+    if (error.etiquetasDiagnostic) throw error;
     throw new Error('Falha de comunicação entre Etiquetas e a autenticação central.');
   }
 
@@ -205,8 +233,9 @@ function getRequestUser_(payload) {
   const body = String(response.getContentText() || '').trim();
   let result;
   try {
-    result = JSON.parse(body || '{}');
+    result = diagnoseStage_('auth.parse', () => JSON.parse(body || '{}'));
   } catch (error) {
+    if (error.etiquetasDiagnostic) throw error;
     if (/<!doctype|<html|accounts\.google\.com|ServiceLogin/i.test(body)) {
       throw new Error('A autenticação central devolveu uma página de login. Revise o acesso da implantação central do Web App.');
     }
@@ -227,7 +256,7 @@ function handleAiHealth_() {
     throw new Error("Configure a propriedade OPENAI_API_KEY no Apps Script.");
   }
 
-  const response = UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
+  const response = diagnoseStage_('ai.health.http', () => UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
     method: "post",
     contentType: "application/json",
     headers: {
@@ -240,14 +269,14 @@ function handleAiHealth_() {
       reasoning: { effort: "low" },
     }),
     muteHttpExceptions: true,
-  });
+  }));
   const status = response.getResponseCode();
   const content = response.getContentText();
   if (status < 200 || status >= 300) {
     throw new Error("API OpenAI nao confirmou a rota de leitura (" + status + "): " + content.slice(0, 200));
   }
 
-  const payload = JSON.parse(content || "{}");
+  const payload = diagnoseStage_('ai.health.parse', () => JSON.parse(content || "{}"));
   const outputText = extractOutputText_(payload);
 
   return jsonResponse({
@@ -326,7 +355,7 @@ function handleAiExtract_(payload) {
     },
   };
 
-  const response = UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
+  const response = diagnoseStage_('ai.extract.http', () => UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
     method: "post",
     contentType: "application/json",
     headers: {
@@ -334,7 +363,7 @@ function handleAiExtract_(payload) {
     },
     payload: JSON.stringify(requestBody),
     muteHttpExceptions: true,
-  });
+  }));
 
   const status = response.getResponseCode();
   const content = response.getContentText();
@@ -342,13 +371,13 @@ function handleAiExtract_(payload) {
     throw new Error("Falha na IA (" + status + "): " + content.slice(0, 300));
   }
 
-  const apiResult = JSON.parse(content);
+  const apiResult = diagnoseStage_('ai.extract.parse', () => JSON.parse(content));
   const outputText = extractOutputText_(apiResult);
   if (!outputText) {
     throw new Error("A IA nao retornou texto estruturado.");
   }
 
-  const extracted = parseJsonObjectSafe_(outputText);
+  const extracted = diagnoseStage_('ai.extract.fields', () => parseJsonObjectSafe_(outputText));
   const nomePaciente = cleanName_(extracted.nomePaciente);
   const convenio = cleanConvenio_(extracted.convenio);
   const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);

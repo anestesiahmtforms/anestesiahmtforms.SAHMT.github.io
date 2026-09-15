@@ -20,6 +20,7 @@ function execute(payload, responseOrError) {
       }
     }
   };
+  context.diagnoseStage_ = (_stage, operation) => operation();
   vm.runInNewContext(functionSource, context);
   return { result: context.getRequestUser_(payload), calls };
 }

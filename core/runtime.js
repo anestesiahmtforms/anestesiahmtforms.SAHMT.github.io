@@ -72,42 +72,8 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
     const isEtiquetasAi=targetUrl.hostname==='script.google.com'&&method==='POST'&&(targetUrl.searchParams.get('action')==='aiExtract'||parsedBody?.action==='aiExtract');
     if(!isEtiquetasAi)return fetch(absoluteUrl,options);
 
-    const baseUrl=new URL(absoluteUrl);baseUrl.searchParams.delete('action');
-    const run=async(url,opts,timeoutMs)=>{
-      const controller=new AbortController();
-      const inherited=opts?.signal;
-      const onAbort=()=>controller.abort();
-      inherited?.addEventListener?.('abort',onAbort,{once:true});
-      const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);
-      try{return await fetch(url,{...opts,signal:controller.signal,cache:'no-store',redirect:'follow'});}
-      finally{window.clearTimeout(timeout);inherited?.removeEventListener?.('abort',onAbort);}
-    };
-
-    if(parsedBody){
-      const healthBody={action:'aiHealth',authToken:parsedBody.authToken||'',deviceToken:parsedBody.deviceToken||'',userEmail:parsedBody.userEmail||''};
-      try{
-        const health=await run(baseUrl.href,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(healthBody)},15000);
-        const healthJson=await health.clone().json().catch(()=>null);
-        if(!health.ok||healthJson?.ok!==true)throw new Error(healthJson?.message||`HTTP ${health.status}`);
-      }catch(error){
-        const wrapped=new Error(error?.name==='AbortError'
-          ? 'O serviço de leitura por IA não respondeu ao teste de conexão em 15 segundos.'
-          : `O serviço de leitura por IA não passou no teste de conexão (${error?.message||'erro de rede'}).`);
-        wrapped.cause=error;
-        throw wrapped;
-      }
-    }
-
     const reducedBody=parsedBody?{...parsedBody,numericImageDataUrls:[]}:null;
-    try{
-      return await run(baseUrl.href,reducedBody?{...options,body:JSON.stringify(reducedBody)}:options,45000);
-    }catch(error){
-      const wrapped=new Error(error?.name==='AbortError'
-        ? 'A conexão com a IA foi confirmada, mas a leitura da imagem excedeu 45 segundos.'
-        : `A conexão com a IA foi confirmada, mas o envio da imagem falhou (${error?.message||'erro de rede'}).`);
-      wrapped.cause=error;
-      throw wrapped;
-    }
+    return fetchEtiquetasImage(absoluteUrl,reducedBody?{...options,body:JSON.stringify(reducedBody)}:options);
   };
   return {document:doc,window:win,navigator:nav,location:locationView,history:historyView,fetch:fetchLocal,
     setTimeout:timer,clearTimeout:window.clearTimeout.bind(window),setInterval:interval,clearInterval:window.clearInterval.bind(window),requestAnimationFrame:raf,cancelAnimationFrame:window.cancelAnimationFrame.bind(window),
@@ -115,4 +81,36 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
     deactivate(){state.active=false;root.dispatchEvent(new Event('sahmt:hide'));root.dispatchEvent(new Event('visibilitychange'));body.querySelectorAll('video').forEach(v=>{v.pause();v.srcObject?.getTracks().forEach(t=>t.stop());v.srcObject=null;});root.querySelectorAll('dialog[open]').forEach(d=>d.close());host.hidden=true;},
     dispose(){this.deactivate();state.events.forEach(e=>e.unsubscribe?e.unsubscribe():e.target.removeEventListener(e.type,e.wrapped,e.options));state.intervals.forEach(clearInterval);state.timeouts.forEach(clearTimeout);state.frames.forEach(cancelAnimationFrame);host.remove();}
   };
+}
+
+// One image request. The server validates the session before invoking the AI.
+export async function fetchEtiquetasImage(url, options={}, transport=fetch, timeoutMs=45000) {
+  const controller=new AbortController();
+  const inherited=options.signal;
+  let timedOut=false;
+  const onAbort=()=>controller.abort();
+  if(inherited?.aborted)throw new DOMException('Operação cancelada.','AbortError');
+  inherited?.addEventListener('abort',onAbort,{once:true});
+  const timeout=setTimeout(()=>{timedOut=true;controller.abort();},timeoutMs);
+  try {
+    const response=await transport(url,{...options,signal:controller.signal,cache:'no-store',redirect:'follow'});
+    // Keep the deadline active until the body arrives, not just the headers.
+    const text=await response.text();
+    let result;
+    try {result=JSON.parse(text);} catch {
+      throw new Error('[IA_RESPOSTA_INVALIDA] O serviço devolveu uma resposta inválida. Tente novamente.');
+    }
+    if(!result||typeof result!=='object'||Array.isArray(result)||typeof result.ok!=='boolean') {
+      throw new Error('[IA_RESPOSTA_INVALIDA] O serviço devolveu uma resposta inválida. Tente novamente.');
+    }
+    return new Response(text,{status:response.status,headers:{'Content-Type':'application/json'}});
+  } catch(error) {
+    if(timedOut)throw new Error('[IA_TEMPO_ESGOTADO] O serviço não respondeu à leitura em 45 segundos. A imagem continua disponível para tentar novamente.');
+    if(inherited?.aborted)throw new DOMException('Operação cancelada.','AbortError');
+    if(error?.message?.startsWith('[IA_RESPOSTA_INVALIDA]'))throw error;
+    throw new Error('[IA_CONEXAO] Não foi possível receber a resposta da leitura. Verifique a conexão e tente novamente.');
+  } finally {
+    clearTimeout(timeout);
+    inherited?.removeEventListener('abort',onAbort);
+  }
 }
