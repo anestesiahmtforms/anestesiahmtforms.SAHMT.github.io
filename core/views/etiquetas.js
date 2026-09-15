@@ -86,6 +86,8 @@ const TOP_LEVEL_LOGIN_PARAM = "topLogin";
 const state = {
   stream: null,
   cameraOpen: false,
+  cameraStarting: false,
+  cameraRequestId: 0,
   imageBlob: null,
   imageUrl: "",
   metadata: null,
@@ -1099,32 +1101,58 @@ async function registerServiceWorker() {
 }
 
 async function startCamera() {
-  document.querySelector(".camera-stage")?.classList.remove("has-capture");
-  cameraEl.style.display = "block";
+  if (state.cameraStarting || state.stream) return;
+  stopCamera();
+  const requestId = state.cameraRequestId;
+  state.cameraStarting = true;
+  resetScannerView();
+  document.querySelector("#capture-image").disabled = true;
+  setStatus("Abrindo camera…", "info");
   try {
-    stopCamera();
-    state.stream = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
         width: { ideal: 2560 },
         height: { ideal: 1440 },
-        focusMode: { ideal: "continuous" },
-        exposureMode: { ideal: "continuous" },
+        frameRate: { ideal: 30, max: 30 },
       },
       audio: false,
     });
-
-    cameraEl.srcObject = state.stream;
-    // Change the same button as soon as the camera stream is granted.
+    // A permission prompt may finish after the user leaves this screen.
+    if (requestId !== state.cameraRequestId) {
+      stream.getTracks().forEach(track => track.stop());
+      return;
+    }
+    state.stream = stream;
+    cameraEl.srcObject = stream;
+    await cameraEl.play();
+    if (requestId !== state.cameraRequestId) return;
+    const track = stream.getVideoTracks()[0];
+    try {
+      if (track?.getCapabilities?.().focusMode?.includes("continuous")) {
+        await track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+      }
+    } catch (error) {
+      // Keep the camera's native focus behavior if optional control is rejected.
+      console.warn("Foco automatico mantido pelo aparelho:", error);
+    }
+    if (requestId !== state.cameraRequestId) return;
     setCaptureButtonReadyState();
-    await cameraEl.play().catch(() => undefined);
-    cameraStatusEl.textContent = "Camera ativa";
-    cameraStatusEl.className = "status-pill";
-    setStatus("Camera pronta. Centralize a etiqueta e capture.", "info");
+    if (cameraStatusEl) {
+      cameraStatusEl.textContent = "Camera ativa";
+      cameraStatusEl.className = "status-pill";
+    }
+    setStatus("Centralize a etiqueta. Aguarde a imagem ficar nitida antes de capturar.", "info");
   } catch (error) {
-    cameraStatusEl.textContent = "Sem acesso";
-    cameraStatusEl.className = "status-pill error";
+    if (requestId !== state.cameraRequestId) return;
+    stopCamera();
+    if (cameraStatusEl) {
+      cameraStatusEl.textContent = "Sem acesso";
+      cameraStatusEl.className = "status-pill error";
+    }
     setStatus(`Nao foi possivel abrir a camera: ${error.message}`, "error");
+  } finally {
+    if (requestId === state.cameraRequestId) state.cameraStarting = false;
   }
 }
 
@@ -1139,6 +1167,7 @@ function openNativeCameraCapture() {
 }
 
 async function handleCameraCaptureButton() {
+  if (state.cameraStarting) return;
   if (state.stream) {
     await captureFromCamera();
     return;
@@ -1148,11 +1177,9 @@ async function handleCameraCaptureButton() {
 }
 
 function stopCamera() {
-  if (!state.stream) {
-    return;
-  }
-
-  state.stream.getTracks().forEach((track) => track.stop());
+  state.cameraRequestId += 1;
+  state.cameraStarting = false;
+  state.stream?.getTracks().forEach((track) => track.stop());
   state.stream = null;
   cameraEl.srcObject = null;
   if (cameraStatusEl) {
@@ -1165,6 +1192,11 @@ function stopCamera() {
 async function captureFromCamera() {
   if (!state.stream) {
     setStatus("Abra a camera antes de capturar.", "error");
+    return;
+  }
+
+  if (state.cameraStarting || cameraEl.readyState < 2 || !cameraEl.videoWidth || !cameraEl.videoHeight) {
+    setStatus("Aguarde a imagem da camera antes de capturar.", "info");
     return;
   }
 
