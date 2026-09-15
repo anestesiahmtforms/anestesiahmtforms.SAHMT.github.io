@@ -13,7 +13,9 @@
     ]
   };
   const noticesPayload = window.SAHMT_NOTICES || fallbackNoticesPayload;
-  const skipOpeningNotice = new URLSearchParams(window.location.search).get("skipNotice") === "1";
+  // Temporarily keep the home screen immediate while the opening notice is reviewed.
+  const openingNoticeEnabled = false;
+  const skipOpeningNotice = !openingNoticeEnabled || new URLSearchParams(window.location.search).get("skipNotice") === "1";
 
   const siglaPattern = /(?:[A-Z]{2}|L2)(?:[/-](?:[A-Z]{2}|L2))*/g;
   const contacts = Array.isArray(contactsPayload?.records) ? contactsPayload.records : [];

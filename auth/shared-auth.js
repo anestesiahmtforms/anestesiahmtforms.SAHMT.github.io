@@ -137,25 +137,6 @@
         text-decoration: underline;
         cursor: pointer;
       }
-      .sahmt-user-pill {
-        position: fixed;
-        top: calc(env(safe-area-inset-top, 0px) + 10px);
-        right: 10px;
-        z-index: 9500;
-        max-width: min(78vw, 360px);
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(11, 35, 63, 0.9);
-        color: #f8fbff;
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.02em;
-        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.24);
-        backdrop-filter: blur(10px);
-      }
-      .sahmt-user-pill[hidden] {
-        display: none !important;
-      }
       .sahmt-inline-auth {
         display: block;
         max-width: 100%;
@@ -218,19 +199,6 @@
       window.dispatchEvent(new Event("sahmt:auth-retry"));
     });
     return gate;
-  }
-
-  function ensureUserPill() {
-    let pill = document.getElementById("sahmt-user-pill");
-    if (pill) {
-      return pill;
-    }
-    pill = document.createElement("div");
-    pill.id = "sahmt-user-pill";
-    pill.className = "sahmt-user-pill";
-    pill.hidden = true;
-    document.body.appendChild(pill);
-    return pill;
   }
 
   function ensureInlineUserSlots() {
@@ -303,11 +271,8 @@
   }
 
   function updateUserUi() {
-    const pill = ensureUserPill();
     const label = authState?.email ? String(authState.email) : "";
-    const inlineSlots = ensureInlineUserSlots();
-    pill.textContent = label;
-    pill.hidden = !label || inlineSlots.length > 0;
+    ensureInlineUserSlots();
 
     document.querySelectorAll("#auth-user, [data-auth-user]").forEach((element) => {
       element.textContent = label || "Aguardando login";
@@ -734,7 +699,7 @@
     const tokenValid = authState?.token && authState.expiresAt > Date.now() + 30000;
     if (authState?.authenticated && (deviceValid || tokenValid) && Date.now() - confirmedAt < RECHECK_MS) return authState;
     if (activePromise) return activePromise;
-    ensureStyles(); ensureGate(); ensureUserPill();
+    ensureStyles(); ensureGate();
     activePromise = (async () => {
       const saved = readStoredSession(getConfig());
       if (saved) {

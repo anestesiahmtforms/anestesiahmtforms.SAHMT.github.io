@@ -20,7 +20,7 @@ async function mountPage(id,url){
   const generation=accountGeneration;
   const response=await fetch(new URL(`views/${id}.json`,import.meta.url));if(!response.ok)throw new Error('Não foi possível carregar esta área.');
   const spec=await response.json();const host=document.createElement('section');host.hidden=true;host.dataset.module=id;host.setAttribute('aria-label',names[id]);
-  const shadow=host.attachShadow({mode:'open'}),style=document.createElement('style');style.textContent=spec.css.replaceAll('__SAHMT_BASE__',base.href)+'\n:host{display:block} :host([hidden]){display:none!important} [hidden]{display:none!important} [data-auth-user]{font-size:.8rem;overflow-wrap:anywhere}';
+  const shadow=host.attachShadow({mode:'open'}),style=document.createElement('style');style.textContent=spec.css.replaceAll('__SAHMT_BASE__',base.href)+'\n:host{display:block} :host([hidden]){display:none!important} [hidden]{display:none!important} [data-auth-user]{font-size:.8rem;overflow-wrap:anywhere;padding-left:0!important;background-image:none!important;background-position:initial!important;background-size:initial!important} [data-auth-user]::before{content:none!important;display:none!important}';
   const body=document.createElement('div');body.dataset.moduleBody='';body.innerHTML=spec.html;
   const moduleBase=new URL(spec.base,base);
   for(const el of body.querySelectorAll('[href],[src],[poster],[action]'))for(const key of ['href','src','poster','action']){const value=el.getAttribute(key);if(value&&!value.startsWith('#')&&!value.startsWith('data:'))el.setAttribute(key,new URL(value,moduleBase).href);}
