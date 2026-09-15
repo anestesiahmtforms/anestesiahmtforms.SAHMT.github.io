@@ -1,160 +1,27 @@
-const CACHE_NAME = "sahmt-pwa-v168";
-const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./atualizar.html",
-  "./atualizar-v2.html",
-  "./atualizar-v3.html",
-  "./atualizar-v4.html",
-  "./atualizar-v5.html",
-  "./atualizar-v6.html",
-  "./escala-ferias.html",
-  "./escala-ferias-v2.html",
-  "./escala-ferias-imagens.html",
-  "./escala-ferias-imagens.css",
-  "./styles.css",
-  "./siglas-layout.css",
-  "./app.js",
-  "./sync-config.js",
-  "./notices.js",
-  "./data.js",
-  "./contacts.js",
-  "./manifest.webmanifest",
-  "./escala-ferias-2026.pdf",
-  "./escala-ferias-2026-v2.pdf",
-  "./escala-ferias-2026-v3.pdf",
-  "./escala-imagens/segunda-2026.jpg",
-  "./escala-imagens/terca-2026.jpg",
-  "./escala-imagens/quarta-2026.jpg",
-  "./escala-imagens/quinta-2026.jpg",
-  "./escala-imagens/sexta-2026.jpg",
-  "./escala-imagens/sabado-2026.jpg",
-  "./escala-imagens/ferias-2026.jpg",
-  "./sahmt_option1_clean.png",
-  "./gestao_operacional.png",
-  "./apps/eventos/index.html",
-  "./apps/eventos/styles.css",
-  "./apps/eventos/app.js",
-  "./apps/eventos/service-worker.js",
-  "./apps/eventos/manifest.webmanifest",
-  "./apps/eventos/data.js",
-  "./apps/eventos/contacts.js",
-  "./apps/eventos/notices.js",
-  "./apps/eventos/sync-config.js",
-  "./apps/eventos/sahmt_option1_clean.png",
-  "./apps/eventos/gestao_operacional.png",
-  "./apps/eventos/icons/icon-192.png",
-  "./apps/eventos/icons/icon-512.png",
-  "./apps/treinamentos/index.html",
-  "./apps/etiquetas/index.html",
-  "./apps/etiquetas/styles.css",
-  "./apps/etiquetas/app.js",
-  "./apps/etiquetas/sw.js",
-  "./apps/etiquetas/manifest.webmanifest",
-  "./apps/gestao/index.html",
-  "./integration/sahmt-checklist.js?v=20260910-5",
-  "./apps/checklist/index.html",
-  "./apps/checklist/styles.css",
-  "./apps/checklist/app.js",
-  "./apps/checklist/config.js",
-  "./apps/checklist/vendor/zxing.min.js",
-  "./apps/checklist/icons/icon.svg",
-  "./apps/checklist/manifest.webmanifest",
-  "./apps/gestao/styles.css",
-  "./apps/gestao/app.js",
-  "./apps/gestao/sw.js",
-  "./apps/gestao/manifest.webmanifest",
-  "./apps/gestao/assets/icon-192.svg",
-  "./apps/gestao/assets/icon-512.svg",
-  "./apps/gestao/assets/sahmt-logo.png",
-  "./apps/gestao/assets/selo-qga-accredited-qmentum-diamond.png",
-  "./eventos/index.html",
-  "./eventos/styles.css",
-  "./eventos/app.js",
-  "./eventos/config.js",
-  "./eventos/sw.js",
-  "./eventos/manifest.webmanifest",
-  "./eventos/assets/hero-icon.png",
-  "./eventos/assets/icon-192.png",
-  "./eventos/assets/icon-512.png",
-  "./logo_administrativo.png",
-  "./logo_gestao.png",
-  "./logo_equipe.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
-];
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key.startsWith("sahmt-pwa-") && key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") {
-    return;
-  }
-
-  // Serve the cached shell immediately, while refreshing it in the background.
-  // External spreadsheet data is still fetched by the app with no-store.
-  if (new URL(event.request.url).origin !== self.location.origin) {
-    return;
-  }
-
-  event.respondWith((async () => {
-    const cached = await caches.match(event.request);
-    const network = fetch(event.request, { cache: "no-store" }).then((response) => {
-      if (response.ok) {
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-      }
-      return response;
-    });
-
-    const needsFreshInterface = event.request.mode === "navigate"
-      || event.request.destination === "style"
-      || event.request.destination === "script";
-
-    if (needsFreshInterface) {
-      return network.catch(async () => {
-        if (cached) return cached;
-        const requestUrl = new URL(event.request.url);
-        if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
-        if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
-        if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
-        if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
-        if (requestUrl.pathname.includes("/apps/checklist/")) return caches.match("./apps/checklist/index.html");
-        return caches.match("./index.html");
-      });
-    }
-
-    if (cached) {
-      event.waitUntil(network.catch(() => {}));
-      return cached;
-    }
-
-    return network.catch(async () => {
-      const requestUrl = new URL(event.request.url);
-      if (requestUrl.pathname.includes("/apps/eventos/")) return caches.match("./apps/eventos/index.html");
-      if (requestUrl.pathname.includes("/apps/treinamentos/")) return caches.match("./apps/treinamentos/index.html");
-      if (requestUrl.pathname.includes("/apps/etiquetas/")) return caches.match("./apps/etiquetas/index.html");
-      if (requestUrl.pathname.includes("/apps/gestao/")) return caches.match("./apps/gestao/index.html");
-      if (requestUrl.pathname.includes("/apps/checklist/")) return caches.match("./apps/checklist/index.html");
-      return caches.match("./index.html");
-    });
+// One cache owner for the complete SAHMT PWA. APIs and clinical records are never cached here.
+const CACHE='sahmt-unified-7ab623a29622f47f';
+const ASSETS=["./index.html","./manifest.webmanifest","./auth/shared-auth.js","./core/app.js","./core/runtime.js","./core/checklist-contract.js","./core/views/checklist.js","./core/views/checklist.json","./core/views/etiquetas.js","./core/views/etiquetas.json","./core/views/eventos.js","./core/views/eventos.json","./core/views/gestao.js","./core/views/gestao.json","./core/views/home.js","./core/views/home.json","./core/views/treinamentos.js","./core/views/treinamentos.json","./icons/icon-192.png"];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
+self.addEventListener('message',event=>{if(event.data==='ACTIVATE_UPDATE')self.skipWaiting();});
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+  const root=new URL('./',self.location.href).href;
+  for(const key of await caches.keys())if(key.startsWith('sahmt-unified-')&&key!==CACHE)await caches.delete(key);
+  // Remove only this app's old entries; caches on the same github.io origin may belong to other apps.
+  const owned=/^(sahmt-pwa-|etiqueta-sahmt-ia-|sahmt-gestao-shell-|sahmt-checklist-)/;
+  for(const key of await caches.keys())if(owned.test(key)){const c=await caches.open(key);for(const req of await c.keys())if(req.url.startsWith(root))await c.delete(req);if(!(await c.keys()).length)await caches.delete(key);}
+  await self.clients.claim();
+})()));
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
+  const url=new URL(event.request.url),root=new URL('./',self.location.href);
+  if(url.origin!==root.origin||!url.pathname.startsWith(root.pathname))return;
+  // Only immutable interface assets from the release list enter the app cache.
+  const clean=new URL(url);clean.search='';
+  const known=ASSETS.some(p=>new URL(p,root).href===clean.href);
+  if(!known&&event.request.mode!=='navigate')return;
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    if(known){const cached=await cache.match(clean.href);if(cached)return cached;const response=await fetch(event.request);if(response.ok)await cache.put(clean.href,response.clone());return response;}
+    try{return await fetch(event.request);}catch{return (await cache.match(new URL('index.html',root).href))||Response.error();}
   })());
 });
-
