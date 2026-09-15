@@ -66,41 +66,47 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
       throw wrapped;
     }
     const targetUrl=new URL(absoluteUrl);
-    const isEtiquetasAi=targetUrl.hostname==='script.google.com'&&targetUrl.searchParams.get('action')==='aiExtract'&&String(options?.method||'GET').toUpperCase()==='POST';
+    const method=String(options?.method||'GET').toUpperCase();
+    let parsedBody=null;
+    try{parsedBody=JSON.parse(String(options?.body||'{}'));}catch{}
+    const isEtiquetasAi=targetUrl.hostname==='script.google.com'&&method==='POST'&&(targetUrl.searchParams.get('action')==='aiExtract'||parsedBody?.action==='aiExtract');
     if(!isEtiquetasAi)return fetch(absoluteUrl,options);
 
-    const run=async(opts,timeoutMs=45000)=>{
+    const baseUrl=new URL(absoluteUrl);baseUrl.searchParams.delete('action');
+    const run=async(url,opts,timeoutMs)=>{
       const controller=new AbortController();
       const inherited=opts?.signal;
       const onAbort=()=>controller.abort();
       inherited?.addEventListener?.('abort',onAbort,{once:true});
       const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);
-      try{return await fetch(absoluteUrl,{...opts,signal:controller.signal});}
+      try{return await fetch(url,{...opts,signal:controller.signal,cache:'no-store',redirect:'follow'});}
       finally{window.clearTimeout(timeout);inherited?.removeEventListener?.('abort',onAbort);}
     };
 
-    try{return await run(options);}
-    catch(firstError){
-      let body;
-      try{body=JSON.parse(String(options?.body||'{}'));}catch{body=null;}
-      const hasNumeric=Array.isArray(body?.numericImageDataUrls)&&body.numericImageDataUrls.length>0;
-      if(hasNumeric){
-        try{
-          const reduced={...body,numericImageDataUrls:[]};
-          return await run({...options,body:JSON.stringify(reduced)},45000);
-        }catch(secondError){
-          const error=new Error(secondError?.name==='AbortError'
-            ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
-            : `Não foi possível comunicar com o serviço de leitura por IA (${secondError?.message||'erro de rede'}).`);
-          error.cause=secondError;
-          throw error;
-        }
+    if(parsedBody){
+      const healthBody={action:'aiHealth',authToken:parsedBody.authToken||'',deviceToken:parsedBody.deviceToken||'',userEmail:parsedBody.userEmail||''};
+      try{
+        const health=await run(baseUrl.href,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(healthBody)},15000);
+        const healthJson=await health.clone().json().catch(()=>null);
+        if(!health.ok||healthJson?.ok!==true)throw new Error(healthJson?.message||`HTTP ${health.status}`);
+      }catch(error){
+        const wrapped=new Error(error?.name==='AbortError'
+          ? 'O serviço de leitura por IA não respondeu ao teste de conexão em 15 segundos.'
+          : `O serviço de leitura por IA não passou no teste de conexão (${error?.message||'erro de rede'}).`);
+        wrapped.cause=error;
+        throw wrapped;
       }
-      const error=new Error(firstError?.name==='AbortError'
-        ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
-        : `Não foi possível comunicar com o serviço de leitura por IA (${firstError?.message||'erro de rede'}).`);
-      error.cause=firstError;
-      throw error;
+    }
+
+    const reducedBody=parsedBody?{...parsedBody,numericImageDataUrls:[]}:null;
+    try{
+      return await run(baseUrl.href,reducedBody?{...options,body:JSON.stringify(reducedBody)}:options,45000);
+    }catch(error){
+      const wrapped=new Error(error?.name==='AbortError'
+        ? 'A conexão com a IA foi confirmada, mas a leitura da imagem excedeu 45 segundos.'
+        : `A conexão com a IA foi confirmada, mas o envio da imagem falhou (${error?.message||'erro de rede'}).`);
+      wrapped.cause=error;
+      throw wrapped;
     }
   };
   return {document:doc,window:win,navigator:nav,location:locationView,history:historyView,fetch:fetchLocal,
