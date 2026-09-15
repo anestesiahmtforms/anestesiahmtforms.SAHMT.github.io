@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {checklistResponse} from '../core/checklist-contract.js';
+test('accept a valid report without inventing records',()=>{const r={ok:true,day:'2026-09-14',items:[{id:'100170003'}],canSign:false};assert.equal(checklistResponse(r,'report',{day:r.day}),r);});
+test('unwrap the explicit data envelope',()=>{const r=checklistResponse({ok:true,data:{day:'2026-09-14',items:[],canSign:false}},'report');assert.deepEqual(r.items,[]);});
+test('reject generic success responses instead of treating them as empty reports',()=>{for(const r of [{ok:true},{ok:true,items:{}},{ok:true,day:'2026-09-14',items:[null]}])assert.throws(()=>checklistResponse(r,'report'),/relatório válido/);});
+test('reject another day and server errors',()=>{assert.throws(()=>checklistResponse({ok:true,day:'2026-09-15',items:[]},'report',{day:'2026-09-14'}),/outra data/);assert.throws(()=>checklistResponse({ok:false,message:'Sem permissão'},'sign'),/Sem permissão/);});
