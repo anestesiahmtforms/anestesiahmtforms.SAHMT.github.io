@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SAHMT</title>
+  <meta name="theme-color" content="#0d3257">
+  <meta name="description" content="Agenda SAHMT com escala diaria, ferias da semana e acesso rapido por data.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://docs.google.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css?v=20260913-12">
+    <link rel="stylesheet" href="./siglas-layout.css?v=20260909-04">
+</head>
+<body>
+  <div class="page-shell">
+    <main class="app-frame">
+      <section class="hero-card">
+        <div class="hero-logo-wrap hero-logo-link premium-title-logo" aria-label="Logo SAHMT">
+          <img src="./sahmt_option1_clean.png" alt="Logo SAHMT" class="hero-logo">
+        </div>
+        <div class="hero-copy">
+          <h1>SAHMT</h1>
+          <span data-auth-user hidden></span>
+        </div>
+      </section>
+
+      <section id="scheduleCard" class="panel-card schedule-card">
+        <section class="search-banner">
+          <div class="card-header">
+            <p class="card-title">CALENDÁRIO</p>
+          </div>
+
+          <div class="controls-grid">
+            <label class="date-field" for="dateInput">
+              <input id="dateInput" type="date">
+            </label>
+
+            <button id="installButton" class="install-banner hidden" type="button">
+              Instalar app na tela do smartphone
+            </button>
+
+            <div class="quick-actions">
+              <button id="prevButton" class="soft-button" type="button">Anterior</button>
+              <button id="todayButton" class="primary-button" type="button">HOJE</button>
+              <button id="nextButton" class="soft-button" type="button">Proximo</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="emptyState" class="empty-state hidden">
+          Sem escala cadastrada para esta data.
+        </div>
+
+        <div id="siglasGrid" class="siglas-grid"></div>
+
+      </section>
+
+      <section class="ecosystem-action-strip" aria-label="Acessos rápidos SAHMT">
+        <button id="checklistLauncher" class="ecosystem-action ecosystem-action--checklist" type="button">
+          <span class="ecosystem-action__icon" aria-hidden="true">✓</span>
+          <span>Checklist</span>
+        </button>
+        <button id="trainingLauncher" class="ecosystem-action ecosystem-action--training" type="button">
+          <span class="ecosystem-action__icon" aria-hidden="true">▶</span>
+          <span>Treinamentos</span>
+        </button>
+        <button id="notificationsLauncher" class="ecosystem-action ecosystem-action--notifications" type="button" disabled title="Em breve">
+          <span class="ecosystem-action__icon" aria-hidden="true">!</span>
+          <span>Notificações</span>
+        </button>
+      </section>
+      <section class="module-link-strip" aria-label="Módulos SAHMT">
+        <a class="module-link-card" href="./apps/eventos/" aria-label="Abrir Eventos de Escala">
+          <img src="./gestao_operacional.png" alt="Operacional" class="module-link-card__image">
+          <span>OPERACIONAL</span>
+        </a>
+        <a class="module-link-card" href="./apps/etiquetas/" aria-label="Abrir Etiquetas SAHMT">
+          <img src="./sahmt_option1.png" alt="Etiquetas" class="module-link-card__image">
+          <span>ETIQUETAS</span>
+        </a>
+        <a class="module-link-card" href="./apps/gestao/" aria-label="Abrir Segmento de Gestão">
+          <img src="./apps/gestao/assets/selo-qga-accredited-qmentum-diamond.png" alt="Diamond" class="module-link-card__image">
+          <span>GESTÃO</span>
+        </a>
+      </section>
+
+      <footer class="footer-banner">
+        By Francisco Tadeu da Mota Albuquerque
+      </footer>
+    </main>
+  </div>
+
+  <div id="contactModal" class="contact-modal hidden" aria-hidden="true">
+    <div id="contactBackdrop" class="contact-modal__backdrop"></div>
+    <section class="contact-sheet" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <div class="contact-sheet__header">
+        <div>
+          <p id="contactKicker" class="contact-sheet__kicker">Sigla selecionada</p>
+          <h2 id="contactTitle">Contato SAHMT</h2>
+        </div>
+        <button id="closeContactModal" class="contact-sheet__close" type="button" aria-label="Fechar contato">Fechar</button>
+      </div>
+
+      <p id="contactSummary" class="contact-sheet__summary"></p>
+      <div id="contactList" class="contact-list"></div>
+    </section>
+  </div>
+
+  <div id="eventsModal" class="events-modal hidden" aria-hidden="true">
+    <div id="eventsBackdrop" class="events-modal__backdrop"></div>
+    <section class="events-sheet" role="dialog" aria-modal="true" aria-label="Gestao Operacional">
+      <div class="events-frame-wrap">
+        <iframe
+          id="eventsFrame"
+          class="events-frame"
+          title="Gestao Operacional SAHMT"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
+          allow="clipboard-read; clipboard-write; camera"
+        ></iframe>
+      </div>
+      <footer class="events-sheet__footer">
+        <button id="closeEventsModal" class="events-sheet__close" type="button" aria-label="Voltar para Escala">ESCALA</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="managementModal" class="events-modal hidden" aria-hidden="true">
+    <div id="managementBackdrop" class="events-modal__backdrop"></div>
+    <section class="events-sheet" role="dialog" aria-modal="true" aria-label="Segmento de Gestao">
+      <div class="events-frame-wrap">
+        <iframe
+          id="managementFrame"
+          class="events-frame"
+          title="Segmento de Gestao SAHMT"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
+          allow="clipboard-read; clipboard-write; camera"
+        ></iframe>
+      </div>
+      <footer class="events-sheet__footer">
+        <button id="closeManagementModal" class="events-sheet__close" type="button" aria-label="Voltar para Escala">ESCALA</button>
+      </footer>
+    </section>
+  </div>
+
+  <div id="labelsModal" class="events-modal hidden" aria-hidden="true">
+    <div id="labelsBackdrop" class="events-modal__backdrop"></div>
+    <section class="events-sheet" role="dialog" aria-modal="true" aria-label="Etiquetas SAHMT">
+      <div class="events-frame-wrap">
+        <iframe
+          id="labelsFrame"
+          class="events-frame"
+          title="Etiquetas SAHMT"
+          loading="eager"
+          referrerpolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads"
+          allow="clipboard-read; clipboard-write; camera"
+        ></iframe>
+      </div>
+    </section>
+  </div>
+
+  <div id="noticeModal" class="notice-modal hidden" aria-hidden="true">
+    <div class="notice-modal__backdrop"></div>
+    <section class="notice-card" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+      <div class="notice-card__glow"></div>
+      <p id="noticeEyebrow" class="notice-card__eyebrow"></p>
+      <h2 id="noticeTitle"></h2>
+      <p id="noticeMessage" class="notice-card__message"></p>
+      <div id="noticeMedia" class="notice-card__media" hidden></div>
+      <div id="noticePresentation" class="notice-presentation" hidden aria-live="polite"></div>
+      <div class="notice-card__footer">
+        <p id="noticeCountdown" class="notice-card__countdown" aria-live="polite"></p>
+        <button id="closeNoticeModal" class="notice-card__close" type="button" disabled>Fechar aviso</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="./data.js?v=20260803-2"></script>
+  <script src="./contacts.js?v=20260803-2"></script>
+  <script src="./sync-config.js?v=20260804-3"></script>
+  <script src="./notices.js?v=20260913-09"></script>
+  <script src="./auth/shared-auth.js?v=20260913-1"></script>
+  <script src="./integration/sahmt-checklist.js?v=20260913-1"></script>
+  <script src="./app.js?v=20260913-11"></script>
+</body>
+</html>
+

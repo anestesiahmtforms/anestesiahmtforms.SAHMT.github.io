@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import vm from 'node:vm';
+import {checklistResponse} from '../core/checklist-contract.js';
+const source=await fs.readFile('reference/checklist/Code.recebido.gs','utf8');
+function load(){const ctx={ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({text,setMimeType(){return this;}})},Utilities:{formatDate:()=> '2026-09-14',DigestAlgorithm:{SHA_256:'sha256'},computeDigest:()=>[1],base64EncodeWebSafe:()=> 'revision'},SpreadsheetApp:{openById:()=>({})},PropertiesService:{getScriptProperties:()=>({getProperty:()=>''})}};vm.createContext(ctx);vm.runInContext(source,ctx);return ctx;}
+test('service health response cannot be rendered as a daily report',()=>{const c=load();const health=JSON.parse(c.doGet().text);assert.equal(health.ok,true);assert.equal(health.service,'SAHMT-BH Checklist');assert.throws(()=>checklistResponse(health,'report'),/relatório válido/);});
+test('uploaded backend requires three definitions absent from this file',()=>{const c=load();for(const name of ['INACTIVE_UNIT_IDS','monthly_','responsibleForDay_'])assert.equal(vm.runInContext(`typeof ${name}`,c),'undefined');});
+test('uploaded backend daily report matches native frontend contract when dependencies are supplied',()=>{const c=load();vm.runInContext('const INACTIVE_UNIT_IDS=new Set();',c);const result=c.report_({},'2026-09-14',{email:'signer@example.invalid'},{units:[['one','Test unit','qr','','']],records:[],signatures:[],signers:[['signer@example.invalid','Test','SIM']]},'2026-09-14');assert.equal(checklistResponse(result,'report',{day:'2026-09-14'}).items.length,1);assert.equal(result.canSign,true);});
+test('daily report request also invokes score synchronization before returning',()=>{const c=load();const calls=[];c.authenticate_=()=>({email:'test@example.invalid'});c.report_=()=>({ok:true,day:'2026-09-14',items:[],signature:null});c.syncChecklistScore_=(_,day)=>calls.push(day);c.responsibleForDay_=()=>({email:'test@example.invalid'});const output=c.doPost({postData:{contents:JSON.stringify({action:'report',day:'2026-09-14'})}});assert.equal(JSON.parse(output.text).ok,true);assert.deepEqual(calls,['2026-09-13']);});

@@ -11,49 +11,12 @@ const CONFIG = Object.freeze({
 });
 
 function doGet(e) {
-  const email = getAuthenticatedEmail_(e);
-  const trainingId = String(e && e.parameter ? e.parameter.trainingId || "" : "").trim();
-  const trainings = getTrainings_();
-  const training = trainings.find((item) => item.id === trainingId) || null;
-  const allowed = Boolean(email && isParticipantAllowed_(email));
-  const accessId = allowed && training ? recordAccess_(email, training.id) : "";
-  const totalPoints = allowed ? getTotalPoints_(email) : 0;
-  const completedTrainingIds = allowed ? getCompletedTrainingIds_(email) : [];
-  const catalogTrainings = trainings.map((item) => Object.assign({}, item, {
-    completed: completedTrainingIds.indexOf(item.id) !== -1
-  }));
-  const totalAvailablePoints = trainings.reduce((total, item) => {
-    return total + item.accessPoints + item.completionPoints;
-  }, 0);
-  const scorePercentage = totalAvailablePoints > 0
-    ? Math.min(100, Math.round((totalPoints / totalAvailablePoints) * 100))
-    : 0;
-
-  const template = HtmlService.createTemplate(html_());
-  template.state = {
-    allowed,
-    email: email || "",
-    accessId,
-    training: training ? {
-      id: training.id,
-      title: training.title,
-      videoId: training.videoId,
-      videoUrl: training.videoUrl
-    } : null,
-    trainings: catalogTrainings,
-    totalPoints,
-    totalAvailablePoints,
-    scorePercentage,
-    endpoint: CONFIG.webAppUrl,
-    trainingCatalogJson: JSON.stringify(catalogTrainings)
-  };
-
-  return template.evaluate()
-    .setTitle(training ? training.title : "Treinamentos SAHMT")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  // The user interface now belongs to the PWA. No email from a URL is accepted as identity.
+  const url='https://anestesiahmtforms.github.io/anestesiahmtforms.SAHMT.github.io/#/apps/treinamentos/';
+  return HtmlService.createHtmlOutput('<!doctype html><html lang="pt-BR"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Treinamentos SAHMT</title><body><p>Os treinamentos estão disponíveis no aplicativo SAHMT.</p><a target="_top" href="'+url+'">Abrir Treinamentos</a></body></html>');
 }
 
-function completeTraining(accessId, email, trainingId) {
+function completeTraining_(accessId, email, trainingId) {
   const normalizedEmail = normalizeEmail_(email);
   const training = getTrainings_().find((item) => item.id === trainingId);
   if (!accessId || !normalizedEmail || !training) {
@@ -87,11 +50,7 @@ function completeTraining(accessId, email, trainingId) {
 }
 
 function getAuthenticatedEmail_(e) {
-  const parameterEmail = e && e.parameter
-    ? (e.parameter.userEmail || e.parameter.email)
-    : "";
-  const clientEmail = normalizeEmail_(parameterEmail);
-  return clientEmail || normalizeEmail_(Session.getActiveUser().getEmail());
+  return normalizeEmail_(Session.getActiveUser().getEmail());
 }
 
 function isParticipantAllowed_(email) {

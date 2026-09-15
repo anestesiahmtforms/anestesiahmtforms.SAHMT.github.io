@@ -1,47 +1,16 @@
-const ETIQUETAS_AUTH_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzdtxNDDOwGyZ44oMbx4LPktnQvdKemF0c2kdbpD63rmzAsF-tiUDOtheBAgej1SWaH/exec';
-const SPREADSHEET_NAME = "Etiquetas";
-const SPREADSHEET_ID = "1JBndSbftojjB-UGkBs4USUmCe5ZWdSx57bbZoSia2ME";
-const REGISTROS_SHEET = "ETIQUETA";
-const LISTAS_SHEET = "Listas";
-const OPENAI_MODEL = "gpt-5.2";
-const OPENAI_API_KEY_PROPERTY = "OPENAI_API_KEY";
-const REGISTROS_HEADERS = [
-  "Data",
-  "Nome do Paciente",
-  "Convênio",
-  "Cirurgia",
-  "Atendimento",
-  "Tipo",
-  "Credor",
-  "Plantonista(s)",
-  "Observacoes",
-  "Criado em",
-  "Criado por",
-  "Observacao atualizada em",
-  "Observacao atualizada por",
-  "Editado em",
-  "Editado por",
-  "Resumo da edicao",
-  "Valor",
-];
-
-const TIPO_OPTIONS = ["Particular", "Complementação", "Convênio", "Consulta Pré-anestésica", "SADT"];
-const CREDOR_OPTIONS = ["Caixa", "Plantão", "Plantão/Caixa"];
-const PLANTONISTA_OPTIONS = [
-  "AD", "AA", "AL", "BA", "CH", "CR", "DE", "DN", "FL", "FR", "GU", "GB", "IG", "JA",
-  "L2", "LE", "LD", "LC", "LH", "LU", "LA", "LO", "MA", "MH", "PR", "RA", "RL", "RC",
-  "RO", "RU", "WE",
-];
-
+// Compatibilidade com funções de Etiquetas deste projeto antigo. Não substituir pelo servidor separado de Etiquetas.
 function setup() {
   return ensureWorkbook_();
 }
 
-function doGet(e) {
+function legacyDoGet_(e) {
   try {
-    getRequestUser_((e && e.parameter) || {});
-    // Reads must not rebuild lists, validations, formatting, or column widths.
-    const spreadsheet = getSpreadsheet_();
+    const user = requireAuthorized_(
+      e && e.parameter && e.parameter.authToken,
+      e && e.parameter && e.parameter.deviceToken,
+      e && e.parameter && e.parameter.userEmail
+    );
+    const spreadsheet = ensureWorkbook_();
     const action = (e && e.parameter && e.parameter.action) || "";
 
     if (action === "metadata") {
@@ -53,6 +22,7 @@ function doGet(e) {
         tipoOptions: TIPO_OPTIONS,
         credorOptions: CREDOR_OPTIONS,
         plantonistaOptions: PLANTONISTA_OPTIONS,
+        userEmail: user.email,
       });
     }
 
@@ -88,6 +58,7 @@ function doGet(e) {
       ok: true,
       message: "ETIQUETAS SAHMT API online.",
       spreadsheetName: spreadsheet.getName(),
+      userEmail: user.email,
     });
   } catch (error) {
     return jsonResponse({
@@ -97,22 +68,34 @@ function doGet(e) {
   }
 }
 
-function doPost(e) {
+function legacyDoPost_(e) {
   try {
     const payload = JSON.parse((e.postData && e.postData.contents) || "{}");
-    const user = getRequestUser_(payload);
     const action = String(payload.action || (e.parameter && e.parameter.action) || "").trim();
 
+    if (action === "auth") {
+      return handleAuth_(payload);
+    }
+
+    if (action === "track") {
+      return handleTrack_(payload);
+    }
+
+    const user = requireAuthorized_(
+      payload.authToken || (e.parameter && e.parameter.authToken),
+      payload.deviceToken || (e.parameter && e.parameter.deviceToken),
+      payload.userEmail || (e.parameter && e.parameter.userEmail)
+    );
+
     if (action === "aiHealth") {
-      return handleAiHealth_();
+      return handleAiHealth_(user);
     }
 
     if (action === "aiExtract") {
       return handleAiExtract_(payload);
     }
 
-    payload.tipo = normalizeTipoValue_(payload.tipo);
-    prepareWriteWorkbook_();
+    ensureWorkbook_();
 
     if (action === "updateObservation") {
       return handleUpdateObservation_(payload, user);
@@ -147,7 +130,7 @@ function doPost(e) {
       "",
       "",
       "",
-      normalizeCurrency_(payload.valor),
+      payload.valor || "",
     ]);
     const appendedRow = sheet.getLastRow();
     setCompactCellWithNote_(
@@ -171,52 +154,29 @@ function doPost(e) {
   }
 }
 
-function getRequestUser_(payload) {
-  const authToken = String(payload && payload.authToken || '');
-  const deviceToken = String(payload && payload.deviceToken || '');
-  if(!authToken && !deviceToken)throw new Error('Sessão autenticada ausente. Entre novamente pelo SAHMT.');
-  const response=UrlFetchApp.fetch(ETIQUETAS_AUTH_ENDPOINT,{
-    method:'post',contentType:'text/plain;charset=utf-8',muteHttpExceptions:true,
-    payload:JSON.stringify({action:'auth',authToken,deviceToken,userEmail:String(payload.userEmail || ''),moduleId:'ETIQUETAS',pageId:'api'})
-  });
-  let result;try{result=JSON.parse(response.getContentText());}catch(error){throw new Error('Não foi possível confirmar a sessão.');}
-  if(response.getResponseCode()!==200 || result?.ok!==true || !result.email)throw new Error('Sessão não autorizada. Entre novamente pelo SAHMT.');
-  return {email:String(result.email).trim().toLowerCase(),name:String(result.name || '')};
-}
-
-function handleAiHealth_() {
+function handleAiHealth_(user) {
   const apiKey = PropertiesService.getScriptProperties().getProperty(OPENAI_API_KEY_PROPERTY);
   if (!apiKey) {
     throw new Error("Configure a propriedade OPENAI_API_KEY no Apps Script.");
   }
 
-  const response = UrlFetchApp.fetch("https://api.openai.com/v1/responses", {
-    method: "post",
-    contentType: "application/json",
+  const response = UrlFetchApp.fetch("https://api.openai.com/v1/models/" + encodeURIComponent(OPENAI_MODEL), {
+    method: "get",
     headers: {
       Authorization: "Bearer " + apiKey,
     },
-    payload: JSON.stringify({
-      model: OPENAI_MODEL,
-      input: "Responda apenas OK.",
-      max_output_tokens: 16,
-      reasoning: { effort: "low" },
-    }),
     muteHttpExceptions: true,
   });
   const status = response.getResponseCode();
-  const content = response.getContentText();
   if (status < 200 || status >= 300) {
-    throw new Error("API OpenAI nao confirmou a rota de leitura (" + status + "): " + content.slice(0, 200));
+    throw new Error("API OpenAI nao confirmou o modelo " + OPENAI_MODEL + " (" + status + ").");
   }
-
-  const payload = JSON.parse(content || "{}");
-  const outputText = extractOutputText_(payload);
 
   return jsonResponse({
     ok: true,
     model: OPENAI_MODEL,
-    message: outputText ? "IA OpenAI ativa via Responses." : "IA OpenAI respondeu sem texto util.",
+    userEmail: user.email,
+    message: "API OpenAI ativa.",
   });
 }
 
@@ -232,38 +192,24 @@ function handleAiExtract_(payload) {
   }
 
   const prompt = [
-    "Voce le etiquetas hospitalares HMT, etiquetas SADT e cards de consulta pre-anestesica.",
+    "Voce le etiquetas hospitalares HMT.",
     "Extraia somente os campos abaixo e responda em JSON.",
     "Regras:",
-    "1. Para etiqueta hospitalar padrao, nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Nao inclua Pront nem o numero do prontuario.",
-    "2. Para etiqueta hospitalar padrao, convenio: texto depois de 'Convenio:' ate o fim da linha. Nao inclua a palavra Convenio:.",
-    "3. Para etiqueta hospitalar padrao, cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Use tambem o recorte numerico ampliado correspondente. Deve conter somente digitos.",
-    "4. Para etiqueta hospitalar padrao, atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Use tambem o recorte numerico ampliado correspondente. Deve conter somente digitos.",
-    "5. Para o modelo de consulta pre-anestesica em formato de card escuro, extraia apenas nomePaciente e atendimento.",
-    "6. Quando detectar o modelo de consulta pre-anestesica, preencha tipo exatamente como 'Consulta Pré-anestésica' e credor exatamente como 'Caixa'. Nessa situacao, deixe convenio e cirurgia vazios.",
-    "7. Para o modelo SADT, reconheca a etiqueta pelo texto 'N. Guia', 'Senha' e 'Convenio'. Extraia nomePaciente depois de 'Nome:' e antes de 'Pront:'. Extraia convenio somente depois de 'Convenio:' na linha da senha, ate o fim da linha; nao inclua 'Convenio:'.",
-    "8. Para o modelo SADT, extraia atendimento somente como o numero impresso abaixo do codigo de barras. Preencha tipo exatamente como 'SADT', deixe cirurgia vazio e deixe credor vazio para o usuario preencher.",
-    "9. Quando detectar a etiqueta hospitalar padrao, deixe tipo e credor vazios para o frontend manter o fluxo atual.",
-    "10. Nao troque cirurgia por atendimento e nao use numero de prontuario nesses campos.",
-    "11. Os recortes numericos aparecem depois da imagem principal: o primeiro mostra a faixa inferior completa, o segundo prioriza o lado esquerdo (N.Cirur) e o terceiro prioriza o lado direito (N.Atend). Compare a imagem principal com os recortes.",
-    "12. Para cirurgia e atendimento, responda somente a sequencia exata de digitos visiveis. Se qualquer digito estiver duvidoso, responda string vazia; nunca complete, corrija ou estime um numero.",
-    "13. Um zero (0) parcialmente cortado ou com a borda apagada nunca deve ser interpretado como oito (8). Se nao for possivel distinguir 0 de 8 com certeza, deixe o campo vazio.",
-    "14. Preserve o nome e o convenio com grafia natural, corrigindo apenas pequenos erros visuais obvios.",
-    "15. Se a foto estiver parcial ou borrada, deixe vazio apenas o campo inseguro.",
+    "1. nomePaciente: texto depois de 'Nome:' e antes de 'Pront:'. Exemplo: 'Celio Cardoso'. Nao inclua Pront nem o numero do prontuario.",
+    "2. convenio: texto depois de 'Convenio:' ate o fim da linha. Exemplo: 'Unimed BH - HMT'. Nao inclua a palavra Convenio:.",
+    "3. cirurgia: numero impresso abaixo do primeiro codigo de barras, na parte inferior esquerda, proximo de 'N.Cirur'. Deve conter somente digitos.",
+    "4. atendimento: numero impresso abaixo do segundo codigo de barras, na parte inferior direita, proximo de 'N.Atend'. Deve conter somente digitos.",
     "Se houver duvida, use string vazia no campo duvidoso. Nao invente valores.",
   ].join("\n");
 
   const requestBody = {
     model: OPENAI_MODEL,
-    reasoning: { effort: "low" },
-    max_output_tokens: 320,
     input: [
       {
         role: "user",
         content: [
           { type: "input_text", text: prompt },
           { type: "input_image", image_url: imageDataUrl, detail: "high" },
-          ...getNumericImageInputs_(payload.numericImageDataUrls),
         ],
       },
     ],
@@ -275,14 +221,12 @@ function handleAiExtract_(payload) {
         schema: {
           type: "object",
           additionalProperties: false,
-          required: ["nomePaciente", "convenio", "cirurgia", "atendimento", "tipo", "credor"],
+          required: ["nomePaciente", "convenio", "cirurgia", "atendimento"],
           properties: {
             nomePaciente: { type: "string" },
             convenio: { type: "string" },
             cirurgia: { type: "string" },
             atendimento: { type: "string" },
-            tipo: { type: "string" },
-            credor: { type: "string" },
           },
         },
       },
@@ -311,28 +255,18 @@ function handleAiExtract_(payload) {
     throw new Error("A IA nao retornou texto estruturado.");
   }
 
-  const extracted = parseJsonObjectSafe_(outputText);
+  const extracted = JSON.parse(outputText);
   const nomePaciente = cleanName_(extracted.nomePaciente);
   const convenio = cleanConvenio_(extracted.convenio);
-  const cirurgia = sanitizeLabelNumber_(extracted.cirurgia);
-  const atendimento = sanitizeLabelNumber_(extracted.atendimento);
-  const extractedTipo = normalizeTipoValue_(extracted.tipo);
-  const isConsultaModel = extractedTipo === "Consulta Pré-anestésica" ||
-    (!extractedTipo && !convenio && !cirurgia && nomePaciente && atendimento);
-  const isSadtModel = extractedTipo === "SADT";
-  const tipo = isConsultaModel ? "Consulta Pré-anestésica" : (isSadtModel ? "SADT" : "");
-  const credor = isConsultaModel ? "Caixa" : "";
+  const cirurgia = cleanDigits_(extracted.cirurgia);
+  const atendimento = cleanDigits_(extracted.atendimento);
 
   return jsonResponse({
     ok: true,
-    model: OPENAI_MODEL,
-    message: "Leitura por IA concluida.",
     nomePaciente,
     convenio,
     cirurgia,
     atendimento,
-    tipo,
-    credor,
   });
 }
 
@@ -355,58 +289,6 @@ function extractOutputText_(apiResult) {
   return "";
 }
 
-function parseJsonObjectSafe_(text) {
-  const raw = String(text || "").trim();
-  if (!raw) {
-    throw new Error("A IA nao retornou JSON.");
-  }
-
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (match) {
-      return JSON.parse(match[0]);
-    }
-    throw new Error("A IA retornou texto fora do JSON esperado.");
-  }
-}
-
-function sanitizeLabelNumber_(value) {
-  const raw = String(value == null ? "" : value).trim();
-  if (!raw || !/^\d+$/.test(raw)) {
-    return "";
-  }
-  return raw.length >= 3 && raw.length <= 14 ? raw : "";
-}
-
-function getNumericImageInputs_(rawImages) {
-  if (!Array.isArray(rawImages)) {
-    return [];
-  }
-
-  return rawImages.slice(0, 3).reduce((inputs, imageDataUrl) => {
-    const value = String(imageDataUrl || "").trim();
-    if (/^data:image\/(png|jpe?g|webp);base64,/i.test(value)) {
-      inputs.push({ type: "input_image", image_url: value, detail: "high" });
-    }
-    return inputs;
-  }, []);
-}
-
-function normalizeConsultaType_(value) {
-  const normalized = normalizeCompare_(value);
-  if (normalized === "consulta pre-anestesica" || normalized === "consulta pre anestesica") {
-    return "Consulta Pré-anestésica";
-  }
-  return "";
-}
-
-function normalizeTipoValue_(value) {
-  const text = String(value || "").trim();
-  return normalizeConsultaType_(text) || (normalizeCompare_(text) === "sadt" ? "SADT" : text);
-}
-
 function ensureWorkbook_() {
   const spreadsheet = getSpreadsheet_();
   const registros = spreadsheet.getSheetByName(REGISTROS_SHEET) || spreadsheet.insertSheet(REGISTROS_SHEET);
@@ -418,16 +300,6 @@ function ensureWorkbook_() {
   applyValidations_(registros, listas);
   formatRegistros_(registros);
 
-  return spreadsheet;
-}
-
-function prepareWriteWorkbook_() {
-  const spreadsheet = getSpreadsheet_();
-  const registros = spreadsheet.getSheetByName(REGISTROS_SHEET);
-  const listas = spreadsheet.getSheetByName(LISTAS_SHEET);
-  if (!registros || !listas) {
-    return ensureWorkbook_();
-  }
   return spreadsheet;
 }
 
@@ -502,10 +374,9 @@ function formatRegistros_(sheet) {
     .setFontColor("#ffffff")
     .setFontWeight("bold");
   sheet.getRange(2, 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy");
-  sheet.getRange(2, 10, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(2, 12, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(2, REGISTROS_HEADERS.indexOf("Valor") + 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("R$ #,##0.00");
+  sheet.getRange(2, 10, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(2, 12, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(2, 14, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat("dd/mm/yyyy hh:mm:ss");
   sheet.autoResizeColumns(1, REGISTROS_HEADERS.length);
 }
 
@@ -515,28 +386,9 @@ function applyRowFormats_(sheet, rowNumber) {
   }
 
   sheet.getRange(rowNumber, 1).setNumberFormat("dd/mm/yyyy");
-  sheet.getRange(rowNumber, 10).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(rowNumber, 12).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(rowNumber, 14).setNumberFormat("dd/mm/yyyy hh:mm");
-  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setNumberFormat("R$ #,##0.00");
-}
-
-function normalizeCurrency_(value) {
-  const text = String(value ?? "").trim();
-  if (!text) {
-    return "";
-  }
-
-  const cleaned = text.replace(/R\$|\s/g, "");
-  const normalized = cleaned.includes(",")
-    ? cleaned.replace(/\./g, "").replace(",", ".")
-    : cleaned;
-  const numeric = Number(normalized);
-  if (!Number.isFinite(numeric)) {
-    return text;
-  }
-
-  return "R$ " + numeric.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  sheet.getRange(rowNumber, 10).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(rowNumber, 12).setNumberFormat("dd/mm/yyyy hh:mm:ss");
+  sheet.getRange(rowNumber, 14).setNumberFormat("dd/mm/yyyy hh:mm:ss");
 }
 
 function validatePayload_(payload) {
@@ -548,17 +400,6 @@ function validatePayload_(payload) {
     }
     if (String(payload.credor || "").trim() !== "Caixa") {
       throw new Error("Consultas devem usar o credor Caixa.");
-    }
-    return;
-  }
-  if (normalizeTipoValue_(payload.tipo) === "SADT") {
-    const sadtRequired = ["data", "nomePaciente", "atendimento", "tipo", "convenio", "credor"];
-    const sadtMissing = sadtRequired.filter((key) => !String(payload[key] || "").trim());
-    if (sadtMissing.length) {
-      throw new Error("Campos obrigatorios ausentes: " + sadtMissing.join(", "));
-    }
-    if (String(payload.credor || "").trim() !== "Caixa" && !String(payload.plantonistas || "").trim()) {
-      throw new Error("Campos obrigatorios ausentes: plantonistas");
     }
     return;
   }
@@ -578,29 +419,6 @@ function validatePayload_(payload) {
 }
 
 function validateUpdatePayload_(payload) {
-  if (normalizeTipoValue_(payload.tipo) === "Consulta Pré-anestésica") {
-    const consultaRequired = ["data", "nomePaciente", "atendimento", "credor"];
-    const consultaMissing = consultaRequired.filter((key) => !String(payload[key] || "").trim());
-    if (consultaMissing.length) {
-      throw new Error("Campos obrigatorios ausentes: " + consultaMissing.join(", "));
-    }
-    if (String(payload.credor || "").trim() !== "Caixa") {
-      throw new Error("Consultas devem usar o credor Caixa.");
-    }
-    return;
-  }
-
-  if (normalizeTipoValue_(payload.tipo) === "SADT") {
-    const sadtRequired = ["data", "nomePaciente", "atendimento", "tipo", "convenio", "credor"];
-    const sadtMissing = sadtRequired.filter((key) => !String(payload[key] || "").trim());
-    if (sadtMissing.length) {
-      throw new Error("Campos obrigatorios ausentes: " + sadtMissing.join(", "));
-    }
-    if (String(payload.credor || "").trim() !== "Caixa" && !String(payload.plantonistas || "").trim()) {
-      throw new Error("Campos obrigatorios ausentes: plantonistas");
-    }
-    return;
-  }
   const required = ["data", "nomePaciente", "cirurgia", "atendimento", "tipo", "credor"];
   if (payload.credor !== "Caixa") {
     required.push("plantonistas");
@@ -672,7 +490,7 @@ function handleUpdateRecord_(payload, user) {
   const observationChanged = normalizeCompare_(oldEntry.observacoes || "") !== normalizeCompare_(payload.observacoes || "");
 
   sheet.getRange(rowNumber, 1, 1, 9).setValues([updatedValues]);
-  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setValue(isFinancialType_(payload.tipo) ? normalizeCurrency_(payload.valor) : "");
+  sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Valor") + 1).setValue(isFinancialType_(payload.tipo) ? (payload.valor || "") : "");
   setCompactCellWithNote_(
     sheet.getRange(rowNumber, REGISTROS_HEADERS.indexOf("Observacoes") + 1),
     String(payload.observacoes || "").trim(),
@@ -688,9 +506,9 @@ function handleUpdateRecord_(payload, user) {
     sheet.getRange(rowNumber, observacaoAtualizadaEmColumn).setValue(new Date());
     sheet.getRange(rowNumber, observacaoAtualizadaPorColumn).setValue(user.email);
   }
-  sheet.getRange(rowNumber, editadoEmColumn).setValue(new Date());
-  sheet.getRange(rowNumber, editadoPorColumn).setValue(user.email);
   if (changeSummary) {
+    sheet.getRange(rowNumber, editadoEmColumn).setValue(new Date());
+    sheet.getRange(rowNumber, editadoPorColumn).setValue(user.email);
     setCompactCellWithNote_(
       sheet.getRange(rowNumber, resumoEdicaoColumn),
       appendEditHistory_(
@@ -743,7 +561,7 @@ function formatEditValue_(value) {
 }
 
 function appendEditHistory_(previousHistory, changeSummary, userEmail) {
-  const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
   const line = timestamp + " - " + userEmail + ": " + String(changeSummary || "").trim();
   const previous = String(previousHistory || "").trim();
   const history = previous ? line + "\n" + previous : line;
@@ -829,37 +647,7 @@ function getAllEntries_() {
   const values = dataRange.getDisplayValues();
   const notes = dataRange.getNotes();
   return values
-    .map((row, index) => rowToEntry_(row, index + 2, notes[index]))
-    .sort(compareEntriesDesc_);
-}
-
-function compareEntriesDesc_(left, right) {
-  const leftTime = parseEntryDateTime_(left.criadoEm || left.data);
-  const rightTime = parseEntryDateTime_(right.criadoEm || right.data);
-  if (leftTime !== rightTime) {
-    return rightTime - leftTime;
-  }
-  return Number(right.rowNumber || 0) - Number(left.rowNumber || 0);
-}
-
-function parseEntryDateTime_(value) {
-  const text = String(value || "").trim();
-  const isoTime = Date.parse(text);
-  if (Number.isFinite(isoTime)) {
-    return isoTime;
-  }
-  const match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (!match) {
-    return 0;
-  }
-  return new Date(
-    Number(match[3]),
-    Number(match[2]) - 1,
-    Number(match[1]),
-    Number(match[4] || 0),
-    Number(match[5] || 0),
-    Number(match[6] || 0)
-  ).getTime();
+    .map((row, index) => rowToEntry_(row, index + 2, notes[index]));
 }
 
 function rowToEntry_(row, rowNumber, notes) {
@@ -882,7 +670,7 @@ function rowToEntry_(row, rowNumber, notes) {
     editadoEm: row[13],
     editadoPor: row[14],
     resumoEdicao: notes[15] || row[15],
-    valor: normalizeCurrency_(row[16]),
+    valor: row[16],
   };
 }
 

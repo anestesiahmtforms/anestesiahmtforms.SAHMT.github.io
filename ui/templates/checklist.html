@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d3257"><title>Checklist • SAHMT-BH</title>
+  <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css?v=20260914-24">
+  <link rel="stylesheet" href="premium-icons.css?v=20260914-24">
+  <link rel="stylesheet" href="report-layout.css?v=20260914-24">
+  <script defer src="vendor/zxing.min.js"></script><script defer src="config.js?v=20260914-24"></script><script defer src="app.js?v=20260914-24"></script>
+</head>
+<body>
+<div class="page-shell">
+<main class="app-frame checklist-frame">
+  <section class="hero-card checklist-hero" aria-label="Checklist diário SAHMT">
+    <div class="hero-logo-wrap"><img src="../../sahmt_option1_clean.png" alt="Logo SAHMT" class="hero-logo"></div>
+    <div class="hero-copy"><h1>CHECKLIST DIÁRIO SAHMT</h1><span data-auth-user hidden></span></div>
+  </section>
+  <section class="card intro arsenal-visual" aria-label="Arsenal tecnológico e estrutural da Anestesiologia"><img class="arsenal-visual-image" src="assets/carrinho-anestesia-checklist.png" alt="Carrinho de anestesia com indicadores dos itens de verificação"></section>
+  <p id="message" role="status" aria-live="polite"></p>
+  <section class="card scan" aria-label="Leitura do QR Code"><button id="scanSymbol" class="scan-symbol" type="button" aria-label="Ler QR Code" disabled><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M5 5h20v5H10v15H5V5Zm34 0h20v20h-5V10H39V5ZM5 39h5v15h15v5H5V39Zm49 0h5v20H39v-5h15V39ZM16 16h11v11H16V16Zm21 0h11v11H37V16ZM16 37h11v11H16V37Zm21 21V37h11v5h-6v16h-5Z" fill="currentColor"/><path d="M32 5h5v5h-5V5Zm0 11h5v5h-5v-5Zm-5 16h10v5H27v-5Zm-11 0h5v5h-5v-5Zm21 5h5v5h-5v-5Z" fill="currentColor"/></svg></button><button id="scan" class="primary" disabled>Ler QR Code</button><input id="photo" type="file" accept="image/*" capture="environment" disabled hidden></section>
+  <div class="report-actions"><button id="report" class="report-button" disabled>RELATÓRIO DIÁRIO</button></div>
+  <nav class="return-strip" aria-label="Retornar para páginas SAHMT">
+    <a href="../../?skipNotice=1" aria-label="Voltar para HOME"><img src="../../sahmt_option1_clean.png" alt="HOME"><span>HOME</span></a>
+    <a href="../eventos/" aria-label="Voltar para Operacional"><img src="../../gestao_operacional.png" alt="Operacional"><span>OPERACIONAL</span></a>
+    <a href="../etiquetas/" aria-label="Voltar para Etiquetas"><img src="../../sahmt_option1.png" alt="Etiquetas"><span>ETIQUETAS</span></a>
+    <a href="../gestao/" aria-label="Voltar para Gestão"><img src="../../apps/gestao/assets/selo-qga-accredited-qmentum-diamond.png" alt="Gestão"><span>GESTÃO</span></a>
+  </nav>
+  <button id="return" type="button" hidden>Voltar ao SAHMT-BH</button><footer class="footer-banner">BY FRANCISCO TADEU DA MOTA ALBUQUERQUE</footer>
+</main>
+</div>
+<dialog id="cameraDialog"><div class="dialog-head"><h2>Ler QR Code</h2><button data-close="cameraDialog">Fechar</button></div><div class="camera-stage" aria-label="Área de leitura do QR Code"><video id="video" autoplay playsinline muted></video><div class="camera-frame" aria-hidden="true"></div></div><p class="camera-hint">Centralize o QR Code de 2 × 2 cm dentro da moldura.</p></dialog>
+<dialog id="recordDialog"><div class="dialog-head"><h2>Registro</h2><button data-close="recordDialog">Fechar</button></div><p id="unitName" class="unit-name"></p><form id="recordForm"><fieldset><legend>O Arsenal tecnológico/estrutural desta unidade está em condições de uso?</legend><div class="choices"><label class="yes"><input type="radio" name="condition" value="SIM" required> SIM</label><label class="no"><input type="radio" name="condition" value="NAO" required> NÃO</label></div></fieldset><label id="occurrenceLabel" hidden>Registro da ocorrência<textarea id="occurrence" rows="4" maxlength="4000" placeholder="Descreva o problema identificado"></textarea></label><button type="submit" class="primary">Salvar registro</button></form></dialog>
+<dialog id="reportDialog" class="report-dialog" tabindex="-1"><div class="dialog-head report-title"><h2 tabindex="-1" autofocus>Relatório diário</h2></div><section class="search-banner report-date-banner" aria-label="Calendário do relatório diário"><div class="card-header"><p class="card-title">CALENDÁRIO</p></div><div class="controls-grid"><label class="date-field" for="reportDate"><input id="reportDate" type="date" required></label><div class="quick-actions"><button id="previousReportDay" class="soft-button" type="button">Anterior</button><button id="todayReportDay" class="primary-button" type="button">HOJE</button><button id="nextReportDay" class="soft-button" type="button" title="Consultar o próximo dia">Próximo</button></div><div id="reportSyncStatus" class="report-sync-status" data-state="idle" aria-live="polite"><span class="report-sync-dot" aria-hidden="true"></span><span id="reportSyncLabel">Aguardando atualização</span></div></div></section><div id="equipmentList" class="equipment-grid"></div><section id="responsible" class="signature responsible-compact"></section><div id="signatureStatus"></div><section id="incompleteSignatureBanner" class="incomplete-signature-banner" hidden aria-live="polite"><strong id="incompleteSignatureTitle">Motivo da assinatura sem concluir</strong><p id="incompleteSignaturePrompt">Registre o motivo de não concluir todos os checklists antes de assinar.</p><textarea id="incompleteJustification" maxlength="4000" placeholder="Descreva o motivo da não conclusão do checklist completo."></textarea><div class="incomplete-signature-actions"><button id="cancelIncompleteSignature" class="soft" type="button">Cancelar</button><button id="confirmIncompleteSignature" class="incomplete-confirm" type="button">Assinar sem concluir</button></div></section><form id="signForm"><label class="declaration"><input id="declaration" type="checkbox" required> <span>Declaro que acompanhei os checklists e tomei as providências necessárias em caso de riscos do Arsenal tecnológico/estrutural da Anestesiologia.</span></label><button id="sign" class="primary" type="submit" disabled>Assinar relatório diário</button></form><button class="soft" data-close="reportDialog">Voltar</button></dialog>
+<dialog id="monthlyDialog"><div class="dialog-head"><h2>Relatório mensal</h2><button data-close="monthlyDialog">Fechar</button></div><label>Escolha o mês<input id="reportMonth" type="month" required></label><p id="monthlySummary" role="status"></p><p class="muted">Vermelho: responsável pendente. Amarelo: outro autorizado assinou. Verde: responsável assinou. O responsável previsto pode ser diferente de quem assinou.</p><div id="monthlyDays" class="monthly-table" role="table" aria-label="Resultado diário do mês"></div><button class="soft" data-close="monthlyDialog">Voltar</button></dialog>
+</body></html>
+
+\n

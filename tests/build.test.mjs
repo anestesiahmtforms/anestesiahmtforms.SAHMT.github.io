@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import postcss from 'postcss';
+const ids=['home','eventos','etiquetas','gestao','checklist','treinamentos'];
+test('six pages compile with isolated styles and no application iframes',async()=>{for(const id of ids){const v=JSON.parse(await fs.readFile(`core/views/${id}.json`,'utf8'));assert.ok(v.html.includes('SAHMT'));assert.equal(/<iframe\b/i.test(v.html),false);postcss.parse(v.css);await import(`../core/views/${id}.js`);}});
+test('retired workers never delete sibling caches',async()=>{for(const p of ['apps/checklist/sw.js','apps/etiquetas/sw.js','apps/gestao/sw.js','apps/eventos/service-worker.js']){const s=await fs.readFile(p,'utf8');assert.equal(s.includes('caches.delete'),false);assert.ok(s.includes('unregister'));}});
+test('old module URLs redirect to the root shell and strip credential query values',async()=>{for(const id of ids.filter(x=>x!=='home')){const s=await fs.readFile(`apps/${id}/index.html`,'utf8');assert.ok(s.includes('location.replace'));assert.ok(s.includes("'authToken','deviceToken','userEmail','userName'"));}});
