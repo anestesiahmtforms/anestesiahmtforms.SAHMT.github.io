@@ -55,7 +55,47 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
       return typeof value==='function'&&!/^[A-Z]/.test(String(key))?value.bind(target):value;
     },set(target,key,value){if(key==='location'){shell.navigate(new URL(value,localURL));return true;}state.values[key]=value;return true;}
   });
-  const fetchLocal=(input,options)=>fetch(typeof input==='string'?new URL(input,localURL):input,options);
+  const fetchLocal=async(input,options={})=>{
+    const requestUrl=typeof input==='string'?new URL(input,localURL):input;
+    const targetUrl=requestUrl instanceof Request?new URL(requestUrl.url):new URL(requestUrl.toString());
+    const isEtiquetasAi=targetUrl.hostname==='script.google.com'&&targetUrl.searchParams.get('action')==='aiExtract'&&String(options?.method||'GET').toUpperCase()==='POST';
+    if(!isEtiquetasAi)return fetch(requestUrl,options);
+
+    const run=async(opts,timeoutMs=45000)=>{
+      const controller=new AbortController();
+      const inherited=opts?.signal;
+      const onAbort=()=>controller.abort();
+      inherited?.addEventListener?.('abort',onAbort,{once:true});
+      const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);
+      try{return await fetch(requestUrl,{...opts,signal:controller.signal});}
+      finally{window.clearTimeout(timeout);inherited?.removeEventListener?.('abort',onAbort);}
+    };
+
+    try{
+      return await run(options);
+    }catch(firstError){
+      let body;
+      try{body=JSON.parse(String(options?.body||'{}'));}catch{body=null;}
+      const hasNumeric=Array.isArray(body?.numericImageDataUrls)&&body.numericImageDataUrls.length>0;
+      if(hasNumeric){
+        try{
+          const reduced={...body,numericImageDataUrls:[]};
+          return await run({...options,body:JSON.stringify(reduced)},45000);
+        }catch(secondError){
+          const error=new Error(secondError?.name==='AbortError'
+            ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
+            : 'Não foi possível comunicar com o serviço de leitura por IA. A tentativa reduzida também falhou.');
+          error.cause=secondError;
+          throw error;
+        }
+      }
+      const error=new Error(firstError?.name==='AbortError'
+        ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
+        : 'Não foi possível comunicar com o serviço de leitura por IA.');
+      error.cause=firstError;
+      throw error;
+    }
+  };
   return {document:doc,window:win,navigator:nav,location:locationView,history:historyView,fetch:fetchLocal,
     setTimeout:timer,clearTimeout:window.clearTimeout.bind(window),setInterval:interval,clearInterval:window.clearInterval.bind(window),requestAnimationFrame:raf,cancelAnimationFrame:window.cancelAnimationFrame.bind(window),
     activate(url){localURL.href=url.href;state.active=true;host.hidden=false;root.dispatchEvent(new Event('sahmt:show'));root.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('resize'));},
