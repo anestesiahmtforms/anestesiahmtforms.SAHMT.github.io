@@ -172,18 +172,55 @@ function doPost(e) {
 }
 
 function getRequestUser_(payload) {
-  const authToken = String(payload && payload.authToken || '');
-  const deviceToken = String(payload && payload.deviceToken || '');
-  if(!authToken && !deviceToken)throw new Error('Sessão autenticada ausente. Entre novamente pelo SAHMT.');
-  const response=UrlFetchApp.fetch(ETIQUETAS_AUTH_ENDPOINT,{
-    method:'post',contentType:'text/plain;charset=utf-8',muteHttpExceptions:true,
-    payload:JSON.stringify({action:'auth',authToken,deviceToken,userEmail:String(payload.userEmail || ''),moduleId:'ETIQUETAS',pageId:'api'})
-  });
-  let result;try{result=JSON.parse(response.getContentText());}catch(error){throw new Error('Não foi possível confirmar a sessão.');}
-  if(response.getResponseCode()!==200 || result?.ok!==true || !result.email)throw new Error('Sessão não autorizada. Entre novamente pelo SAHMT.');
-  return {email:String(result.email).trim().toLowerCase(),name:String(result.name || '')};
-}
+  const authToken = String(payload && payload.authToken || '').trim();
+  const deviceToken = String(payload && payload.deviceToken || '').trim();
+  const userEmail = String(payload && payload.userEmail || '').trim().toLowerCase();
+  if (!authToken && !deviceToken) {
+    throw new Error('Sessão autenticada ausente. Entre novamente pelo SAHMT.');
+  }
 
+  let response;
+  try {
+    response = UrlFetchApp.fetch(ETIQUETAS_AUTH_ENDPOINT, {
+      method: 'post',
+      contentType: 'application/json; charset=utf-8',
+      muteHttpExceptions: true,
+      followRedirects: true,
+      payload: JSON.stringify({
+        action: 'auth',
+        authToken: authToken,
+        deviceToken: deviceToken,
+        userEmail: userEmail,
+        moduleId: 'ETIQUETAS',
+        pageId: 'api'
+      })
+    });
+  } catch (error) {
+    throw new Error('Falha de comunicação entre Etiquetas e a autenticação central.');
+  }
+
+  const status = response.getResponseCode();
+  const headers = response.getHeaders ? response.getHeaders() : {};
+  const contentType = String(headers['Content-Type'] || headers['content-type'] || '');
+  const body = String(response.getContentText() || '').trim();
+  let result;
+  try {
+    result = JSON.parse(body || '{}');
+  } catch (error) {
+    if (/<!doctype|<html|accounts\.google\.com|ServiceLogin/i.test(body)) {
+      throw new Error('A autenticação central devolveu uma página de login. Revise o acesso da implantação central do Web App.');
+    }
+    throw new Error('A autenticação central respondeu em formato inválido (HTTP ' + status + ', ' + contentType + ').');
+  }
+
+  if (status < 200 || status >= 300 || result.ok !== true || !result.email) {
+    throw new Error(String(result.message || 'Sessão não autorizada. Entre novamente pelo SAHMT.'));
+  }
+  return {
+    email: String(result.email).trim().toLowerCase(),
+    name: String(result.name || '')
+  };
+}
 function handleAiHealth_() {
   const apiKey = PropertiesService.getScriptProperties().getProperty(OPENAI_API_KEY_PROPERTY);
   if (!apiKey) {
@@ -988,3 +1025,4 @@ function jsonResponse(data) {
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
