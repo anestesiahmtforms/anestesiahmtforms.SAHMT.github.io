@@ -9,7 +9,6 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
   });
   const add=(target,type,listener,options)=>{
     if(type==='load'){queueMicrotask(()=>listener(new Event('load')));return;}
-    // Local legacy history handlers must not redirect the SPA's back button.
     if(type==='popstate')return;
     const wrapped=event=>{if(state.active || ['beforeunload','sahmt:hide','visibilitychange'].includes(type))typeof listener==='function'?listener(event):listener.handleEvent(event);};
     state.events.push({target,type,listener,wrapped,options});target.addEventListener(type,wrapped,options);
@@ -51,15 +50,24 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
       if(key==='removeEventListener')return (type,fn)=>remove(window,type,fn);
       if(Object.hasOwn(state.values,key))return state.values[key];
       const value=Reflect.get(target,key,target);
-      // Constructor identity must be retained; only bind browser methods with a receiver.
       return typeof value==='function'&&!/^[A-Z]/.test(String(key))?value.bind(target):value;
     },set(target,key,value){if(key==='location'){shell.navigate(new URL(value,localURL));return true;}state.values[key]=value;return true;}
   });
   const fetchLocal=async(input,options={})=>{
-    const requestUrl=typeof input==='string'?new URL(input,localURL):input;
-    const targetUrl=requestUrl instanceof Request?new URL(requestUrl.url):new URL(requestUrl.toString());
+    let absoluteUrl='';
+    try{
+      if(typeof input==='string') absoluteUrl=new URL(input,localURL).href;
+      else if(input && typeof input.url==='string') absoluteUrl=new URL(input.url,localURL).href;
+      else if(input && typeof input.href==='string') absoluteUrl=new URL(input.href,localURL).href;
+      else absoluteUrl=new URL(String(input),localURL).href;
+    }catch(error){
+      const wrapped=new Error('Endereço inválido na comunicação com o serviço.');
+      wrapped.cause=error;
+      throw wrapped;
+    }
+    const targetUrl=new URL(absoluteUrl);
     const isEtiquetasAi=targetUrl.hostname==='script.google.com'&&targetUrl.searchParams.get('action')==='aiExtract'&&String(options?.method||'GET').toUpperCase()==='POST';
-    if(!isEtiquetasAi)return fetch(requestUrl,options);
+    if(!isEtiquetasAi)return fetch(absoluteUrl,options);
 
     const run=async(opts,timeoutMs=45000)=>{
       const controller=new AbortController();
@@ -67,13 +75,12 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
       const onAbort=()=>controller.abort();
       inherited?.addEventListener?.('abort',onAbort,{once:true});
       const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);
-      try{return await fetch(requestUrl,{...opts,signal:controller.signal});}
+      try{return await fetch(absoluteUrl,{...opts,signal:controller.signal});}
       finally{window.clearTimeout(timeout);inherited?.removeEventListener?.('abort',onAbort);}
     };
 
-    try{
-      return await run(options);
-    }catch(firstError){
+    try{return await run(options);}
+    catch(firstError){
       let body;
       try{body=JSON.parse(String(options?.body||'{}'));}catch{body=null;}
       const hasNumeric=Array.isArray(body?.numericImageDataUrls)&&body.numericImageDataUrls.length>0;
@@ -84,14 +91,14 @@ export function createPageScope(host, root, body, moduleUrl, shell) {
         }catch(secondError){
           const error=new Error(secondError?.name==='AbortError'
             ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
-            : 'Não foi possível comunicar com o serviço de leitura por IA. A tentativa reduzida também falhou.');
+            : `Não foi possível comunicar com o serviço de leitura por IA (${secondError?.message||'erro de rede'}).`);
           error.cause=secondError;
           throw error;
         }
       }
       const error=new Error(firstError?.name==='AbortError'
         ? 'Tempo limite na comunicação com o serviço de leitura por IA.'
-        : 'Não foi possível comunicar com o serviço de leitura por IA.');
+        : `Não foi possível comunicar com o serviço de leitura por IA (${firstError?.message||'erro de rede'}).`);
       error.cause=firstError;
       throw error;
     }
