@@ -41,6 +41,64 @@ dialog{width:min(94%,560px);max-height:90dvh;overflow:auto;border:1px solid #fff
   .return-strip a{min-height:82px;padding:4px 2px 7px}
   .return-strip img{width:60px;height:58px}
 }
+/* Shared training-style navigation cards across the ecosystem. */
+.module-link-card,
+.return-strip a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 2px;
+  border: 1px solid #e2e6df;
+  border-radius: 15px;
+  background: #fff;
+  color: #12324f;
+  text-decoration: none;
+  box-shadow: none;
+  font-size: clamp(.58rem, 2vw, .85rem);
+  font-weight: 800;
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+.module-link-card::before { display: none; }
+
+.module-link-card__image,
+.return-strip img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.module-link-card span,
+.return-strip span {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #12324f;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: normal;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.module-link-card:hover,
+.module-link-card:focus-visible,
+.return-strip a:hover,
+.return-strip a:focus-visible {
+  filter: brightness(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(26, 73, 98, .14);
+}
+
+.module-link-card:active,
+.return-strip a:active {
+  transform: translateY(1px) scale(.97);
+}
 @media(max-width:380px){
   .checklist-hero{min-height:118px;padding:13px 11px}
   .return-strip{min-height:88px;padding:6px 4px;gap:4px}

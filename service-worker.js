@@ -1,5 +1,5 @@
 // One cache owner for the complete SAHMT PWA. APIs and clinical records are never cached here.
-const CACHE='sahmt-unified-b62b03b53947256c';
+const CACHE='sahmt-unified-a84424c0402ff3fc';
 const ASSETS=["./index.html","./manifest.webmanifest","./auth/shared-auth.js","./core/app.js","./core/runtime.js","./core/checklist-contract.js","./core/views/checklist.js","./core/views/checklist.json","./core/views/etiquetas.js","./core/views/etiquetas.json","./core/views/eventos.js","./core/views/eventos.json","./core/views/gestao.js","./core/views/gestao.json","./core/views/home.js","./core/views/home.json","./core/views/treinamentos.js","./core/views/treinamentos.json","./icons/icon-192.png"];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('message',event=>{if(event.data==='ACTIVATE_UPDATE')self.skipWaiting();});
